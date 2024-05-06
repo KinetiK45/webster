@@ -1,14 +1,6 @@
 const autService = require('../service/authenticationService')
 const rabbitService = require('../service/rabbitService');
 const {generateToken} = require('../controllers/TokenController');
-// const transporter = nodemailer.createTransport({
-//     host: 'smtp.gmail.com',
-//     port: 587,
-//     auth: {
-//         user: 'javawebtempmail@gmail.com',
-//         pass: 'ljgw wsww hvod tkpz'
-//     }
-// });
 
 async function register(req, res) {
     const { username, password, email, full_name } = req.body;
