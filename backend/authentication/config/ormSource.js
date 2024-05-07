@@ -1,5 +1,6 @@
 const path = require('path');
 const { ConnectionOptionsReader, DataSource } = require('typeorm');
+const {Users} = require("../model/users");
 
 const configPath = path.resolve(__dirname, '../ormconfig.js');
 console.log('Configuration path:', configPath);
@@ -30,5 +31,6 @@ const myDataSourcePromise = new Promise((resolve, reject) => {
             reject(error);
         });
 });
+
 
 module.exports = myDataSourcePromise;

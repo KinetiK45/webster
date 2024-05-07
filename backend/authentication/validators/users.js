@@ -1,17 +1,28 @@
 const { body } = require('express-validator');
-// const userRepository = new DataSource().getRepository(User);
+const myDataSourcePromise = require("../config/ormSource");
+const {Users} = require("../model/users");
+
+let userRepository= (async () => {
+    try {
+        const myDataSource = await myDataSourcePromise;
+        userRepository = myDataSource.getRepository(Users);
+    } catch (error) {
+        console.error("Error initializing userRepository:", error);
+        throw error;
+    }
+})();
 
 const registrationValidationChain = [
     body('username')
         .trim()
         .isLength({ min: 3, max: 45 })
-        .withMessage('Username must be between 3 and 45 characters long'),
-        // .custom(async (value) => {
-        //     const user = await userRepository.findOne({ where: { username:value } });
-        //     if (user) {
-        //         throw new Error('Username is already taken');
-        //     }
-        // }),
+        .withMessage('Username must be between 3 and 45 characters long')
+        .custom(async (value) => {
+            const user = await userRepository.findOne({ where: { username:value } });
+            if (user) {
+                throw new Error('Username is already taken');
+            }
+        }),
     body('password')
         .trim()
         .isLength({ min: 6, max: 70 })
@@ -19,13 +30,13 @@ const registrationValidationChain = [
     body('email')
         .trim()
         .isEmail()
-        .withMessage('Please provide a valid email'),
-        // .custom(async (value) => {
-        //     const user = await userRepository.findOne({ where: { email:value } });
-        //     if (user) {
-        //         throw new Error('Email is already registered');
-        //     }
-        // }),
+        .withMessage('Please provide a valid email')
+        .custom(async (value) => {
+            const user = await userRepository.findOne({ where: { email:value } });
+            if (user) {
+                throw new Error('Email is already registered');
+            }
+        }),
     body('full_name')
         .trim()
         .isLength({ min: 3, max: 60 })
@@ -64,13 +75,13 @@ const editProfileValidationChain = [
         .optional()
         .trim()
         .isEmail()
-        .withMessage('Please provide a valid email'),
-        // .custom(async (value) => {
-        //     const user = await userRepository.findOne({ where: { email:value } });
-        //     if (user) {
-        //         throw new Error('Email is already registered');
-        //     }
-        // }),
+        .withMessage('Please provide a valid email')
+        .custom(async (value) => {
+            const user = await userRepository.findOne({ where: { email:value } });
+            if (user) {
+                throw new Error('Email is already registered');
+            }
+        }),
     body('full_name')
         .optional()
         .trim()

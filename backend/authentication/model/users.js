@@ -43,5 +43,5 @@ __decorate([
     __metadata("design:type", Date)
 ], Users.prototype, "registered_at", void 0);
 exports.Users = Users = __decorate([
-    (0, typeorm_1.Entity)('users') // Имя таблицы
+    (0, typeorm_1.Entity)('users')
 ], Users);

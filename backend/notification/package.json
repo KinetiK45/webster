@@ -4,15 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "notification": "cross-env node -r dotenv/config index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.569.0",
+    "amqplib": "^0.10.4",
+    "aws-sdk": "^2.1615.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "nodemailer": "^6.9.13",
-    "amqplib": "^0.10.4"
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

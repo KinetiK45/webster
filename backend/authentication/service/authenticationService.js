@@ -1,19 +1,19 @@
-const redis = require("redis");
 const bcrypt = require("bcrypt");
-const myDataSourcePromise = require("../config/dataSource");
+const myDataSourcePromise = require("../config/ormSource");
 const { Users } = require("../model/users");
+const client = require("../config/redisSource");
+const getAsync = (client.get).bind(client);
 let userRepository;
 (async () => {
     try {
-        const myDataSource = await myDataSourcePromise; // Ждем, пока DataSource будет инициализирован
-        userRepository = myDataSource.getRepository(Users); // Теперь инициализируем userRepository
+        const myDataSource = await myDataSourcePromise;
+        userRepository = myDataSource.getRepository(Users);
         console.log("userRepository initialized");
     } catch (error) {
         console.error("Error initializing userRepository:", error);
-        throw error; // Остановить выполнение, если инициализация не удалась
+        throw error;
     }
 })();
-const client = redis.createClient();
 
 async function registerUser({ username, password, email, full_name }) {
     try {
@@ -71,32 +71,20 @@ async function saveResetPasswordCode(user_id, code) {
     try {
         const key = `reset:${code}`;
         const expirationTime = 1500;
-        await client.setex(key, expirationTime, user_id);
+        await client.set(key, user_id, 'EX', expirationTime);
     }catch (error) {
         console.error('Error save reset password code:', error);
         throw error;
     }
 }
 
-async function getResetPasswordCode(code) {
-    const key = `reset:${code}`;
-    return new Promise((resolve, reject) => {
-        client.get(key, (err, result) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(result);
-        });
-    });
-}
-
 async function resetPassword(code, newPassword) {
     try {
-        const user_id = await getResetPasswordCode(code);
+        const user_id = await getAsync(`reset:${code}`);
         if (!user_id) {
             return { state: false, message: 'Invalid or expired reset code'};
         }
-        const user = await userRepository.findOne({ where: { id: user_id } });
+        const user = await userRepository.findOne({ where: { id: Number.parseInt(user_id) } });
         if (!user) {
             return { state: false, message: 'User not found' };
         }
@@ -110,38 +98,26 @@ async function resetPassword(code, newPassword) {
     }
 }
 
-async function saveTwoFactorCode(user_id, code) {
+async function saveTwoFactorCode(user_id,code ) {
     try {
-        const key = `2fa:${user_id}`;
+        const key = `2fa:${code}`;
         const expirationTime = 300;
-        await client.setex(key, expirationTime, code);
-    }catch (error) {
-        console.error('Error save two factor code:', error);
+        const value = JSON.stringify({ user_id, code });
+        await client.set(key, value, 'EX', expirationTime);
+    } catch (error) {
         throw error;
     }
 }
 
-async function getTwoFactorCode(user_id) {
-    const key = `2fa:${user_id}`;
-    return new Promise((resolve, reject) => {
-        client.get(key, (err, result) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(result);
-        });
-    });
-}
 
 function generateCode(length = 8) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const bytes = crypto.randomBytes(length);
-    for (let i = 0; i < bytes.length; i++) {
-        const randomIndex = bytes[i] % characters.length;
-        result += characters[randomIndex];
+    let code = '';
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        code += characters.charAt(randomIndex);
     }
-    return result;
+    return code;
 }
 
 module.exports = {
@@ -151,7 +127,5 @@ module.exports = {
     saveResetPasswordCode,
     saveTwoFactorCode,
     generateCode,
-    getTwoFactorCode,
-    client,
     resetPassword
 }
