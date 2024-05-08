@@ -3,9 +3,7 @@ const session = require('express-session');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const redis = require('redis');
 const router = require("./router");
-const {client} = require("./service/authenticationService");
 
 const app = express();
 
