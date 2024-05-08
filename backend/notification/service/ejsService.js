@@ -1,7 +1,6 @@
 const ejs = require("ejs");
 const path = require("path");
 
-
 function renderRegistration(username, logo) {
     try {
         return ejs.renderFile(path.resolve(__dirname, "../templates/registration.ejs"), { username, logo });
@@ -28,6 +27,7 @@ function renderResetEmail  (logo, username, code) {
         throw error;
     }
 }
+
 module.exports = {
     renderRegistration,
     renderConfirmationEmail,

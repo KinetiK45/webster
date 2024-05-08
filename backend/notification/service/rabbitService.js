@@ -2,7 +2,7 @@ const amqplib = require('amqplib');
 const sendEmail = require("./nodemailerService");
 const {renderRegistration, renderConfirmationEmail, renderResetEmail} = require("./ejsService");
 const path = require("path");
-const logoUrl = ("https://ucodewebster.s3.amazonaws.com/img.png");
+const logoUrl = "https://ucodewebster.s3.amazonaws.com/img.png";
 async function createRabbitMQConnection() {
     const connection = await amqplib.connect('amqp://localhost');
 
@@ -36,6 +36,7 @@ async function listenForUserRegistrationEvents() {
         channel.ack(message);
     });
 }
+
 async function listenForUserLoginEvents() {
     try {
         const queueName = 'user_login';
@@ -63,6 +64,7 @@ async function listenForUserLoginEvents() {
         console.error('Error listening for user login events:', error);
     }
 }
+
 async function listenForUserResetEvents(){
     try {
         const queueName = 'user_reset';
