@@ -3,22 +3,42 @@ const rabbitService = require('../service/rabbitService');
 const {generateToken} = require('../controllers/TokenController');
 const client = require("../config/redisSource");
 const getAsync = (client.get).bind(client);
+const amqplib = require ('amqplib');
 
-async function register(req, res) {
-    const { username, password, email, full_name } = req.body;
+async function register() {
+    const connection = await amqplib.connect('amqp://localhost');
+    const channel = await connection.createChannel();
     try {
-        const newUser = await autService.registerUser({ username, password, email, full_name });
-        await rabbitService.publishUserRegisteredEvent(newUser.id, newUser.email, newUser.full_name);
-        res.status(201).json({
-            state: true,
-            message: 'Registration successful!',
-            data: {
-                id: newUser.id,
-            },
+        const queue = 'user_registration_queue', responseQueue = 'registration_response_queue';
+
+        await channel.assertQueue(queue);
+        await channel.assertQueue(responseQueue);
+
+        channel.consume(queue, async (message) => {
+            if (message !== null) {
+                const userData = JSON.parse(message.content.toString());
+
+                channel.ack(message);
+
+                const newUser = await autService.registerUser({
+                    username: userData.username,
+                    password: userData.password,
+                    email: userData.email,
+                    full_name: userData.full_name});
+                await rabbitService.publishUserRegisteredEvent(newUser.id, newUser.email, newUser.full_name);
+
+                await channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify({
+                    state: true,
+                    message: 'Registration successful!',
+                    data: {
+                        id: newUser.id,
+                    },
+                })));
+            }
         });
     } catch (error) {
         console.log('Error during registration : ',error);
-        res.status(500).json({ state: false, message: 'Registration failed' });
+        await channel.sendToQueue('registration_response_queue', Buffer.from(JSON.stringify({ state: false, message: 'Registration failed' })));
     }
 }
 

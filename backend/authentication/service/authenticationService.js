@@ -17,7 +17,8 @@ let userRepository;
 
 async function registerUser({ username, password, email, full_name }) {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        let salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = await userRepository.create({
             username,
             password: hashedPassword,
