@@ -96,6 +96,11 @@ async function uploadImage(file, user_id) {
         if (user_id === undefined) {
             return { status: 401, isMatch: false, message: "Authorization required" };
         }
+        const user = await userRepository.findOne(user_id);
+        if (!user) {
+            return { status: 404, isMatch: false, message: "User not found" };
+        }
+
         const contentType = file.mimetype;
         const fileExtension = getFileExtension(contentType);
         const objectKey = `userAvatar/${generateCode(12)}${fileExtension}`;
@@ -106,7 +111,7 @@ async function uploadImage(file, user_id) {
 
         const newUserAvatar = await photoRepository.create({
             url: objectKey,
-            userId: user_id,
+            user: user,
         });
 
         await photoRepository.save(newUserAvatar);
