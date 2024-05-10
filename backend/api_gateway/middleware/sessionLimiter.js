@@ -1,14 +1,36 @@
-const rateLimit = require("express-rate-limit");
+const rateLimit = 20;
+const interval = 60 * 1000;
 
-const sessionLimiter = rateLimit({
-    windowMs: 60 * 1000, // 2 минуты
-    max: 20,
-    keyGenerator: function (req /*, res*/) {
-        return req.cookies.session_token;
-    },
-    handler: function (req, res /*, next*/) {
-        res.status(429).json({state: false, message: "Too many requests. Please try again later."});
+const requestCounts = {};
+setInterval(() => {
+    Object.keys(requestCounts).forEach((ip) => {
+        requestCounts[ip] = 0;
+    });
+}, interval);
+
+function rateLimitAndTimeout(req, res, next) {
+    const ip = req.ip;
+
+    requestCounts[ip] = (requestCounts[ip] || 0) + 1;
+
+    if (requestCounts[ip] > rateLimit) {
+        return res.status(429).json({
+            code: 429,
+            status: "Error",
+            message: "Rate limit exceeded.",
+        });
     }
-});
 
-module.exports = sessionLimiter;
+    req.setTimeout(1500, () => {
+        res.status(504).json({
+            code: 504,
+            status: "Error",
+            message: "Gateway timeout.",
+        });
+        req.abort();
+    });
+    next();
+}
+
+
+module.exports = rateLimitAndTimeout;

@@ -1,19 +1,12 @@
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-// const secretYaEby = generateSecretKey();
-const secretYaEby = 'secret key';
-
+const secretKey = process.env.SECRET_KEY;
 const blackList = new Set();
-
-function generateSecretKey() {
-    return crypto.randomBytes(32).toString('hex');
-}
 
 function generateToken(payload, expires = '24h') {
     const options = {
         expiresIn: expires,
     };
-    return jwt.sign(payload, secretYaEby, options);
+    return jwt.sign(payload, secretKey, options);
 }
 
 function deactivateToken(req, res) {
@@ -51,7 +44,7 @@ function verifyToken(req, res) {
         if (blackList.has(token)) {
             return res.status(401).json({state: false, message: 'The token has already been deleted'});
         }
-        jwt.verify(token, secretYaEby, (err, decoded) => {
+        jwt.verify(token, secretKey, (err, decoded) => {
             if (err) {
                 console.log("Invalid token");
                 // return res.status(401).json({state: false, message: 'Invalid token'});

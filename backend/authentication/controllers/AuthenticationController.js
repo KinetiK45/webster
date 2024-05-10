@@ -2,43 +2,18 @@ const autService = require('../service/authenticationService')
 const rabbitService = require('../service/rabbitService');
 const {generateToken} = require('../controllers/TokenController');
 const client = require("../config/redisSource");
+const generateCode = require("../helpers/GenerateCode");
 const getAsync = (client.get).bind(client);
-const amqplib = require ('amqplib');
 
-async function register() {
-    const connection = await amqplib.connect('amqp://localhost');
-    const channel = await connection.createChannel();
+async function register(req, res) {
+    const { username, password, email, full_name } = req.body;
     try {
-        const queue = 'user_registration_queue', responseQueue = 'registration_response_queue';
-
-        await channel.assertQueue(queue);
-        await channel.assertQueue(responseQueue);
-
-        channel.consume(queue, async (message) => {
-            if (message !== null) {
-                const userData = JSON.parse(message.content.toString());
-
-                channel.ack(message);
-
-                const newUser = await autService.registerUser({
-                    username: userData.username,
-                    password: userData.password,
-                    email: userData.email,
-                    full_name: userData.full_name});
-                await rabbitService.publishUserRegisteredEvent(newUser.id, newUser.email, newUser.full_name);
-
-                await channel.sendToQueue(responseQueue, Buffer.from(JSON.stringify({
-                    state: true,
-                    message: 'Registration successful!',
-                    data: {
-                        id: newUser.id,
-                    },
-                })));
-            }
-        });
+        const newUser = await autService.registerUser({ username, password, email, full_name });
+        await rabbitService.publishUserRegisteredEvent(newUser.id, newUser.email, newUser.full_name);
+        res.status(201).json({ state: true, message: 'Registration successful!', data: { id: newUser.id } });
     } catch (error) {
         console.log('Error during registration : ',error);
-        await channel.sendToQueue('registration_response_queue', Buffer.from(JSON.stringify({ state: false, message: 'Registration failed' })));
+        res.status(500).json({ state: false, message: 'Registration failed' });
     }
 }
 
@@ -88,7 +63,7 @@ async function passwordReset(req, res) {
         if (!result.isMatch) {
             return res.status(404).json({ state: false, message: result.message });
         }
-        const resetPasswordCode = autService.generateCode()
+        const resetPasswordCode = generateCode()
         await autService.saveResetPasswordCode(result.user.id, resetPasswordCode);
         await rabbitService.publishUserResetEvent(resetPasswordCode, email);
         res.json({ state: true, message:'A password recovery link has been sent to your email' });
@@ -102,7 +77,7 @@ async function resetConfirmation(req, res) {
     try {
         const { resetPasswordCode } = req.params;
         const result = await autService.resetPassword(resetPasswordCode,req.body.password);
-        if(!result.state) {
+        if(!result.isMatch) {
             return res.status(404).json({state: false, message: result.message });
         }
         res.status(200).json({state: true, message: 'Data successfully updated'});
