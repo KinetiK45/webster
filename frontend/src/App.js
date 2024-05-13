@@ -7,6 +7,7 @@ import RootLayout from "./RootLayout";
 import AuthLayout from "./pages/auth/AuthLayout";
 import Error from "./Error";
 import Login from "./pages/auth/Login";
+import {Test} from "./pages/editor/Test";
 
 // const Login = lazy(() => import("./pages/auth/Login"));
 const Registration = lazy(() => import("./pages/auth/Registration"));
@@ -25,6 +26,7 @@ function App() {
               <Route path="password-recovery" element={<PasswordRecovery />} />
               <Route path="password-reset/:token" element={<PasswordReset />} />
             </Route>
+              <Route path="editor" element={<Test />} />
           </Route>
       )
   );
