@@ -59,14 +59,14 @@ const loginValidationChain = [
 ];
 
 const editProfileValidationChain = [
-    body('old_password')
+    body('password')
         .optional()
         .trim()
         .isLength({ min: 3, max: 45 })
         .withMessage('Username must be between 3 and 45 characters long')
         .isString()
         .withMessage('Old password must be a string'),
-    body('password')
+    body('new_password')
         .optional()
         .trim()
         .isString()

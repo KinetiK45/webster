@@ -17,7 +17,8 @@ let userRepository;
 
 async function registerUser({ username, password, email, full_name }) {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        let salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = await userRepository.create({
             username,
             password: hashedPassword,
@@ -82,19 +83,19 @@ async function resetPassword(code, newPassword) {
     try {
         const user_id = await getAsync(`reset:${code}`);
         if (!user_id) {
-            return { state: false, message: 'Invalid or expired reset code'};
+            return { isMatch: false, message: 'Invalid or expired reset code'};
         }
         const user = await userRepository.findOne({ where: { id: Number.parseInt(user_id) } });
         if (!user) {
-            return { state: false, message: 'User not found' };
+            return { isMatch: false, message: 'User not found' };
         }
         user.password = await bcrypt.hash(newPassword, 10);
         await userRepository.save(user);
         await client.del(`reset:${code}`);
-        return { state: true, message: 'Password reset successful' };
+        return { isMatch: true, message: 'Password reset successful' };
     } catch (error) {
         console.error('Error resetting password:', error);
-        return { state: false, message: error.message };
+        throw Error;
     }
 }
 
@@ -109,23 +110,11 @@ async function saveTwoFactorCode(user_id,code ) {
     }
 }
 
-
-function generateCode(length = 8) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        code += characters.charAt(randomIndex);
-    }
-    return code;
-}
-
 module.exports = {
     registerUser,
     authenticateUser,
     getUserByEmail,
     saveResetPasswordCode,
     saveTwoFactorCode,
-    generateCode,
     resetPassword
 }

@@ -1,0 +1,28 @@
+{
+  "name": "api_gateway",
+  "version": "1.0.0",
+  "description": "webster gateway",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "trace": "node --trace-deprecation index.js",
+    "gateway": "cross-env node -r dotenv/config index.js",
+    "trace-gateway": "cross-env node --trace-deprecation -r dotenv/config index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "http-proxy": "^1.18.1",
+    "http-proxy-middleware": "^3.0.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.0"
+  }
+}

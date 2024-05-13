@@ -2,6 +2,7 @@ const autService = require('../service/authenticationService')
 const rabbitService = require('../service/rabbitService');
 const {generateToken} = require('../controllers/TokenController');
 const client = require("../config/redisSource");
+const generateCode = require("../helpers/GenerateCode");
 const getAsync = (client.get).bind(client);
 
 async function register(req, res) {
@@ -9,13 +10,7 @@ async function register(req, res) {
     try {
         const newUser = await autService.registerUser({ username, password, email, full_name });
         await rabbitService.publishUserRegisteredEvent(newUser.id, newUser.email, newUser.full_name);
-        res.status(201).json({
-            state: true,
-            message: 'Registration successful!',
-            data: {
-                id: newUser.id,
-            },
-        });
+        res.status(201).json({ state: true, message: 'Registration successful!', data: { id: newUser.id } });
     } catch (error) {
         console.log('Error during registration : ',error);
         res.status(500).json({ state: false, message: 'Registration failed' });
@@ -68,7 +63,7 @@ async function passwordReset(req, res) {
         if (!result.isMatch) {
             return res.status(404).json({ state: false, message: result.message });
         }
-        const resetPasswordCode = autService.generateCode()
+        const resetPasswordCode = generateCode()
         await autService.saveResetPasswordCode(result.user.id, resetPasswordCode);
         await rabbitService.publishUserResetEvent(resetPasswordCode, email);
         res.json({ state: true, message:'A password recovery link has been sent to your email' });
@@ -82,7 +77,7 @@ async function resetConfirmation(req, res) {
     try {
         const { resetPasswordCode } = req.params;
         const result = await autService.resetPassword(resetPasswordCode,req.body.password);
-        if(!result.state) {
+        if(!result.isMatch) {
             return res.status(404).json({state: false, message: result.message });
         }
         res.status(200).json({state: true, message: 'Data successfully updated'});

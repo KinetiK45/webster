@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Photos } from './photos';
 
 @Entity('users')
 export class Users {
@@ -11,18 +12,19 @@ export class Users {
     @Column({ type: 'varchar', length: 70, nullable: false })
     password!: string;
 
-    @Column({ type: 'varchar', length: 256, default: 'default.png', nullable: false })
-    photo!: string;
-
     @Column({ type: 'varchar', length: 256, unique: true, nullable: false })
     email!: string;
 
     @Column({ type: 'varchar', length: 60, nullable: false })
     full_name!: string;
 
-    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' ,nullable: false})
+    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', nullable: false })
     registered_at!: Date;
+
+    @OneToMany(() => Photos, (photo) => photo.user)
+    photos!: Photos[];
 }
+
 
 
 

@@ -3,12 +3,16 @@ const session = require('express-session');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const router = require("./router");
+const router = require("./routers/router");
+const tokenMiddleware = require("./middleware/vetifyToken");
+const fileUpload = require('express-fileupload');
+const morgan = require('morgan');
+
 
 const app = express();
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://192.168.1.2:3000', 'http://192.168.1.3:3000'],
+    origin: ['http://localhost:3001'],
     credentials: true,
 }));
 
@@ -19,10 +23,13 @@ app.use(
         saveUninitialized: true
     })
 );
+app.use(morgan('dev'));
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(tokenMiddleware);
+
 app.use(router);
 app.use(express.static('images'));
 
