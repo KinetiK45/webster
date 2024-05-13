@@ -3,8 +3,6 @@ const session = require('express-session');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const router = require("./routers/router");
-const tokenMiddleware = require("./middleware/vetifyToken");
 const morgan = require('morgan');
 
 
@@ -27,7 +25,6 @@ app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(tokenMiddleware);
 
 app.use(router);
 app.use(express.static('images'));

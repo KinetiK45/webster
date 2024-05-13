@@ -10,8 +10,7 @@ module.exports = {
     database: process.env.DATABASE_NAME,
     synchronize: true,
     logging: true,
-    entities: [path.join(__dirname, 'model', 'users.js'),
-        path.join(__dirname, 'model', 'photos.js')],
+    entities: [path.join(__dirname, 'model', '*.js')],
     // migrations: [path.join(__dirname, 'migrations', '*.js')],
     // subscribers: [path.join(__dirname, 'subscribers', '*.js')],
     // cli: {

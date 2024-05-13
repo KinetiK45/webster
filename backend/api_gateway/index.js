@@ -5,6 +5,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const proxyRouter = require("./routers/proxyRouter");
 const helmet = require("helmet");
 const rateLimitAndTimeout = require("./middleware/sessionLimiter");
+const fileUploadMiddleware = require("./middleware/fileUpload");
 const app = express();
 const PORT = process.env.PORT;
 
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 
 app.use(rateLimitAndTimeout);
+app.use(fileUploadMiddleware);
 app.use(helmet());
 app.disable("x-powered-by");
 app.use(proxyRouter);

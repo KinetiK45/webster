@@ -1,7 +1,7 @@
 const path = require('path');
 const { ConnectionOptionsReader, DataSource } = require('typeorm');
 
-const configPath = path.resolve(__dirname, '../ormconfig.js');
+const configPath = path.resolve(__dirname, '../ormPostgresConfig.js');
 console.log('Configuration path:', configPath);
 
 const myDataSourcePromise = new Promise((resolve, reject) => {

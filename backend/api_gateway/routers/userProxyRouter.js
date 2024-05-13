@@ -28,4 +28,11 @@ userProxyRouter.use(
     })
 );
 
+userProxyRouter.use(
+    "/create",
+    createProxyMiddleware({
+        target: `${host}/v1/api/users/create`,
+    })
+)
+
 module.exports = userProxyRouter;

@@ -7,7 +7,7 @@ const loginLimiter = require("../middleware/loginLimiter");
 const router = new AuthenticationRouter;
 
 router.post('/register', registrationValidationChain, validateRequest, authentication.register);
-router.post('/login', loginLimiter ,loginValidationChain, validateRequest, authentication.login);
+router.post('/login', loginLimiter, loginValidationChain, validateRequest, authentication.login);
 router.post('/login-confirm',authentication.confirmTwoFactor);
 router.post('/logout', deactivateToken);
 router.post('/password-reset', authentication.passwordReset);
