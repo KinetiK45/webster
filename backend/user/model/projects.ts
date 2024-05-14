@@ -9,6 +9,9 @@ export class Projects {
     @Column({ type: 'varchar', length: 45, unique: true, nullable: false })
     project_name!: string;
 
+    @Column({ type: 'varchar',length: 256, nullable: false })
+    projectImageUrl!: string;
+
     @ManyToOne(() => Users, (user) => user.projects)
     user!: Users;
 

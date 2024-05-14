@@ -27,37 +27,8 @@ function deactivateToken(req, res) {
     return res.json({ state: false, message: 'The token has been successfully deleted' });
 }
 
-function verifyToken(req, res) {
-    return new Promise((resolve, reject) => {
-        let token;
-        try {
-            if (req.cookies.auth_token) {
-                token = req.cookies.auth_token;
-            }
-        } catch (e) {
-            reject(e);
-        }
-
-        if (!req.cookies.auth_token) {
-            console.log("No authorisation token");
-        }
-        if (blackList.has(token)) {
-            return res.status(401).json({state: false, message: 'The token has already been deleted'});
-        }
-        jwt.verify(token, secretKey, (err, decoded) => {
-            if (err) {
-                console.log("Invalid token");
-                // return res.status(401).json({state: false, message: 'Invalid token'});
-            }
-            req.senderData = decoded;
-            resolve();
-        });
-    });
-}
-
 module.exports = {
     generateToken,
-    verifyToken,
     deactivateToken
 }
 

@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const router = require("./routers/router");
 const morgan = require('morgan');
+const tokenMiddleware = require("./middleware/vetifyToken");
 
 
 const app = express();
@@ -26,7 +27,7 @@ app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use(tokenMiddleware);
 app.use(router);
 app.use(express.static('images'));
 

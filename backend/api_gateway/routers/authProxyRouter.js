@@ -42,10 +42,7 @@ authProxyRouter.use(
 authProxyRouter.use(
     "/password-reset/:resetPasswordCode",
     (req, res, next) => {
-        req.resetPasswordCode = req.params.resetPasswordCode;
-        console.log("resetPasswordCode ID:", req.resetPasswordCode);
-
-        const targetUrl = `${host}/v1/api/auth/password-reset/${req.resetPasswordCode}`;
+        const targetUrl = `${host}/v1/api/auth/password-reset/${req.params.resetPasswordCode}`;
         createProxyMiddleware({
             target: targetUrl,
         })(req, res, next);

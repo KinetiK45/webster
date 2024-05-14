@@ -1,14 +1,11 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const host = process.env.AUTHENTICATION_HOST;
+const host = process.env.USER_HOST;
 
 const userProxyRouter = express.Router();
 
 userProxyRouter.use("/:user_id", (req, res, next) => {
-    req.userId = req.params.user_id;
-    console.log("User ID:", req.userId);
-
-    const targetUrl = `${host}/v1/api/users/${req.userId}`;
+    const targetUrl = `${host}/v1/api/users/${req.params.user_id}`;
     createProxyMiddleware({
         target: targetUrl,
     })(req, res, next);
