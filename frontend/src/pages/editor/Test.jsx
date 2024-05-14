@@ -10,35 +10,50 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import {AddPhotoAlternateOutlined, PanTool, Rectangle, RectangleOutlined, Settings,Gesture} from "@mui/icons-material";
 import Button from "@mui/material/Button";
-function MenuIcon() {
-    return null;
-}
 
 export function Test() {
-    const [canvas, setCanvas] = useState(null);
-    const [isDrawingMode,setIsDrawingMode] = useState(false)
+    const [canvas, setCanvas] = useState('');
+    const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
+    const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
+    const [imgPath, setImgPath] = useState('');
+    const [isDrawingMode,setIsDrawingMode] = useState(false);
+
     useEffect(() => {
         setCanvas(initCanvas());
-
     }, []);
 
-    const [anchorEl, setAnchorEl] = useState(null);
+    useEffect(() => {
+        if(imgPath === '') return;
+        fabric.Image.fromURL(imgPath, function(img) {
+            canvas.add(img);
+            setImgPath('');
+        });
+    }, [imgPath]);
 
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+    const handleFiguresClick = (event) => {
+        setFiguresAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
+    const handleFiguresClose = () => {
+        setFiguresAnchorEl(null);
     };
-    const initCanvas = () => (
-        new fabric.Canvas('canvas', {
-            height: 300,
-            width: 400,
+    const handleDrawClick = (event) => {
+        setDrawingAnchorEl(event.currentTarget);
+    };
+
+    const handleDrawClose = () => {
+        setDrawingAnchorEl(null);
+    };
+    const initCanvas = () => {
+        const containerWidth = document.getElementById('canvas').clientWidth;
+        const containerHeight = document.getElementById('canvas').clientHeight;
+        return new fabric.Canvas('canvas', {
+            width: containerWidth,
+            height: containerHeight,
             backgroundColor: 'pink',
-            selectable: true
-        })
-    )
+            selectable: true,
+        });
+    };
     useEffect(() => {
         if (canvas) {
             canvas.on('mouse:wheel', function(opt) {
@@ -74,6 +89,7 @@ export function Test() {
                     this.lastPosX = evt.clientX;
                     this.lastPosY = evt.clientY;
                 }
+                if(canvas.isDrawingMode) setIsDrawingMode(true);
             });
             canvas.on('mouse:move', function(opt) {
                 if (this.isDragging) {
@@ -87,8 +103,7 @@ export function Test() {
                 }
             });
             canvas.on('mouse:up', function(opt) {
-                // on mouse up we want to recalculate new interaction
-                // for all objects, so we call setViewportTransform
+                if(canvas.isDrawingMode) setIsDrawingMode(false);
                 this.setViewportTransform(this.viewportTransform);
                 this.isDragging = false;
                 this.selection = true;
@@ -106,7 +121,16 @@ export function Test() {
             selectable: true
         });
         canvas.add(rect);
-        handleClose();
+        handleFiguresClose();
+    }
+
+    function createLine() {
+        canvas.add(new fabric.Line([50, 100, 200, 200], {
+            left: 170,
+            top: 150,
+            stroke: 'red'
+        }));
+        handleFiguresClose();
     }
 
     function createCircle() {
@@ -117,18 +141,18 @@ export function Test() {
             fill: 'red',
         });
         canvas.add(circle);
-        handleClose();
+        handleFiguresClose();
     }
 
     function createText() {
-        const text = new fabric.Text('Hello', {
+        const text = new fabric.IText('Hello', {
             left: 100,
             top: 130,
             fontSize: 16,
             fill: 'white'
         });
         canvas.add(text);
-        handleClose();
+        handleFiguresClose();
     }
     function selectObject(index) {
         const object = canvas.getObjects()[index];
@@ -145,47 +169,42 @@ export function Test() {
         input.addEventListener('change', function(event) {
             const file = event.target.files[0];
             const filePath = URL.createObjectURL(file);
-            console.log(filePath);
-            fabric.Image.fromURL(filePath, function(img) {
-                canvas.add(img);
-            });
+            setImgPath(filePath);
         })
 
         input.click();
     }
     function handleEnableDrawing() {
+        handleDrawClose();
         if(canvas.isDrawingMode) {
             canvas.isDrawingMode = false
-            setIsDrawingMode(false)
             return
         }
         canvas.isDrawingMode = true
-        setIsDrawingMode(true)
     }
 
     return (
-        <Grid container spacing={2} style={{marginTop: 0}}>
+        <Grid container spacing={2} style={{marginTop: 0, height: '100vh'}}>
             <Grid item xs={12} style={{paddingTop: 0}}>
                 <Toolbar style={{backgroundColor: '#657B81'}}>
                     <IconButton
                         edge="start"
                         color="inherit"
                         aria-label="menu"
-                        onClick={handleClick}
+                        onClick={handleFiguresClick}
                     >
                         <RectangleOutlined />
                     </IconButton>
                     <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleClose}
+                        anchorEl={figuresAnchorEl}
+                        open={Boolean(figuresAnchorEl)}
+                        onClose={handleFiguresClose}
                     >
                         <MenuItem onClick={createRect}>Rectangle</MenuItem>
                         <MenuItem onClick={createCircle}>Circle</MenuItem>
+                        <MenuItem onClick={createLine}>Line</MenuItem>
                         <MenuItem onClick={createText}>Text</MenuItem>
                     </Menu>
-
-
                     <IconButton
                         edge="start"
                         color="inherit"
@@ -197,16 +216,24 @@ export function Test() {
                     <IconButton
                         edge="start"
                         color="inherit"
-                        aria-label="add-image"
-                        onClick={handleEnableDrawing}
+                        aria-label="menu"
+                        onClick={handleDrawClick}
                     >
                         <Gesture />
                     </IconButton>
+                    <Menu
+                        anchorEl={drawingAnchorEl}
+                        open={Boolean(drawingAnchorEl)}
+                        onClose={handleDrawClose}
+                    >
+                        <MenuItem onClick={handleEnableDrawing}>Pen</MenuItem>
+                        <MenuItem onClick={handleEnableDrawing}>Pencil</MenuItem>
+                    </Menu>
 
                 </Toolbar>
             </Grid>
 
-            <Grid item xs={1} style={{padding: 0}}>
+            <Grid item xs={1} style={{padding: 0, height: '100%'}}>
                 <Box style={{backgroundColor: '#1F2833', width: '100%', height: '100%'}}>
                     {canvas && canvas.getObjects().map((item, index) => (
                         <Button onClick={() => {selectObject(index)}} key={index} variant="outlinad" style={{width: '100%', display: 'block'}}>
