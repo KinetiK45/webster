@@ -8,7 +8,6 @@ function renderRegistration(username, logo) {
         console.error("Error rendering email template registration:", error);
         throw error;
     }
-
 }
 
 function renderConfirmationEmail  (logo, username, code) {

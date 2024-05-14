@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+#  3001
+  api_gateway:
+    build: ./backend/api_gateway/
+    container_name: api_gateway
+    ports:
+      - "3001:3001"
+    environment:
+      AUTHENTICATION_URL: 'http://authentication:3002'
+      USER_URL: 'http://user:3004'
+
+#3002
+  authentication:
+    build: ./backend/authentication/
+    container_name: authentication_container
+    depends_on:
+      - redis
+      - rabbitmq
+      - postgres
+    environment:
+      POSTGRES_URL: 'postgres://user:pass@host:port/webster'
+      REDIS_URL: 'redis://redis:6379'
+      RABBITMQ_URL: 'amqp://rabbitmq'
+      JWT_SECRET_KEY: ''
+      AWS_ACCESS_KEY_ID: ''
+      AWS_SECRET_ACCESS_KEY: ''
+      BUCKET_NAME: ''
+#3003
+  design_rendering:
+    build: ./backend/design_rendering/
+    container_name: design_rendering
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      MONGO_DB_URL: 'mongodb://mongo:27017/webster'
+      RABBITMQ_URL: 'amqp://rabbitmq'
+#3004
+  user:
+    build: ./backend/user/
+    container_name: user
+    environment:
+      RABBITMQ_URL: 'amqp://rabbitmq'
+      POSTGRES_URL: 'postgres://user:pass@host:port/webster'
+      AWS_ACCESS_KEY_ID: ''
+      AWS_SECRET_ACCESS_KEY: ''
+      BUCKET_NAME: ''
+
+  notification:
+    build: ./backend/notification/
+    container_name: notification
+    environment:
+      RABBITMQ_URL: 'amqp://rabbitmq'
+      STMP_URL: 'smtp://user:pass@host:port'
+
+  redis:
+    image: redis:latest
+
+  rabbitmq:
+    image: rabbitmq:latest
+
+  mongo:
+    image: mongo:latest
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: securepass
+    volumes:
+      - ./backend/initdb:/docker-entrypoint-initdb.d/

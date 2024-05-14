@@ -2,7 +2,7 @@ import axios from "axios";
 import {logout} from "../utils/Utils";
 
 const ip = new URL(window.location.origin).hostname;
-const domain = `http://${ip}:3001/api`;
+const domain = `http://${ip}:3001/api/`;
 
 const axiosInstance = axios.create({
     baseURL: domain,

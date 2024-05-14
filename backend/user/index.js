@@ -5,13 +5,13 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const router = require("./routers/router");
 const morgan = require('morgan');
-const tokenMiddleware = require("./middleware/vetifyToken");
+const tokenMiddleware = require("./middleware/verifyToken");
 
 
 const app = express();
 
 app.use(cors({
-    origin: ['http://localhost:3001'],
+    origin: ['*'],
     credentials: true,
 }));
 

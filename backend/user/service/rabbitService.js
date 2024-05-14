@@ -1,7 +1,7 @@
 const amqplib = require ('amqplib');
 const uuid = require('uuid');
 async function createRabbitMQConnection() {
-    const connection = await amqplib.connect('amqp://localhost');
+    const connection = await amqplib.connect(process.env.RABBITMQ_URL);
     process.on('exit', () => {
         console.log('Closing RabbitMQ connection...');
         connection.close();

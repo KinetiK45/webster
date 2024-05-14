@@ -1,7 +1,7 @@
 const redis = require("redis");
 
 const client = redis.createClient({
-    url: 'redis://127.0.0.1:6379'
+    url: process.env.REDIS_URL
 });
 
 client.on('connect', () => {
@@ -12,10 +12,10 @@ client.on('error', (err) => {
     console.error('Redis error:', err);
 });
 
-client.connect();
 client.on('reconnecting', () => {
     console.log('Reconnecting to Redis...');
 });
+
 process.on('exit', () => {
     console.log('Closing Redis client...');
     client.quit();
@@ -32,10 +32,13 @@ const flushDatabase = async () => {
 };
 
 setInterval(flushDatabase, 10 * 60 * 1000);
+
 process.on('SIGINT', () => {
     console.log('Application interrupted, closing Redis client...');
     client.disconnect();
     process.exit();
 });
+
+client.connect();
 
 module.exports = client;

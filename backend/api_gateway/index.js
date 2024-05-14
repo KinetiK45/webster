@@ -23,5 +23,5 @@ app.disable("x-powered-by");
 app.use(proxyRouter);
 
 app.listen(PORT, () => {
-    console.log(`API Gateway listening on http://localhost:${PORT}`);
+    console.log(`API Gateway listening on port ${PORT}`);
 });

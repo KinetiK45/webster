@@ -1,6 +1,6 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const host = process.env.USER_HOST;
+const host = process.env.USER_URL;
 
 const userProxyRouter = express.Router();
 

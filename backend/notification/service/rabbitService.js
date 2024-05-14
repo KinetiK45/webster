@@ -1,10 +1,9 @@
 const amqplib = require('amqplib');
 const sendEmail = require("./nodemailerService");
 const {renderRegistration, renderConfirmationEmail, renderResetEmail} = require("./ejsService");
-const path = require("path");
 const logoUrl = "https://ucodewebster.s3.amazonaws.com/img.png";
 async function createRabbitMQConnection() {
-    const connection = await amqplib.connect('amqp://localhost');
+    const connection = await amqplib.connect(process.env.RABBITMQ_URL);
 
     process.on('exit', () => {
         console.log('Closing RabbitMQ connection...');

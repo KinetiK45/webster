@@ -1,7 +1,6 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const loginLimiter = require("../../authentication/middleware/loginLimiter");
-const host = process.env.AUTHENTICATION_HOST;
+const host = process.env.AUTHENTICATION_URL;
 const authProxyRouter = express.Router();
 
 authProxyRouter.use(

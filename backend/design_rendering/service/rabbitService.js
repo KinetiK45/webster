@@ -2,7 +2,7 @@ const amqplib = require('amqplib');
 const {deleteProject} = require("./projectService");
 
 async function createRabbitMQConnection() {
-    const connection = await amqplib.connect('amqp://localhost');
+    const connection = await amqplib.connect(process.env.RABBITMQ_URL);
 
     process.on('exit', () => {
         console.log('Closing RabbitMQ connection...');

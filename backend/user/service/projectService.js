@@ -1,7 +1,6 @@
 const myDataSourcePromise = require("../config/ormSource");
 const {Users} = require("../model/users");
 const {Projects} = require("../model/projects");
-const bcrypt = require("bcrypt");
 let userRepository;
 let projectRepository;
 (async () => {

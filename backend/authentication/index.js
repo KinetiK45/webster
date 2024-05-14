@@ -10,7 +10,7 @@ const morgan = require('morgan');
 const app = express();
 
 app.use(cors({
-    origin: ['http://localhost:3001'],
+    origin: ['http://api_gateway'],
     credentials: true,
 }));
 
@@ -33,5 +33,5 @@ app.use(express.static('images'));
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-    console.log(`Сервер запущен http://localhost:${PORT}`);
+    console.log(`Server started on port ${PORT}`);
 });

@@ -32,5 +32,4 @@ async function getByProjectId(req,res){
 module.exports = {
     saveProject,
     getByProjectId,
-
 }

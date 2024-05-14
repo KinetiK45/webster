@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const secretKey = process.env.SECRET_KEY;
+const secretKey = process.env.JWT_SECRET_KEY;
 const blackList = new Set();
 
 function generateToken(payload, expires = '24h') {
