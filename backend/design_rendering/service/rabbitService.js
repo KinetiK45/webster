@@ -10,7 +10,7 @@ async function createRabbitMQConnection() {
     });
     return connection;
 }
-async function listenForUserRegistrationEvents() {
+async function listenForDeleteProjectEvents() {
     const queueName = 'project_delete';
     const connection = await createRabbitMQConnection();
     const channel = await connection.createChannel();
@@ -32,4 +32,7 @@ async function listenForUserRegistrationEvents() {
         console.log("message: " + message);
         channel.ack(message);
     });
+}
+module.exports = {
+    listenForDeleteProjectEvents
 }
