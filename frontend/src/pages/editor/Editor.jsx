@@ -1,18 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { fabric } from 'fabric';
 import { Grid } from "@mui/material";
-import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import {AddPhotoAlternateOutlined, PanTool, Rectangle, RectangleOutlined, Settings,Gesture} from "@mui/icons-material";
 import Button from "@mui/material/Button";
+import {EditorContext} from "./EditorContextProvider";
+import ProjectLayers from "../../components/editor/ProjectLayers";
 
-export function Test() {
-    const [canvas, setCanvas] = useState('');
+export function Editor() {
+    const projectSettings = useContext(EditorContext);
+    const [canvas, setCanvas] = useState(undefined);
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
     const [imgPath, setImgPath] = useState('');
@@ -37,6 +38,7 @@ export function Test() {
     const handleFiguresClose = () => {
         setFiguresAnchorEl(null);
     };
+
     const handleDrawClick = (event) => {
         setDrawingAnchorEl(event.currentTarget);
     };
@@ -44,16 +46,16 @@ export function Test() {
     const handleDrawClose = () => {
         setDrawingAnchorEl(null);
     };
+
     const initCanvas = () => {
-        const containerWidth = document.getElementById('canvas').clientWidth;
-        const containerHeight = document.getElementById('canvas').clientHeight;
         return new fabric.Canvas('canvas', {
-            width: containerWidth,
-            height: containerHeight,
-            backgroundColor: 'pink',
+            width: projectSettings.projectWidth,
+            height: projectSettings.projectHeight,
+            backgroundColor: projectSettings.backgroundColor,
             selectable: true,
         });
     };
+
     useEffect(() => {
         if (canvas) {
             canvas.on('mouse:wheel', function(opt) {
@@ -118,7 +120,7 @@ export function Test() {
             fill: 'red',
             width: 20,
             height: 20,
-            selectable: true
+            selectable: true,
         });
         canvas.add(rect);
         handleFiguresClose();
@@ -128,7 +130,7 @@ export function Test() {
         canvas.add(new fabric.Line([50, 100, 200, 200], {
             left: 170,
             top: 150,
-            stroke: 'red'
+            stroke: 'red',
         }));
         handleFiguresClose();
     }
@@ -149,16 +151,12 @@ export function Test() {
             left: 100,
             top: 130,
             fontSize: 16,
-            fill: 'white'
+            fill: 'white',
         });
         canvas.add(text);
         handleFiguresClose();
     }
-    function selectObject(index) {
-        const object = canvas.getObjects()[index];
-        canvas.setActiveObject(object);
-        canvas.renderAll();
-    }
+
     function saveCanvas() {
         const json = canvas.toJSON();
         console.log(json);
@@ -174,6 +172,7 @@ export function Test() {
 
         input.click();
     }
+
     function handleEnableDrawing() {
         handleDrawClose();
         if(canvas.isDrawingMode) {
@@ -232,24 +231,21 @@ export function Test() {
 
                 </Toolbar>
             </Grid>
-
-            <Grid item xs={1} style={{padding: 0, height: '100%'}}>
-                <Box style={{backgroundColor: '#1F2833', width: '100%', height: '100%'}}>
-                    {canvas && canvas.getObjects().map((item, index) => (
-                        <Button onClick={() => {selectObject(index)}} key={index} variant="outlinad" style={{width: '100%', display: 'block'}}>
-                            {item.type} {index}
-                        </Button>
-                    ))}
-                </Box>
+            <Grid item xs={3} sx={{padding: 0, height: '100%'}}>
+                <ProjectLayers
+                    canvas={canvas}
+                />
+                {/*<Box style={{backgroundColor: '#1F2833', width: '100%', height: '100%'}}>*/}
+                {/*    {canvas && canvas.getObjects().map((item, index) => (*/}
+                {/*        <Button onClick={() => {selectObject(index)}} key={index} variant="outlinad" sx={{width: '100%', display: 'block'}}>*/}
+                {/*            {item.type} {index}*/}
+                {/*        </Button>*/}
+                {/*    ))}*/}
+                {/*</Box>*/}
             </Grid>
 
-            <Grid item xs={10} style={{padding: 0}}>
+            <Grid item xs={9} style={{padding: 0}}>
                 <canvas id="canvas" style={{width: '100%', height: '100%'}}></canvas>
-            </Grid>
-
-            <Grid item xs={1} style={{padding: 0}} >
-                <Box style={{backgroundColor: '#1F2833', width: '100%', height: '100%'}}>
-                </Box>
             </Grid>
         </Grid>
     );
