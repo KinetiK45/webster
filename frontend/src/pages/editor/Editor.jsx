@@ -1,38 +1,28 @@
-import React, {useContext, useEffect, useState} from 'react';
-import { fabric } from 'fabric';
-import { Grid } from "@mui/material";
+import React, {useEffect, useState} from 'react';
+import {fabric} from 'fabric';
 import Toolbar from "@mui/material/Toolbar";
-import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import RectangleOutlinedIcon from '@mui/icons-material/RectangleOutlined';
+import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
+import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined';
+import PermDataSettingIcon from '@mui/icons-material/PermDataSetting';
 import Menu from "@mui/material/Menu";
-import {
-    AddPhotoAlternateOutlined,
-    PanTool,
-    Rectangle,
-    RectangleOutlined,
-    Settings,
-    Gesture,
-    Group
-} from "@mui/icons-material";
-import Button from "@mui/material/Button";
-import {EditorContext} from "./EditorContextProvider";
-import ProjectLayers from "../../components/editor/ProjectLayers";
+import {Divider, ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
+import Typography from "@mui/material/Typography";
+import {AddPhotoAlternateOutlined, Gesture} from "@mui/icons-material";
+import Avatar from "@mui/material/Avatar";
 
-export function Editor() {
-    const projectSettings = useContext(EditorContext);
-    const [canvas, setCanvas] = useState(undefined);
+export function Editor({canvas}) {
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
     const [imgPath, setImgPath] = useState('');
-    const [isDrawingMode,setIsDrawingMode] = useState(false);
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
 
     useEffect(() => {
-        setCanvas(initCanvas());
-    }, []);
-    useEffect(() => {
-        if(imgPath === '') return;
-        fabric.Image.fromURL(imgPath, function(img) {
+        if (imgPath === '') return;
+        fabric.Image.fromURL(imgPath, function (img) {
             canvas.add(img);
             setImgPath('');
         });
@@ -54,24 +44,15 @@ export function Editor() {
         setDrawingAnchorEl(null);
     };
 
-    const initCanvas = () => {
-        return new fabric.Canvas('canvas', {
-            width: projectSettings.projectWidth,
-            height: projectSettings.projectHeight,
-            backgroundColor: projectSettings.backgroundColor,
-            selectable: true,
-        });
-    };
-
     useEffect(() => {
         if (canvas) {
-            canvas.on('mouse:wheel', function(opt) {
+            canvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
                 var zoom = canvas.getZoom();
                 zoom *= 0.999 ** delta;
                 if (zoom > 20) zoom = 20;
                 if (zoom < 0.01) zoom = 0.01;
-                canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+                canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
                 opt.e.preventDefault();
                 opt.e.stopPropagation();
                 var vpt = this.viewportTransform;
@@ -89,8 +70,9 @@ export function Editor() {
                     } else if (vpt[5] < canvas.getHeight() - 1000 * zoom) {
                         vpt[5] = canvas.getHeight() - 1000 * zoom;
                     }
-                }})
-            canvas.on('mouse:down', function(opt) {
+                }
+            })
+            canvas.on('mouse:down', function (opt) {
                 var evt = opt.e;
                 if (evt.altKey === true) {
                     this.isDragging = true;
@@ -98,9 +80,9 @@ export function Editor() {
                     this.lastPosX = evt.clientX;
                     this.lastPosY = evt.clientY;
                 }
-                if(canvas.isDrawingMode) setIsDrawingMode(true);
+                if (canvas.isDrawingMode) setIsDrawingMode(true);
             });
-            canvas.on('mouse:move', function(opt) {
+            canvas.on('mouse:move', function (opt) {
                 if (this.isDragging) {
                     var e = opt.e;
                     var vpt = this.viewportTransform;
@@ -111,8 +93,8 @@ export function Editor() {
                     this.lastPosY = e.clientY;
                 }
             });
-            canvas.on('mouse:up', function(opt) {
-                if(canvas.isDrawingMode) setIsDrawingMode(false);
+            canvas.on('mouse:up', function (opt) {
+                if (canvas.isDrawingMode) setIsDrawingMode(false);
                 this.setViewportTransform(this.viewportTransform);
                 this.isDragging = false;
                 this.selection = true;
@@ -250,7 +232,7 @@ export function Editor() {
     function handleAddImage() {
         const input = document.createElement('input');
         input.type = 'file';
-        input.addEventListener('change', function(event) {
+        input.addEventListener('change', function (event) {
             const file = event.target.files[0];
             const filePath = URL.createObjectURL(file);
             setImgPath(filePath);
@@ -266,6 +248,12 @@ export function Editor() {
         // }
         canvas.isDrawingMode = !canvas.isDrawingMode
     }
+
+    const figuresActions = [
+        {icon: <RectangleOutlinedIcon fontSize="small" />, text: 'Rect', func: createRect},
+        {icon: <CircleOutlinedIcon fontSize="small" />, text: 'Circle', func: createCircle},
+        {icon: <RemoveOutlinedIcon fontSize="small" />, text: 'Line', func: createLine}
+    ];
 
     return (
         <Grid container spacing={2} style={{marginTop: 0, height: '100vh'}}>
@@ -344,5 +332,72 @@ export function Editor() {
                 <canvas id="canvas" style={{width: '100%', height: '100%'}}></canvas>
             </Grid>
         </Grid>
+        <Toolbar variant="regular" sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
+            <Stack direction="row" spacing={0.5}>
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={handleFiguresClick}
+                >
+                    <PermDataSettingIcon/>
+                </IconButton>
+                <Menu
+                    anchorEl={figuresAnchorEl}
+                    open={Boolean(figuresAnchorEl)}
+                    onClose={handleFiguresClose}
+                >
+                    <MenuList>
+                        {figuresActions.map((item) => {
+                            return <MenuItem key={item.text} onClick={item.func}>
+                                <ListItemIcon>{item.icon}</ListItemIcon>
+                                <ListItemText>{item.text}</ListItemText>
+                            </MenuItem>
+                        })}
+                    </MenuList>
+                </Menu>
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="add-image"
+                    onClick={createText}
+                >
+                    <TextFieldsIcon/>
+                </IconButton>
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="add-image"
+                    onClick={handleAddImage}
+                >
+                    <AddPhotoAlternateOutlined/>
+                </IconButton>
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={handleDrawClick}
+                >
+                    <Gesture/>
+                </IconButton>
+                <Menu
+                    anchorEl={drawingAnchorEl}
+                    open={Boolean(drawingAnchorEl)}
+                    onClose={handleDrawClose}
+                >
+                    <MenuItem onClick={handleEnableDrawing}>Pen</MenuItem>
+                    <MenuItem onClick={handleEnableDrawing}>Pencil</MenuItem>
+                </Menu>
+            </Stack>
+            <Typography>
+                Proj name
+            </Typography>
+            <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
+                <Avatar alt="Avatar" />
+                <Typography>
+                    Creator Name
+                </Typography>
+            </Stack>
+        </Toolbar>
     );
 }

@@ -58,7 +58,7 @@ function CustomNavigation() {
                             color: 'inherit'
                         }}
                     >
-                        uEvent
+                        FigSter
                     </Typography>
                     <Link to={'/editor'}>
                         <IconButton>
