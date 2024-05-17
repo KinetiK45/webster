@@ -58,7 +58,7 @@ function CustomNavigation() {
                             color: 'inherit'
                         }}
                     >
-                        uEvent
+                        FigSter
                     </Typography>
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'compact', md: 'flex' } }}>
