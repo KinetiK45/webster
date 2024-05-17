@@ -8,7 +8,15 @@ import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
-import {AddPhotoAlternateOutlined, PanTool, Rectangle, RectangleOutlined, Settings,Gesture} from "@mui/icons-material";
+import {
+    AddPhotoAlternateOutlined,
+    PanTool,
+    Rectangle,
+    RectangleOutlined,
+    Settings,
+    Gesture,
+    Group
+} from "@mui/icons-material";
 import Button from "@mui/material/Button";
 
 export function Test() {
@@ -21,7 +29,6 @@ export function Test() {
     useEffect(() => {
         setCanvas(initCanvas());
     }, []);
-
     useEffect(() => {
         if(imgPath === '') return;
         fabric.Image.fromURL(imgPath, function(img) {
@@ -29,31 +36,6 @@ export function Test() {
             setImgPath('');
         });
     }, [imgPath]);
-
-    const handleFiguresClick = (event) => {
-        setFiguresAnchorEl(event.currentTarget);
-    };
-
-    const handleFiguresClose = () => {
-        setFiguresAnchorEl(null);
-    };
-    const handleDrawClick = (event) => {
-        setDrawingAnchorEl(event.currentTarget);
-    };
-
-    const handleDrawClose = () => {
-        setDrawingAnchorEl(null);
-    };
-    const initCanvas = () => {
-        const containerWidth = document.getElementById('canvas').clientWidth;
-        const containerHeight = document.getElementById('canvas').clientHeight;
-        return new fabric.Canvas('canvas', {
-            width: containerWidth,
-            height: containerHeight,
-            backgroundColor: 'pink',
-            selectable: true,
-        });
-    };
     useEffect(() => {
         if (canvas) {
             canvas.on('mouse:wheel', function(opt) {
@@ -111,6 +93,29 @@ export function Test() {
         }
     }, [canvas]);
 
+    const handleFiguresClick = (event) => {
+        setFiguresAnchorEl(event.currentTarget);
+    };
+    const handleFiguresClose = () => {
+        setFiguresAnchorEl(null);
+    };
+    const handleDrawClick = (event) => {
+        setDrawingAnchorEl(event.currentTarget);
+    };
+    const handleDrawClose = () => {
+        setDrawingAnchorEl(null);
+    };
+    const initCanvas = () => {
+        const containerWidth = document.getElementById('canvas').clientWidth;
+        const containerHeight = document.getElementById('canvas').clientHeight;
+        return new fabric.Canvas('canvas', {
+            width: containerWidth,
+            height: containerHeight,
+            backgroundColor: 'pink',
+            selectable: true,
+        });
+    };
+
     function createRect() {
         const rect = new fabric.Rect({
             left: 100,
@@ -123,7 +128,34 @@ export function Test() {
         canvas.add(rect);
         handleFiguresClose();
     }
+    function createTriangle() {
+        const triangle = new fabric.Triangle({
+            left: 100,
+            top: 100,
+            fill: 'blue',
+            width: 20,
+            height: 30,
+            selectable: true
+        });
+        canvas.add(triangle);
+        handleFiguresClose();
+    }
+    function createPolygon() {
+        const points = [
+            { x: 100, y: 100 },
+            { x: 150, y: 50 },
+            { x: 200, y: 100 },
+            { x: 150, y: 150 }
+        ];
 
+        const polygon = new fabric.Polygon(points, {
+            fill: 'green',
+            selectable: true
+        });
+
+        canvas.add(polygon);
+        handleFiguresClose();
+    }
     function createLine() {
         canvas.add(new fabric.Line([50, 100, 200, 200], {
             left: 170,
@@ -132,7 +164,25 @@ export function Test() {
         }));
         handleFiguresClose();
     }
+    function createPolyline() {
+        const points = [
+            { x: 50, y: 100 },
+            { x: 150, y: 200 },
+            { x: 250, y: 150 },
+            { x: 350, y: 200 }
+        ];
 
+        const polyline = new fabric.Polyline(points, {
+            left: 170,
+            top: 150,
+            stroke: 'blue',
+            fill: 'transparent',
+            strokeWidth: 2
+        });
+
+        canvas.add(polyline);
+        handleFiguresClose();
+    }
     function createCircle() {
         const circle = new fabric.Circle({
             left: 100,
@@ -143,7 +193,6 @@ export function Test() {
         canvas.add(circle);
         handleFiguresClose();
     }
-
     function createText() {
         const text = new fabric.IText('Hello', {
             left: 100,
@@ -152,6 +201,19 @@ export function Test() {
             fill: 'white'
         });
         canvas.add(text);
+        handleFiguresClose();
+    }
+    function createEllipse() {
+        const ellipse = new fabric.Ellipse({
+            left: 100,
+            top: 100,
+            fill: 'orange',
+            rx: 50,
+            ry: 30,
+            selectable: true
+        });
+
+        canvas.add(ellipse);
         handleFiguresClose();
     }
     function selectObject(index) {
@@ -176,11 +238,11 @@ export function Test() {
     }
     function handleEnableDrawing() {
         handleDrawClose();
-        if(canvas.isDrawingMode) {
-            canvas.isDrawingMode = false
-            return
-        }
-        canvas.isDrawingMode = true
+        // if(canvas.isDrawingMode) {
+        //     canvas.isDrawingMode = false
+        //     return
+        // }
+        canvas.isDrawingMode = !canvas.isDrawingMode
     }
 
     return (
@@ -202,6 +264,10 @@ export function Test() {
                     >
                         <MenuItem onClick={createRect}>Rectangle</MenuItem>
                         <MenuItem onClick={createCircle}>Circle</MenuItem>
+                        <MenuItem onClick={createTriangle}>Triangle</MenuItem>
+                        <MenuItem onClick={createPolygon}>Polygon</MenuItem>
+                        <MenuItem onClick={createEllipse}>Ellipse</MenuItem>
+                        <MenuItem onClick={createPolyline}>Polyline</MenuItem>
                         <MenuItem onClick={createLine}>Line</MenuItem>
                         <MenuItem onClick={createText}>Text</MenuItem>
                     </Menu>
@@ -229,7 +295,14 @@ export function Test() {
                         <MenuItem onClick={handleEnableDrawing}>Pen</MenuItem>
                         <MenuItem onClick={handleEnableDrawing}>Pencil</MenuItem>
                     </Menu>
-
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        aria-label="add-image"
+                        onClick={groupSelectedObjects}
+                    >
+                        <Group />
+                    </IconButton>
                 </Toolbar>
             </Grid>
 
