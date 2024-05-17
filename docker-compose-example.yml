@@ -51,6 +51,8 @@ services:
   notification:
     build: ./backend/notification/
     container_name: notification
+    depends_on:
+      - rabbitmq
     environment:
       RABBITMQ_URL: 'amqp://rabbitmq'
       STMP_URL: 'smtp://user:pass@host:port'
