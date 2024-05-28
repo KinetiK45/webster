@@ -33,6 +33,34 @@ async function listenForDeleteProjectEvents() {
         channel.ack(message);
     });
 }
+
+async function publishUpdateProjectEvent(project_id, url) {
+    try {
+        const queueName = 'project_update';
+        const connection = await createRabbitMQConnection();
+        const channel = await connection.createChannel();
+
+        await channel.assertQueue(queueName);
+
+        const event = {
+            eventId: uuid.v4(),
+            project_id: project_id,
+            url: url,
+            eventName: 'UpdateProject',
+            timestamp: new Date(),
+        };
+
+        console.log('Publishing update project event: ', event);
+        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(event)));
+
+        await channel.close();
+        await connection.close();
+    } catch (error) {
+        console.log('Publishing update project event: ' + error);
+        throw error;
+    }
+}
 module.exports = {
-    listenForDeleteProjectEvents
+    listenForDeleteProjectEvents,
+    publishUpdateProjectEvent
 }

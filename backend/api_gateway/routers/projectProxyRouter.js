@@ -1,7 +1,7 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const userHost = process.env.USER_URL;
-const projectHost = process.env.PROJECT_HOST;
+const projectHost = process.env.PROJECT_URL;
 const axios = require('axios');
 
 const projectProxyRouter = express.Router();

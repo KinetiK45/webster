@@ -1,5 +1,6 @@
 const amqplib = require ('amqplib');
 const uuid = require('uuid');
+
 async function createRabbitMQConnection() {
     const connection = await amqplib.connect(process.env.RABBITMQ_URL);
     process.on('exit', () => {
@@ -8,6 +9,7 @@ async function createRabbitMQConnection() {
     });
     return connection;
 }
+
 async function publishDeleteProjectEvent(project_id) {
     try {
         const queueName = 'project_delete';
