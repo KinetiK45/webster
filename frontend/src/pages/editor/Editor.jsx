@@ -101,19 +101,6 @@ export function Editor({canvas}) {
             });
         }
     }, [canvas]);
-
-    const handleFiguresClick = (event) => {
-        setFiguresAnchorEl(event.currentTarget);
-    };
-    const handleFiguresClose = () => {
-        setFiguresAnchorEl(null);
-    };
-    const handleDrawClick = (event) => {
-        setDrawingAnchorEl(event.currentTarget);
-    };
-    const handleDrawClose = () => {
-        setDrawingAnchorEl(null);
-    };
     const initCanvas = () => {
         const containerWidth = document.getElementById('canvas').clientWidth;
         const containerHeight = document.getElementById('canvas').clientHeight;
@@ -256,82 +243,6 @@ export function Editor({canvas}) {
     ];
 
     return (
-        <Grid container spacing={2} style={{marginTop: 0, height: '100vh'}}>
-            <Grid item xs={12} style={{paddingTop: 0}}>
-                <Toolbar style={{backgroundColor: '#657B81'}}>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        onClick={handleFiguresClick}
-                    >
-                        <RectangleOutlined />
-                    </IconButton>
-                    <Menu
-                        anchorEl={figuresAnchorEl}
-                        open={Boolean(figuresAnchorEl)}
-                        onClose={handleFiguresClose}
-                    >
-                        <MenuItem onClick={createRect}>Rectangle</MenuItem>
-                        <MenuItem onClick={createCircle}>Circle</MenuItem>
-                        <MenuItem onClick={createTriangle}>Triangle</MenuItem>
-                        <MenuItem onClick={createPolygon}>Polygon</MenuItem>
-                        <MenuItem onClick={createEllipse}>Ellipse</MenuItem>
-                        <MenuItem onClick={createPolyline}>Polyline</MenuItem>
-                        <MenuItem onClick={createLine}>Line</MenuItem>
-                        <MenuItem onClick={createText}>Text</MenuItem>
-                    </Menu>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="add-image"
-                        onClick={handleAddImage}
-                    >
-                        <AddPhotoAlternateOutlined />
-                    </IconButton>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        onClick={handleDrawClick}
-                    >
-                        <Gesture />
-                    </IconButton>
-                    <Menu
-                        anchorEl={drawingAnchorEl}
-                        open={Boolean(drawingAnchorEl)}
-                        onClose={handleDrawClose}
-                    >
-                        <MenuItem onClick={handleEnableDrawing}>Pen</MenuItem>
-                        <MenuItem onClick={handleEnableDrawing}>Pencil</MenuItem>
-                    </Menu>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="add-image"
-                        onClick={groupSelectedObjects}
-                    >
-                        <Group />
-                    </IconButton>
-                </Toolbar>
-            </Grid>
-            <Grid item xs={3} sx={{padding: 0, height: '100%'}}>
-                <ProjectLayers
-                    canvas={canvas}
-                />
-                {/*<Box style={{backgroundColor: '#1F2833', width: '100%', height: '100%'}}>*/}
-                {/*    {canvas && canvas.getObjects().map((item, index) => (*/}
-                {/*        <Button onClick={() => {selectObject(index)}} key={index} variant="outlinad" sx={{width: '100%', display: 'block'}}>*/}
-                {/*            {item.type} {index}*/}
-                {/*        </Button>*/}
-                {/*    ))}*/}
-                {/*</Box>*/}
-            </Grid>
-
-            <Grid item xs={9} style={{padding: 0}}>
-                <canvas id="canvas" style={{width: '100%', height: '100%'}}></canvas>
-            </Grid>
-        </Grid>
         <Toolbar variant="regular" sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
             <Stack direction="row" spacing={0.5}>
                 <IconButton
