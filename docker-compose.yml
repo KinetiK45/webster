@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+#  3001
+  api_gateway:
+    image: gateway:latest
+    #    build: ./backend/api_gateway/
+    ports:
+      - "3001:3001"
+    environment:
+      AUTHENTICATION_URL: ${AUTHENTICATION_URL}
+      USER_URL: ${USER_URL}
+    restart: on-failure
+
+#3002
+  authentication:
+    image: authentication:latest
+    #    build: ./backend/authentication/
+    depends_on:
+      - redis
+      - rabbitmq
+      - initdb
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      REDIS_URL: ${REDIS_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
+    restart: on-failure
+
+  #3003
+  design_rendering:
+    image: design-rendering:latest
+#    build: ./backend/design_rendering/
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      MONGO_DB_URL: ${MONGO_DB_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+    restart: on-failure
+
+  #3004
+  user:
+    image: user:latest
+#    build: ./backend/user/
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      POSTGRES_URL: ${POSTGRES_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
+    restart: on-failure
+
+  notification:
+    image: notification:latest
+#    build: ./backend/notification/
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      STMP_URL: ${STMP_URL}
+    restart: always
+
+  initdb:
+    image: init-db:latest
+    #    build: ./backend/initdb/
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      BACKUP_FILE: ${BACKUP_FILE}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
+    depends_on:
+      - postgres
+    restart: on-failure
+
+  redis:
+    image: redis:latest
+    volumes:
+      - webster_redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:latest
+    volumes:
+      - webster_rabbit_data:/var/lib/rabbitmq
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - webster_mongo_db:/data/db
+      - webster_mongo_configdb:/data/configdb
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - webster_postgres:/var/lib/postgresql/data
+
+volumes:
+  webster_postgres:
+    name: webster_postgres
+
+  webster_mongo_db:
+    name: webster_mongo_db
+
+  webster_mongo_configdb:
+    name: webster_mongo_config_db
+
+  webster_redis_data:
+    name: webster_redis_data
+
+  webster_rabbit_data:
+    name: webster_rabbit_data

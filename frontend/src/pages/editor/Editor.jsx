@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {fabric} from 'fabric';
 import Toolbar from "@mui/material/Toolbar";
 import MenuItem from "@mui/material/MenuItem";
@@ -13,8 +13,10 @@ import {Divider, ListItemIcon, ListItemText, MenuList, Stack} from "@mui/materia
 import Typography from "@mui/material/Typography";
 import {AddPhotoAlternateOutlined, Gesture} from "@mui/icons-material";
 import Avatar from "@mui/material/Avatar";
+import {EditorContext} from "./EditorContextProvider";
 
 export function Editor({canvas}) {
+    const projectSettings = useContext(EditorContext);
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
     const [imgPath, setImgPath] = useState('');
@@ -140,8 +142,9 @@ export function Editor({canvas}) {
         const text = new fabric.IText('Hello', {
             left: 100,
             top: 130,
-            fontSize: 16,
-            fill: 'white',
+            fontSize: projectSettings.fontSize,
+            fill: projectSettings.fillColor,
+            fontFamily: projectSettings.fontFamily,
         });
         canvas.add(text);
         handleFiguresClose();
