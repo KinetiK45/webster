@@ -98,7 +98,7 @@ services:
       - webster_mongo_configdb:/data/configdb
 
   postgres:
-    image: postgres:16
+    image: postgres:latest
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
