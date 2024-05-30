@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const {createProxyMiddleware} = require('http-proxy-middleware');
 const proxyRouter = require("./routers/proxyRouter");
 const helmet = require("helmet");
 const rateLimitAndTimeout = require("./middleware/sessionLimiter");

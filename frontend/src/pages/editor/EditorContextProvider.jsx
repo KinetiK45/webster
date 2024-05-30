@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, {useState, createContext, useContext, useEffect} from "react";
 import {Outlet} from "react-router-dom";
 import Typography from "@mui/material/Typography";
 
@@ -17,6 +17,8 @@ function EditorContextProvider({ children }) {
     const [fontSize, setFontSize] = useState(16);
     // OBJECTS:
     const [fillStyleEnable, setFillStyleEnable] = useState(true);
+    // FONTS:
+    const [fontFamily, setFontFamily] = useState('Times New Roman');
 
     const value = {
         projectName, setProjectName,
@@ -26,7 +28,8 @@ function EditorContextProvider({ children }) {
         backgroundColor, setBackgroundColor,
         textColor, setTextColor,
         fontSize, setFontSize,
-        fillStyleEnable, setFillStyleEnable
+        fillStyleEnable, setFillStyleEnable,
+        fontFamily, setFontFamily
     };
 
     return (
