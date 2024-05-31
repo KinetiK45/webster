@@ -298,6 +298,13 @@ export function Editor({canvas}) {
         handleFiguresClose();
         let startX, startY;
         let figure = null;
+        const polyOptions = {
+            left: startX,
+            top: startY,
+            fill: 'red',
+            selectable: true,
+            objectCaching: false,
+        };
         function removeListeners() {
             canvas.off('mouse:down', onMouseDown);
             canvas.off('mouse:move', onMouseMove);
@@ -307,63 +314,7 @@ export function Editor({canvas}) {
             const pointer = canvas.getPointer(options.e);
             startX = pointer.x;
             startY = pointer.y;
-            switch (name) {
-                case 'rect':
-                    figure = new fabric.Polygon([
-                        { x: 0, y: 0 },
-                        { x: 0, y: 0 },
-                        { x: 0, y: 0 },
-                        { x: 0, y: 0 }
-                    ],{
-                        left: startX,
-                        top: startY,
-                        width: 0,
-                        height: 0,
-                        fill: 'red',
-                        selectable: true,
-                        objectCaching: false,
-                    });
-                    break;
-
-                case 'triangle':
-                    figure = new fabric.Polygon([
-                        { x: 0, y: 0 },
-                        { x: 0, y: 0 },
-                        { x: 0, y: 0 }
-                    ], {
-                        left: startX,
-                        top: startY,
-                        fill: 'blue',
-                        width: 0,
-                        height: 0,
-                        selectable: true,
-                        objectCaching: false
-                    });
-                    break;
-                case 'ellipse':
-                    const ellipsePoints = [];
-                    const rx = 0; // Початковий радіус по осі x
-                    const ry = 0; // Початковий радіус по осі y
-
-                    for (let i = 0; i < 50; i++) { // Використовуємо 50 точок для еліпса
-                        const angle = (i * 2 * Math.PI) / 50;
-                        ellipsePoints.push({
-                            x: rx * Math.cos(angle),
-                            y: ry * Math.sin(angle)
-                        });
-                    }
-                    figure = new fabric.Polygon(ellipsePoints, {
-                        left: startX,
-                        top: startY,
-                        fill: 'orange',
-                        selectable: true,
-                        objectCaching: false
-                    });
-                    break;
-
-                default:
-                    throw new Error('Непідтримувана фігура: ' + name);
-            }
+            figure = new fabric.Polygon([], polyOptions);
             canvas.add(figure);
         }
 
@@ -383,15 +334,10 @@ export function Editor({canvas}) {
                             {x: width, y: height},
                             {x: 0, y: height},
                         ],
-                        width: Math.abs(width),
-                        height: Math.abs(height),
                         left: Math.min(pointer.x, startX),
                         top: Math.min(pointer.y, startY),
-                        pathOffset: {x: figure.width / 2, y: figure.height / 2}
                     });
-                    figure.setCoords();
                     break;
-
 
                 case 'triangle':
                     figure.set({
@@ -400,11 +346,8 @@ export function Editor({canvas}) {
                             { x: width, y: height },
                             { x: 0, y: height }
                         ],
-                        width: Math.abs(width),
-                        height: Math.abs(height),
                         left: Math.min(pointer.x, startX),
                         top: Math.min(pointer.y, startY),
-                        pathOffset: {x: figure.width / 2, y: figure.height / 2}
                     });
                     break;
 
@@ -421,14 +364,12 @@ export function Editor({canvas}) {
                     }
                     figure.set({
                         points: ellipsePoints,
-                        width: Math.abs(width),
-                        height: Math.abs(height),
+                        width: width,
+                        height: height,
                         left: Math.min(pointer.x, startX),
                         top: Math.min(pointer.y, startY),
                     });
-                    figure.setCoords();
                     break;
-
                 default:
                     throw new Error('Непідтримувана фігура: ' + name);
             }
@@ -438,7 +379,17 @@ export function Editor({canvas}) {
         function onMouseUp(options) {
             if(!figure) return
             removeListeners();
-            console.log(figure)
+            const pointer = canvas.getPointer(options.e);
+            const width = Math.abs(startX - pointer.x);
+            const height = Math.abs(startY - pointer.y);
+            if(name !== 'ellipse'){
+                figure.set({
+                    width: width,
+                    height: height,
+                    pathOffset: {x: width / 2, y: height / 2}
+                });
+            }
+            figure.setCoords();
             canvas.selection = true;
             figure = null;
         }
