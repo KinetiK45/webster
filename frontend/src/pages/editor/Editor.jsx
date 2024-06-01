@@ -36,7 +36,6 @@ export function Editor({canvas}) {
             setImgPath('');
         });
     }, [imgPath]);
-
     const handleFiguresClick = (event) => {
         setFiguresAnchorEl(event.currentTarget);
     };
@@ -156,9 +155,7 @@ export function Editor({canvas}) {
             canvas.off('mouse:up', handleMouseUp);
         }
         function addEndPoints() {
-            const p1 = new fabric.Circle({
-                left: drawingLine.x1,
-                top: drawingLine.y1,
+            const pointProps = {
                 radius: 3,
                 fill: 'white',
                 hasControls: false,
@@ -171,22 +168,16 @@ export function Editor({canvas}) {
                 visible: false,
                 linePoint: true,
                 needToHide: true
+            }
+            const p1 = new fabric.Circle({
+                ...pointProps,
+                left: drawingLine.x1,
+                top: drawingLine.y1
             });
             const p2 = new fabric.Circle({
+                ...pointProps,
                 left: drawingLine.x2,
                 top: drawingLine.y2,
-                radius: 3,
-                fill: 'white',
-                hasControls: false,
-                hasBorders: false,
-                selectable: true,
-                originX: 'center',
-                originY: 'center',
-                strokeWidth: 0,
-                hoverCursor: 'move',
-                visible: false,
-                linePoint: true,
-                needToHide: true
             });
             drawingLine.p1 = p1;
             drawingLine.p2 = p2;
