@@ -9,7 +9,7 @@ async function createProject(req,res){
             return res.status(result.status).json({ state: false, message: result.message });
         }
         // TODO: return projectId
-        res.status(200).json({ state: true, message: "Project successfully create" });
+        res.status(200).json({ state: true, message: "Project successfully create", data: result.data });
     }catch (error) {
         console.error('Error in creating project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });

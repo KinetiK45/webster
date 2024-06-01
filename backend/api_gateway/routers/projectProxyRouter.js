@@ -5,6 +5,14 @@ const projectHost = process.env.PROJECT_URL;
 const axios = require('axios');
 
 const projectProxyRouter = express.Router();
+
+projectProxyRouter.use(
+    "/create",
+    createProxyMiddleware({
+        target: `${userHost}/v1/api/projects/create`,
+    })
+)
+
 projectProxyRouter.use(
     "/:user_id/all", (req, res, next) =>{
         const targetUrl = `${userHost}/v1/api/projects/getAllProjects/${req.params.user_id}`
@@ -51,11 +59,5 @@ projectProxyRouter.use(
         })(req, res, next)
     });
 
-projectProxyRouter.use(
-    "/create",
-    createProxyMiddleware({
-        target: `${userHost}/v1/api/projects/create`,
-    })
-)
 
 module.exports = projectProxyRouter;

@@ -42,7 +42,7 @@ async function createNewProject(project_name, userId) {
         });
 
         await projectRepository.save(newUserProject);
-        return { isMatch: true, message: "Project create successfully", data: newUserProject };
+        return { isMatch: true, message: "Project create successfully", data: newUserProject.id };
     } catch (error) {
         console.error("Error creating project:", error);
         throw Error;
