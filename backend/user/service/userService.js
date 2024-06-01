@@ -20,7 +20,7 @@ let photoRepository;
 
 async function getById(requestedId, currentUserId) {
     try {
-        if(requestedId === 'me'){
+        if(requestedId === undefined){
             return { status: 400, isMatch: false, message: "Not your profile" };
         }
         const user = await userRepository.findOne({ where: { id: requestedId } });
