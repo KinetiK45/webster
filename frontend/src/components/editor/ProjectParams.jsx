@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Divider, MenuItem, Select, Stack, TextField, Typography} from '@mui/material';
 import FontFaceObserver from 'fontfaceobserver';
 import {customAlert} from "../../utils/Utils";
@@ -14,7 +14,6 @@ function ProjectParams({canvas}) {
 
     const loadAndUseFont = (font) => {
         const myFont = new FontFaceObserver(font);
-        console.log(myFont);
         myFont.load()
             .then(() => {
                 if (canvas) {
@@ -22,9 +21,9 @@ function ProjectParams({canvas}) {
                     if (activeObject){
                         activeObject.set("fontFamily", font);
                         canvas.requestRenderAll();
-                    }
-                    else
+                    } else {
                         projectSettings.setFontFamily(font);
+                    }
                 }
             })
             .catch((e) => {
@@ -35,7 +34,7 @@ function ProjectParams({canvas}) {
 
     const handleFontChange = (event) => {
         const newFont = event.target.value;
-        projectSettings.setFontFamily(newFont)
+        projectSettings.setFontFamily(newFont);
         loadAndUseFont(newFont);
     };
 
@@ -53,6 +52,26 @@ function ProjectParams({canvas}) {
             }
         }
     };
+
+    useEffect(() => {
+        if (canvas) {
+            const onObjectSelected = () => {
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    projectSettings.setFontFamily(activeObject.fontFamily || projectSettings.fontFamily);
+                    projectSettings.setFillColor(activeObject.fill || projectSettings.fillColor);
+                }
+            };
+
+            canvas.on('selection:created', onObjectSelected);
+            canvas.on('selection:updated', onObjectSelected);
+
+            return () => {
+                canvas.off('selection:created', onObjectSelected);
+                canvas.off('selection:updated', onObjectSelected);
+            };
+        }
+    }, [canvas, projectSettings]);
 
     return (
         <>

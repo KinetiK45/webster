@@ -10,7 +10,7 @@ function EditorContextProvider({ children }) {
     const [projectHeight, setProjectHeight] = useState(400);
     const [projectWidth, setProjectWidth] = useState(500);
     // COLORS:
-    const [fillColor, setFillColor] = useState('red');
+    const [fillColor, setFillColor] = useState('#be0303');
     const [backgroundColor, setBackgroundColor] = useState('#696969');
     const [textColor, setTextColor] = useState('white');
     // SIZES:
