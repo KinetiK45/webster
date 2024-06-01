@@ -1,17 +1,17 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Divider, Stack, Typography, Select, MenuItem, TextField} from '@mui/material';
+import React, {useContext} from 'react';
+import {Divider, MenuItem, Select, Stack, TextField, Typography} from '@mui/material';
 import FontFaceObserver from 'fontfaceobserver';
 import {customAlert} from "../../utils/Utils";
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import CustomInputField from "../inputs/CustomInputField";
 
 function ProjectParams({canvas}) {
     const projectSettings = useContext(EditorContext);
 
     const fonts = [
         'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
-    ]
+    ];
+
     const loadAndUseFont = (font) => {
         const myFont = new FontFaceObserver(font);
         console.log(myFont);
