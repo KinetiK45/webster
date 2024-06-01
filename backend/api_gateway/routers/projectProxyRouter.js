@@ -1,7 +1,7 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const userHost = process.env.USER_URL;
-const authUrl = process.env.AUTHENTICATION_URL;
+const projectHost = process.env.PROJECT_URL;
 const axios = require('axios');
 
 const projectProxyRouter = express.Router();
@@ -19,7 +19,7 @@ projectProxyRouter.use("/:project_id", async (req, res, next) => {
         const response = await axios.get(`${userHost}/v1/api/projects/${project_id}`,
             {headers: req.headers, withCredentials: true });
         if (response.data.isMatch) {
-            const targetUrl = `${authUrl}/v1/api/project/${project_id}`;
+            const targetUrl = `${projectHost}/v1/api/project/${project_id}`;
             createProxyMiddleware({
                 target: targetUrl,
             })(req, res, next);
@@ -45,10 +45,17 @@ projectProxyRouter.use(
 
 projectProxyRouter.use(
     "/:project_id/save",(req, res, next) => {
-        const targetUrl = `${authUrl}/v1/api/project/${req.params.project_id}/save`
+        const targetUrl = `${projectHost}/v1/api/project/${req.params.project_id}/save`
         createProxyMiddleware({
             target: targetUrl,
         })(req, res, next)
     });
+
+projectProxyRouter.use(
+    "/create",
+    createProxyMiddleware({
+        target: `${userHost}/v1/api/projects/create`,
+    })
+)
 
 module.exports = projectProxyRouter;

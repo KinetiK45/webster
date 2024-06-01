@@ -10,6 +10,7 @@ services:
     environment:
       AUTHENTICATION_URL: ${AUTHENTICATION_URL}
       USER_URL: ${USER_URL}
+      PROJECT_URL: ${PROJECT_URL}
     restart: on-failure
 
 #3002
@@ -68,12 +69,12 @@ services:
     image: init-db:latest
     #    build: ./backend/initdb/
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      BACKUP_FILE: ${BACKUP_FILE}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_NAME: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_POSTGRES: ${BACKUP_POSTGRES}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       BUCKET_NAME: ${BUCKET_NAME}
