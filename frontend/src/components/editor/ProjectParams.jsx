@@ -46,7 +46,9 @@ function ProjectParams({canvas}) {
         if (canvas) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
-                activeObject.set("fill", color);
+                if(activeObject.type === 'line')
+                    activeObject.set("stroke", color);
+                else activeObject.set("fill", color);
                 canvas.requestRenderAll();
             } else {
                 customAlert('Please select an object on the canvas first.', 'warning');

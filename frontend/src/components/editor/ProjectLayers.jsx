@@ -1,5 +1,5 @@
 import {Divider, Stack} from "@mui/material";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,47 +10,14 @@ function ProjectLayers({
                        }) {
     const [objects, setObjects] = useState([]);
     const projectSettings = useContext(EditorContext);
-    const [lastTargetLine, setLastTargetLine] = useState(null);
+    const [activeObjects, setActiveObjects] = useState([]);
+
     function selectObject(index) {
         const object = canvas.getObjects()[index];
-        if(object.type === 'line' && object.withPoints){
-            canvas.discardActiveObject();
-            object.p1.visible = true;
-            object.p2.visible = true;
-            setLastTargetLine(object);
-            projectSettings.setActiveObjects([object]);
-        }
-        else{
-            canvas.setActiveObject(object);
-            if(lastTargetLine){
-                lastTargetLine.p1.visible = false;
-                lastTargetLine.p2.visible = false;
-            }
-        }
+        canvas.setActiveObject(object);
         canvas.renderAll();
     }
-    useEffect(() => {
-        if (canvas) {
-            canvas.on('mouse:down', function (opt) {
-                if (opt.target?.type === 'line' && opt.target?.withPoints) {
-                    if(lastTargetLine && lastTargetLine !== opt.target){
-                        lastTargetLine.p1.visible = false;
-                        lastTargetLine.p2.visible = false;
-                    }
-                    projectSettings.setActiveObjects([opt.target]);
-                    opt.target.p1.visible = true;
-                    opt.target.p2.visible = true;
-                    setLastTargetLine(opt.target)
-                }
-                else if (lastTargetLine && !opt.target?.linePoint) {
-                    lastTargetLine.p1.visible = false;
-                    lastTargetLine.p2.visible = false;
-                    setLastTargetLine(null)
-                }
-                canvas.renderAll();
-            });
-        }
-    }, [lastTargetLine]);
+
     function deleteObject(index) {
         if (canvas) {
             // console.log(canvas);
@@ -82,13 +49,30 @@ function ProjectLayers({
                 setObjects(canvas.getObjects())
             });
             canvas.on('selection:created', (opt) => {
-                projectSettings.setActiveObjects(canvas.getActiveObjects())
+                const active = canvas.getActiveObjects();
+                if(active.length === 1 && active[0].withPoints)
+                    active[0].p1.visible = active[0].p2.visible = true;
+                setActiveObjects(active)
             });
             canvas.on('selection:updated', () => {
-                projectSettings.setActiveObjects(canvas.getActiveObjects())
+                const active = canvas.getActiveObjects();
+                canvas.getObjects().map((item, index) => {
+                    if(item.withPoints && item.p1 !== active[0] && item.p2 !== active[0]){
+                        item.p1.visible = item.p2.visible = false;
+                    }
+                })
+                if(active.length === 1 && active[0].withPoints)
+                    active[0].p1.visible = active[0].p2.visible = true;
+
+                setActiveObjects(active)
             });
             canvas.on('selection:cleared', () => {
-                projectSettings.setActiveObjects([]);
+                canvas.getObjects().map((item, index) => {
+                    if(item.withPoints){
+                        item.p1.visible = item.p2.visible = false;
+                    }
+                })
+                setActiveObjects([]);
             });
         }
     }, [canvas]);
@@ -119,7 +103,7 @@ function ProjectLayers({
                                    }}
                                    sx={{
                                        display: 'flex', p: 1, justifyContent: 'space-between',
-                                       backgroundColor: projectSettings.activeObjects.indexOf(item) === -1 ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+                                       backgroundColor: activeObjects.indexOf(item) === -1 ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
                                        // border: '0.5px solid white'
                                    }}
                             >

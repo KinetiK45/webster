@@ -5,7 +5,6 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import RectangleOutlinedIcon from '@mui/icons-material/RectangleOutlined';
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import PermDataSettingIcon from '@mui/icons-material/PermDataSetting';
 import Menu from "@mui/material/Menu";
 import {ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
@@ -50,41 +49,6 @@ export function Editor({canvas}) {
         setDrawingAnchorEl(null);
     };
 
-    function createPolygon() {
-        const points = [
-            { x: 100, y: 100 },
-            { x: 150, y: 50 },
-            { x: 200, y: 100 },
-            { x: 150, y: 150}
-        ];
-
-        const polygon = new fabric.Polygon(points, {
-            fill: 'green',
-            selectable: true
-        });
-
-        canvas.add(polygon);
-        handleFiguresClose();
-    }
-    function createPolyline() {
-        const points = [
-            { x: 50, y: 100 },
-            { x: 150, y: 200 },
-            { x: 250, y: 150 },
-            { x: 350, y: 200 }
-        ];
-
-        const polyline = new fabric.Polyline(points, {
-            left: 170,
-            top: 150,
-            stroke: 'blue',
-            fill: 'transparent',
-            strokeWidth: 2
-        });
-
-        canvas.add(polyline);
-        handleFiguresClose();
-    }
     function createText() {
         const text = new fabric.Textbox('Hello', {
             left: 100,
@@ -125,12 +89,14 @@ export function Editor({canvas}) {
             const points = [pointer.x, pointer.y, pointer.x, pointer.y];
             drawingLine = new fabric.Line(points, {
                 strokeWidth: 2,
-                fill: 'black',
+                // fill: 'black',
                 stroke: 'black',
                 originX: 'center',
                 originY: 'center',
                 perPixelTargetFind: true,
-                selectable: false
+                selectable: true,
+                hasControls: false,
+                hasBorders: false
             });
         }
         function handleMouseMove(o) {
@@ -163,7 +129,7 @@ export function Editor({canvas}) {
                 fill: 'white',
                 hasControls: false,
                 hasBorders: false,
-                selectable: true,
+                // selectable: false,
                 originX: 'center',
                 originY: 'center',
                 strokeWidth: 0,
@@ -179,7 +145,7 @@ export function Editor({canvas}) {
                 fill: 'white',
                 hasControls: false,
                 hasBorders: false,
-                selectable: true,
+                // selectable: false,
                 originX: 'center',
                 originY: 'center',
                 strokeWidth: 0,
@@ -205,7 +171,80 @@ export function Editor({canvas}) {
                 drawingLine.setCoords();
                 canvas.renderAll();
             });
+            let startX = 0, startY = 0;
 
+            canvas.on('mouse:down', function(opt){
+                let pointer = canvas.getPointer(opt.e);
+                startX = pointer.x;
+                startY = pointer.y;
+            });
+
+            drawingLine.on('moving', function(opt){
+                if(drawingLine.p1.visible || drawingLine.p2.visible) {
+                    drawingLine.p1.visible = false;
+                    drawingLine.p2.visible = false;
+                    canvas.renderAll();
+                }
+            });
+
+            drawingLine.on('modified', function(opt){
+                let pointer = canvas.getPointer(opt.e);
+                let offsetX = pointer.x - startX;
+                let offsetY = pointer.y - startY;
+                drawingLine.set({
+                    x1: drawingLine.x1 + offsetX,
+                    x2: drawingLine.x2 + offsetX,
+                    y1: drawingLine.y1 + offsetY,
+                    y2: drawingLine.y2 + offsetY,
+                });
+                drawingLine.p1.set({
+                    left: drawingLine.x1,
+                    top: drawingLine.y1,
+                    visible: true,
+                });
+                drawingLine.p2.set({
+                    left: drawingLine.x2,
+                    top: drawingLine.y2,
+                    visible: true,
+                });
+                drawingLine.setCoords();
+                drawingLine.p1.setCoords();
+                drawingLine.p2.setCoords();
+                canvas.renderAll();
+            });
+
+            canvas.on('object:modified', (opt) => {
+                console.log(opt.target.type)
+                if(opt.target.type === 'activeSelection'){
+                    opt.target._objects.map((item, index) => {
+                        const pointer = canvas.getPointer(opt.e);
+                        let offsetX = pointer.x - startX;
+                        let offsetY = pointer.y - startY;
+                        if(item.withPoints){
+                            item.set({
+                                x1: item.x1 + offsetX,
+                                x2: item.x2 + offsetX,
+                                y1: item.y1 + offsetY,
+                                y2: item.y2 + offsetY,
+                            });
+                            item.p1.set({
+                                left: item.x1,
+                                top: item.y1,
+                                visible: true,
+                            });
+                            item.p2.set({
+                                left: item.x2,
+                                top: item.y2,
+                                visible: true,
+                            });
+                            item.setCoords();
+                            item.p1.setCoords();
+                            item.p2.setCoords();
+                        }
+                    })
+                }
+                else{}
+            })
             canvas.add(p1);
             canvas.add(p2);
             canvas.renderAll();
@@ -402,10 +441,8 @@ export function Editor({canvas}) {
 
     const figuresActions = [
         {icon: <RectangleOutlinedIcon fontSize="small" />, text: 'Rect', func: () => {addFigure('rect')}},
-        {icon: <ChangeHistoryOutlined fontSize="small" />, text: 'Triangle', func: () => addFigure('triangle')},
+        {icon: <ChangeHistoryOutlined fontSize="small" />, text: 'Polygon', func: () => addFigure('triangle')},
         {icon: <HorizontalRuleOutlined fontSize="small" />, text: 'Line', func: createLine},
-        {icon: <TimelineOutlined fontSize="small" />, text: 'Polyline', func: createPolyline},
-        {icon: <HexagonOutlined fontSize="small" />, text: 'Polygon', func: createPolygon},
         {icon: <RadioButtonUncheckedOutlined fontSize="small" />, text: 'Ellipse', func: () => addFigure('ellipse')},
     ];
     const drawActions = [
