@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secretKey = process.env.SECRET_KEY;
+const secretKey = process.env.JWT_SECRET_KEY;
 
 function tokenMiddleware(req, res, next) {
     const token = req.cookies?.auth_token;
@@ -12,6 +12,7 @@ function tokenMiddleware(req, res, next) {
     jwt.verify(token, secretKey, (err, decoded) => {
         if (err) {
             console.error('Invalid token');
+            console.error(err);
             // return res.status(401).json({ state: false, message: 'Invalid token' });
         }
 

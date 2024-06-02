@@ -1,5 +1,6 @@
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { exec } = require("child_process");
+const path = require('path');
 const fs= require("fs");
 
 process.env.PATH = `${process.env.PATH}:/usr/lib/postgresql/16/bin`;
@@ -13,28 +14,26 @@ const s3Client = new S3Client({
     },
 });
 
-function checkDatabaseExists() {
+function checkPostgresDatabaseExists() {
     return new Promise((resolve, reject) => {
-        const checkDbCommand = `PGPASSWORD=${process.env.DB_PASSWORD} psql -h ${process.env.DB_HOST} -p ${process.env.DB_PORT} -U ${process.env.DB_USER} -lqt | cut -d \\| -f 1 | grep -qw ${process.env.DB_NAME}`;
+        const checkDbCommand = `PGPASSWORD=${process.env.POSTGRES_PASSWORD} psql -h ${process.env.POSTGRES_HOST} -p ${process.env.POSTGRES_PORT} -U ${process.env.POSTGRES_USER} -lqt | cut -d \\| -f 1 | grep -qw ${process.env.POSTGRES_NAME}`;
         exec(checkDbCommand, (error, stdout, stderr) => {
             if (error) {
-                // База данных не существует
-                resolve(false);
+                reject(new Error(`Ошибка при проверке существования базы данных: ${stderr}`));
             } else {
-                // База данных существует
                 resolve(true);
             }
         });
     });
 }
 
-function createDatabase() {
+function createPostgresDatabase() {
     return new Promise((resolve, reject) => {
-        const createDbCommand = `PGPASSWORD=${process.env.DB_PASSWORD} createdb -h ${process.env.DB_HOST} -p ${process.env.DB_PORT} -U ${process.env.DB_USER} ${process.env.DB_NAME}`;
+        const createDbCommand = `PGPASSWORD=${process.env.POSTGRES_PASSWORD} createdb -h ${process.env.POSTGRES_HOST} -p ${process.env.POSTGRES_PORT} -U ${process.env.POSTGRES_USER} ${process.env.POSTGRES_NAME}`;
         exec(createDbCommand, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Ошибка при создании базы данных: ${stderr}`);
-                reject(error);
+                reject(new Error(`Ошибка при создании базы данных: ${stderr}`));
             } else {
                 console.log("База данных успешно создана.");
                 resolve();
@@ -43,25 +42,33 @@ function createDatabase() {
     });
 }
 
-async function checkAndCreateDatabase() {
-    const exists = await checkDatabaseExists();
-    if (!exists) {
-        await createDatabase();
-    } else {
-        console.log("База данных уже существует.");
+async function checkAndCreatePostgresDatabase() {
+    try {
+        const exists = await checkPostgresDatabaseExists();
+        if (!exists) {
+            await createPostgresDatabase();
+        } else {
+            console.log("База данных уже существует.");
+        }
+    }catch (error) {
+        if (error.message.includes('Ошибка при проверке существования базы данных')) {
+            await createPostgresDatabase();
+        } else {
+            throw error;
+        }
     }
 }
 
 
-function downloadBackup() {
+function downloadPostgresBackup() {
     const downloadParams = {
         Bucket: process.env.BUCKET_NAME,
-        Key: process.env.BACKUP_FILE,
+        Key: process.env.BACKUP_POSTGRES,
     };
 
     return new Promise((resolve, reject) => {
         const getObjectCommand = new GetObjectCommand(downloadParams);
-        const downloadFile = fs.createWriteStream(process.env.BACKUP_FILE);
+        const downloadFile = fs.createWriteStream(process.env.BACKUP_POSTGRES);
         s3Client.send(getObjectCommand)
             .then(data => {
                 data.Body.pipe(downloadFile);
@@ -71,18 +78,18 @@ function downloadBackup() {
                 });
                 downloadFile.on('error', err => {
                     console.error("Ошибка при записи файла из S3:", err);
-                    reject(err);
+                    reject(new Error(`Ошибка при записи файла из S3: ${err.message}`));
                 });
             })
             .catch(err => {
                 console.error("Ошибка при загрузке файла из S3:", err);
-                reject(err);
+                reject(new Error(`Ошибка при загрузке файла из S3: ${err.message}`));
             });
     });
 }
 
-function restoreDatabase() {
-    const pgRestoreCommand = `PGPASSWORD=${ process.env.DB_PASSWORD} pg_restore -h ${process.env.DB_HOST} -p ${process.env.DB_PORT} -U ${process.env.DB_USER} -d ${process.env.DB_NAME} ${process.env.BACKUP_FILE}`;
+function restorePostgresDatabase() {
+    const pgRestoreCommand = `PGPASSWORD=${ process.env.POSTGRES_PASSWORD} pg_restore -h ${process.env.POSTGRES_HOST} -p ${process.env.POSTGRES_PORT} -U ${process.env.POSTGRES_USER} -d ${process.env.POSTGRES_NAME} ${process.env.BACKUP_POSTGRES}`;
     return new Promise((resolve, reject) => {
         exec(pgRestoreCommand, (error, stdout, stderr) => {
             if (error) {
@@ -96,12 +103,90 @@ function restoreDatabase() {
     });
 }
 
-async function Restore() {
+async function downloadMongoBackup() {
+    return new Promise((resolve, reject) => {
+        const backupDir = path.join(__dirname, 'backup');
+        const archivePath = path.join(backupDir, `${process.env.MONGO_NAME}.tar.gz`);
+        const downloadParams = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: `${process.env.MONGO_NAME}.tar.gz`,
+        };
+
+        if (!fs.existsSync(backupDir)){
+            fs.mkdirSync(backupDir);
+        }
+
+        const fileStream = fs.createWriteStream(archivePath);
+        const getObjectCommand = new GetObjectCommand(downloadParams);
+
+        s3Client.send(getObjectCommand)
+            .then(data => {
+                data.Body.pipe(fileStream);
+                fileStream.on('finish', () => {
+                    console.log("Файл успешно загружен из S3.");
+                    resolve(archivePath);
+                });
+                fileStream.on('error', err => {
+                    console.error("Ошибка при записи файла из S3:", err);
+                    reject(new Error(`Ошибка при проверке существования базы данных: ${err}`));
+                });
+            })
+            .catch(err => {
+                console.error("Ошибка при загрузке файла из S3:", err);
+                reject(new Error(`Ошибка при проверке существования базы данных: ${err}`));
+            });
+    });
+}
+
+function extractMongoBackup(archivePath) {
+    return new Promise((resolve, reject) => {
+        const extractCommand = `tar -xzvf ${archivePath} -C ${path.dirname(archivePath)}`;
+        exec(extractCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Ошибка при распаковке архива: ${stderr}`);
+                reject(new Error(`Ошибка при проверке существования базы данных: ${stderr}`));
+            } else {
+                console.log(`Архив успешно распакован: ${archivePath}`);
+                resolve(path.dirname(archivePath));
+            }
+        });
+    });
+}
+
+function restoreMongoDB(backupDir) {
+    return new Promise((resolve, reject) => {
+        const restoreCommand = `mongorestore --host ${process.env.MONGO_HOST} --port ${process.env.MONGO_PORT} --db ${process.env.MONGO_NAME} ${path.join(backupDir, process.env.MONGO_NAME)}`;
+        exec(restoreCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Ошибка при восстановлении базы данных MongoDB: ${stderr}`);
+                reject(new Error(`Ошибка при проверке существования базы данных: ${stderr}`));
+            } else {
+                console.log("База данных MongoDB успешно восстановлена.");
+                resolve();
+            }
+        });
+    });
+}
+
+async function RestoreMongo() {
     try {
-        await checkAndCreateDatabase();
-        await downloadBackup();
-        await restoreDatabase();
-        fs.unlinkSync(process.env.BACKUP_FILE);
+        const archivePath = await downloadMongoBackup();
+        const backupDir = await extractMongoBackup(archivePath);
+        await restoreMongoDB(backupDir);
+        fs.unlinkSync(archivePath);
+        console.log("Архив резервной копии удален.");
+    } catch (err) {
+        console.error("Произошла ошибка при восстановлении базы данных:", err);
+    }
+}
+
+
+async function RestorePostgres() {
+    try {
+        await checkAndCreatePostgresDatabase();
+        await downloadPostgresBackup();
+        await restorePostgresDatabase();
+        fs.unlinkSync(process.env.BACKUP_POSTGRES);
         console.log("Файл резервной копии удален.");
     } catch (err) {
         console.error("Произошла ошибка:", err);
@@ -109,5 +194,6 @@ async function Restore() {
 }
 
 module.exports = {
-    Restore
+    RestorePostgres,
+    RestoreMongo
 };

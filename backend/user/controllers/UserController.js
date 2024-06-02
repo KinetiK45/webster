@@ -4,7 +4,8 @@ async function getUser(req, res) {
     const { user_id } = req.params;
     try {
         const currentUserId = req.senderData?.id;
-        const requestedId = user_id === 'me' ? currentUserId : parseInt(user_id, 10);
+        console.log(req.cookies);
+        const requestedId = user_id === 'me' ? req.senderData?.id : parseInt(user_id, 10);
         const userResult = await userService.getById(requestedId, currentUserId);
         if (!userResult.isMatch) {
             return res.status(404).json({ state: false, message: userResult.message });

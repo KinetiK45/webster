@@ -35,7 +35,6 @@ export function Editor({canvas}) {
             setImgPath('');
         });
     }, [imgPath]);
-
     const handleFiguresClick = (event) => {
         setFiguresAnchorEl(event.currentTarget);
     };
@@ -59,10 +58,6 @@ export function Editor({canvas}) {
         });
         canvas.add(text);
         handleFiguresClose();
-    }
-    function saveCanvas() {
-        const json = canvas.toJSON();
-        console.log(json);
     }
     function handleAddImage() {
         const input = document.createElement('input');
@@ -122,9 +117,7 @@ export function Editor({canvas}) {
             canvas.off('mouse:up', handleMouseUp);
         }
         function addEndPoints() {
-            const p1 = new fabric.Circle({
-                left: drawingLine.x1,
-                top: drawingLine.y1,
+            const pointProps = {
                 radius: 3,
                 fill: 'white',
                 hasControls: false,
@@ -137,22 +130,16 @@ export function Editor({canvas}) {
                 visible: false,
                 linePoint: true,
                 needToHide: true
+            }
+            const p1 = new fabric.Circle({
+                ...pointProps,
+                left: drawingLine.x1,
+                top: drawingLine.y1
             });
             const p2 = new fabric.Circle({
+                ...pointProps,
                 left: drawingLine.x2,
                 top: drawingLine.y2,
-                radius: 3,
-                fill: 'white',
-                hasControls: false,
-                hasBorders: false,
-                // selectable: false,
-                originX: 'center',
-                originY: 'center',
-                strokeWidth: 0,
-                hoverCursor: 'move',
-                visible: false,
-                linePoint: true,
-                needToHide: true
             });
             drawingLine.p1 = p1;
             drawingLine.p2 = p2;
@@ -340,7 +327,7 @@ export function Editor({canvas}) {
         const polyOptions = {
             left: startX,
             top: startY,
-            fill: 'red',
+            fill: projectSettings.fillColor,
             selectable: true,
             objectCaching: false,
         };
@@ -524,7 +511,7 @@ export function Editor({canvas}) {
                 </Menu>
             </Stack>
             <Typography>
-                Proj name
+                {projectSettings.projectName}
             </Typography>
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
                 <Avatar alt="Avatar" />

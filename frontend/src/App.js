@@ -8,6 +8,8 @@ import AuthLayout from "./pages/auth/AuthLayout";
 import {Editor} from "./pages/editor/Editor";
 import EditorContextProvider from "./pages/editor/EditorContextProvider";
 import {Workspace} from "./pages/editor/Workspace";
+import Profile from "./pages/users/Profile";
+import UserLayout from "./pages/users/UserLayout";
 
 const Login = lazy(() => import("./pages/auth/Login"));
 const Registration = lazy(() => import("./pages/auth/Registration"));
@@ -25,6 +27,10 @@ function App() {
                     <Route path="registration" element={<Registration/>}/>
                     <Route path="password-recovery" element={<PasswordRecovery/>}/>
                     <Route path="password-reset/:token" element={<PasswordReset/>}/>
+                </Route>
+                <Route path="users" element={<UserLayout />}>
+                    {/*<Route path="me/settings" element={<ProfileSettings />} />*/}
+                    <Route path=":user_id" element={<Profile />} />
                 </Route>
                 <Route path="editor" element={<EditorContextProvider/>}>
                     <Route index element={<Workspace/>}/>

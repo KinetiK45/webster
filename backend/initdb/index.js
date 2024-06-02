@@ -1,4 +1,4 @@
-const {Restore} = require("./restore");
+const {RestorePostgres,RestoreMongo} = require("./restore");
 
-Restore();
-
+RestorePostgres();
+RestoreMongo()

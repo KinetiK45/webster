@@ -1,14 +1,38 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Divider, Stack, Typography, Select, MenuItem, TextField} from '@mui/material';
+import {Divider, MenuItem, Select, Stack, TextField, Typography} from '@mui/material';
 import FontFaceObserver from 'fontfaceobserver';
 import {customAlert} from "../../utils/Utils";
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import CustomInputField from "../inputs/CustomInputField";
+import MainColorPicker from "./MainColorPicker";
+import FontSelector from "./FontSelector";
+import Button from "@mui/material/Button";
+import Requests from "../../api/Requests";
+import {UserContext} from "../../RootLayout";
 
 function ProjectParams({canvas}) {
     const projectSettings = useContext(EditorContext);
+    const {userData} = useContext(UserContext);
 
+
+    function saveProject(event) {
+        console.log(canvas.toJSON());
+        if (projectSettings.projectId === undefined && !userData) {
+            // TODO: save project & redirect to login page + create project after login
+            customAlert('Authorization is required', 'warning')
+        } else if (projectSettings.projectId === undefined && userData) {
+            // TODO: project create
+            customAlert('Create project not specified =)', 'error');
+        } else
+            Requests.saveProject(projectSettings.projectId, canvas.toJSON())
+                .then((resp) => {
+                    customAlert(resp.state ? 'Saved' : 'Error',
+                        resp.state ? 'success' : 'error')
+                })
+                .catch((e) => {
+                    customAlert(e.toString(), 'error')
+                })
+    }
     const fonts = [
         'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
     ]
@@ -64,28 +88,9 @@ function ProjectParams({canvas}) {
                     Settings:
                 </Typography>
                 <Divider/>
-                <Stack direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-                    <FontDownloadIcon/>
-                    <Select
-                        value={projectSettings.fontFamily}
-                        onChange={handleFontChange}
-                        displayEmpty
-                        sx={{width: '100%', '& .MuiSelect-select': { padding: '8px' }}}
-                    >
-                        {fonts.map((font, index) => (
-                            <MenuItem key={index} value={font}>
-                                {font}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Stack>
-                <TextField
-                    label="Choose Color"
-                    type="color"
-                    value={projectSettings.fillColor}
-                    onChange={handleColorChange}
-                    sx={{ width: '100%', margin: '8px 0' }}
-                />
+                <FontSelector canvas={canvas}/>
+                <MainColorPicker canvas={canvas}/>
+                <Button variant="outlined" onClick={saveProject}>Save project</Button>
             </Stack>
         </>
     );

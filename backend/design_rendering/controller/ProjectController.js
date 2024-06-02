@@ -2,13 +2,14 @@ const projectService = require('../service/projectService');
 
 async function saveProject(req,res){
     const { project_id } = req.params;
-    const { data, project_name } = req.body;
+    const { data } = req.body;
     try {
         const result = projectService.saveProject(project_id, data);
         if (!result.isMatch) {
             return res.status(result.status).json({state: false, message: result.message});
         }
-        await projectService.createImage(project_id,data,project_name);
+        // TODO: enable
+        // await projectService.createImage(project_id,data,project_name);
         res.status(200).json({ state: true, message: "Project successfully create", data: result});
     }catch (error) {
         console.error('Error in save project:', error);
