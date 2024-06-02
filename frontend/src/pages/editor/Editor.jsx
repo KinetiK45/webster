@@ -95,10 +95,6 @@ export function Editor({canvas}) {
         canvas.add(text);
         handleFiguresClose();
     }
-    function saveCanvas() {
-        const json = canvas.toJSON();
-        console.log(json);
-    }
     function handleAddImage() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -292,7 +288,7 @@ export function Editor({canvas}) {
         const polyOptions = {
             left: startX,
             top: startY,
-            fill: 'red',
+            fill: projectSettings.fillColor,
             selectable: true,
             objectCaching: false,
         };
@@ -478,7 +474,7 @@ export function Editor({canvas}) {
                 </Menu>
             </Stack>
             <Typography>
-                Proj name
+                {projectSettings.projectName}
             </Typography>
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
                 <Avatar alt="Avatar" />
