@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import {Link} from "react-router-dom";
 import {useContext, useState} from "react";
 import {logout} from "../utils/Utils";
-import {Edit, ExitToApp, Person, Settings} from "@mui/icons-material";
+import {ExitToApp, Person, Settings} from "@mui/icons-material";
 import {UserContext} from "../RootLayout";
 import {ListItemIcon} from "@mui/material";
 
@@ -60,11 +60,6 @@ function CustomNavigation() {
                     >
                         FigSter
                     </Typography>
-                    <Link to={'/editor'}>
-                        <IconButton>
-                            <Edit/>
-                        </IconButton>
-                    </Link>
                     <Box sx={{ flexGrow: 1, display: { xs: 'compact', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Link key={page.text} to={page.to}>
