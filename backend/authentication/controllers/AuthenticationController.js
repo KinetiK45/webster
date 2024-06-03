@@ -44,7 +44,7 @@ async function confirmTwoFactor(req, res) {
         const storedValue = await getAsync(`2fa:${confirm}`);
         const {user_id, code} = JSON.parse(storedValue);
         if (Number.parseInt(code) === confirm) {
-            res.cookie('auth_token', generateToken({id: user_id}), {httpOnly: true , sameSite: 'none', secure: true });
+            res.cookie('auth_token', generateToken({id: user_id}), {httpOnly: true , sameSite: 'none', session: true});
             await client.del(`2fa:${confirm}`);
             return res.status(200).json({state: true, message: 'Authentication successful'});
         } else {
