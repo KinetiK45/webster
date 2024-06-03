@@ -12,8 +12,8 @@ const app = express();
 const PORT = process.env.PORT;
 
 const options = {
-    key: fs.readFileSync(`${process.env.CERTIFICATES_PATH}localhost-key.pem`),
-    cert: fs.readFileSync(`${process.env.CERTIFICATES_PATH}localhost.pem`)
+    key: fs.readFileSync('/certificates/localhost-key.pem'),
+    cert: fs.readFileSync('/certificates/localhost.pem')
 };
 
 app.use(morgan('dev'));
