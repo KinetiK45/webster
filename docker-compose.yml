@@ -12,6 +12,8 @@ services:
       AUTHENTICATION_URL: ${AUTHENTICATION_URL}
       USER_URL: ${USER_URL}
       PROJECT_URL: ${PROJECT_URL}
+    volumes:
+      - ${CERTIFICATES_PATH}:/certificates
     restart: on-failure
 
 #3002
