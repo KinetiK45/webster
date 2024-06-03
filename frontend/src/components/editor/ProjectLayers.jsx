@@ -3,73 +3,73 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import Typography from "@mui/material/Typography";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import Layer from "../Layer";
+import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
 
 function ProjectLayers({ canvas }) {
     const [objects, setObjects] = useState([]);
     const projectSettings = useContext(EditorContext);
-    const [activeObjects, setActiveObjects] = useState([]);
+    const objectsRef = useRef([]);
 
-    function selectObject(index) {
-        const object = canvas.getObjects()[index];
-        canvas.setActiveObject(object);
-        canvas.renderAll();
-    }
-
-    function deleteObject(index) {
-        if (canvas) {
-            // console.log(canvas);
-            const object = canvas.getObjects()[index];
-            if (object) {
-                console.log(object);
-                if(object.withPoints){
-                    canvas.remove(object.p1);
-                    canvas.remove(object.p2);
-                }
-                canvas.remove(object);
-            }
-            // console.log(canvas);
-        }
-    }
+    useEffect(() => {
+        objectsRef.current = objects;
+    }, [objects]);
 
     function calculateItemNumber(item) {
         return objects
             .filter((value) => value.type === item.type)
             .indexOf(item);
     }
+    function makePointsVisible(active){
+        const object = active[0];
+        if(active.length === 1 && object.withPoints){
+            object.p1.visible = object.p2.visible = true;
+        }
+    }
+    function setLinePoints(active) {
+        objectsRef.current.map((item, index)=> {
+            if (item.withPoints) {
+                if (item.x1 !== item.p1.left) setLineCoordinates(item);
+                item.p1.visible = item.p2.visible = active.includes(item.p1) || active.includes(item.p2);
+            }
+        });
+    }
 
     useEffect(() => {
         if (canvas) {
+            let startX = 0, startY = 0;
+            canvas.on('mouse:down', (opt)=> {
+                ({ startX, startY } = getPointerStart(canvas, opt))
+            });
             canvas.on('object:added', () => {
-                setObjects(canvas.getObjects())
+                setObjects(canvas.getObjects());
             });
             canvas.on('object:removed', () => {
-                setObjects(canvas.getObjects())
+                setObjects(canvas.getObjects());
             });
             canvas.on('selection:created', (opt) => {
                 const active = canvas.getActiveObjects();
-                if(active.length === 1 && active[0].withPoints)
-                    active[0].p1.visible = active[0].p2.visible = true;
-                setActiveObjects(active)
+                makePointsVisible(active);
+                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:updated', () => {
                 const active = canvas.getActiveObjects();
-                canvas.getObjects().map((item, index) => {
-                    if(item.withPoints && item.p1 !== active[0] && item.p2 !== active[0]){
-                        item.p1.visible = item.p2.visible = false;
-                    }
-                })
-                if(active.length === 1 && active[0].withPoints)
-                    active[0].p1.visible = active[0].p2.visible = true;
-
-                setActiveObjects(active)
+                setLinePoints(active);
+                makePointsVisible(active);
+                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:cleared', () => {
-                canvas.getObjects().map((item, index) => {
-                    if(item.withPoints){
-                        item.p1.visible = item.p2.visible = false;
-                    }
-                })
-                setActiveObjects([]);
+                setLinePoints([]);
+                projectSettings.setActiveObjects([]);
+            });
+            canvas.on('object:modified', (opt) => {
+                if(opt.target.type === 'activeSelection'){
+                    opt.target._objects.map((item, index) => {
+                        const { offsetX, offsetY} = getOffsets(canvas, opt, startX, startY);
+                        if(item.withPoints){
+                            setPointsCoordinates(item, offsetX, offsetY);
+                        }
+                    });
+                }
             });
         }
     }, [canvas]);

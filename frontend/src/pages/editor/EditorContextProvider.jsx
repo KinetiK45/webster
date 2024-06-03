@@ -20,6 +20,7 @@ function EditorContextProvider({ children }) {
     const [fillStyleEnable, setFillStyleEnable] = useState(true);
     // FONTS:
     const [fontFamily, setFontFamily] = useState('Times New Roman');
+    const [activeObjects, setActiveObjects] = useState([]);
 
     const value = {
         projectName, setProjectName,
@@ -31,7 +32,8 @@ function EditorContextProvider({ children }) {
         lineSize, setLineSize,
         fontSize, setFontSize,
         fillStyleEnable, setFillStyleEnable,
-        fontFamily, setFontFamily
+        fontFamily, setFontFamily,
+        activeObjects, setActiveObjects
     };
 
     return (

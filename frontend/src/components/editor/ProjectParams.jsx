@@ -57,29 +57,6 @@ function ProjectParams({canvas}) {
             });
     };
 
-    const handleFontChange = (event) => {
-        const newFont = event.target.value;
-        projectSettings.setFontFamily(newFont)
-        loadAndUseFont(newFont);
-    };
-
-    const handleColorChange = (event) => {
-        const color = event.target.value;
-        projectSettings.setFillColor(color);
-
-        if (canvas) {
-            const activeObject = canvas.getActiveObject();
-            if (activeObject) {
-                if(activeObject.type === 'line')
-                    activeObject.set("stroke", color);
-                else activeObject.set("fill", color);
-                canvas.requestRenderAll();
-            } else {
-                customAlert('Please select an object on the canvas first.', 'warning');
-            }
-        }
-    };
-
     return (
         <>
             <Divider/>
