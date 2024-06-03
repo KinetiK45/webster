@@ -33,6 +33,29 @@ function ProjectParams({canvas}) {
                     customAlert(e.toString(), 'error')
                 })
     }
+    const fonts = [
+        'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
+    ]
+    const loadAndUseFont = (font) => {
+        const myFont = new FontFaceObserver(font);
+        console.log(myFont);
+        myFont.load()
+            .then(() => {
+                if (canvas) {
+                    const activeObject = canvas.getActiveObject();
+                    if (activeObject){
+                        activeObject.set("fontFamily", font);
+                        canvas.requestRenderAll();
+                    }
+                    else
+                        projectSettings.setFontFamily(font);
+                }
+            })
+            .catch((e) => {
+                console.error('Font loading failed:', e);
+                customAlert(`Font loading failed: ${font}`, 'error');
+            });
+    };
 
     return (
         <>

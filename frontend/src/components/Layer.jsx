@@ -8,48 +8,10 @@ import {EditorContext} from "../pages/editor/EditorContextProvider";
 function Layer({ canvas, item, index, sameItemNumber }) {
     const projectSettings = useContext(EditorContext);
 
-    // const [lastTargetLine, setLastTargetLine] = useState(null);
-
-    // useEffect(() => {
-    //     if (canvas) {
-    //         canvas.on('mouse:down', function (opt) {
-    //             if (opt.target?.type === 'line' && opt.target?.withPoints) {
-    //                 if(lastTargetLine && lastTargetLine !== opt.target){
-    //                     lastTargetLine.p1.visible = false;
-    //                     lastTargetLine.p2.visible = false;
-    //                 }
-    //                 projectSettings.setActiveObjects([opt.target]);
-    //                 opt.target.p1.visible = true;
-    //                 opt.target.p2.visible = true;
-    //                 setLastTargetLine(opt.target)
-    //             }
-    //             else if (lastTargetLine && !opt.target?.linePoint) {
-    //                 lastTargetLine.p1.visible = false;
-    //                 lastTargetLine.p2.visible = false;
-    //                 setLastTargetLine(null)
-    //             }
-    //             canvas.renderAll();
-    //         });
-    //     }
-    // }, [lastTargetLine]);
-
     function selectObject() {
         const object = canvas.getObjects()[index];
         console.log(object);
-        if(object.type && object.type === 'line' && object.withPoints){
-            canvas.discardActiveObject();
-            object.p1.visible = true;
-            object.p2.visible = true;
-            // setLastTargetLine(object);
-            projectSettings.setActiveObjects([object]);
-        }
-        else{
-            canvas.setActiveObject(object);
-            // if(lastTargetLine){
-            //     lastTargetLine.p1.visible = false;
-            //     lastTargetLine.p2.visible = false;
-            // }
-        }
+        canvas.setActiveObject(object);
         canvas.renderAll();
     }
 

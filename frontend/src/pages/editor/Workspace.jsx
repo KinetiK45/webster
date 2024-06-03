@@ -32,7 +32,6 @@ export function Workspace() {
     }, []);
     useEffect(() => {
         if (canvas) {
-            // let lastTargetLine = null;
             canvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
                 var zoom = canvas.getZoom();
