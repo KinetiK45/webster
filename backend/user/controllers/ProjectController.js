@@ -8,7 +8,7 @@ async function createProject(req,res){
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, message: "Project successfully create", data: result.data });
+        res.status(200).json({ state: true, data: result.data });
     }catch (error) {
         console.error('Error in creating project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -24,7 +24,7 @@ async function updateProject(req,res){
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, message: "Project successfully update" });
+        res.status(200).json({ state: true });
     }catch (error) {
         console.error('Error in update project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -40,13 +40,13 @@ async function getProject(req,res){
             return res.status(result.status).json({ state: false, message: result.message });
         }
         if (userId === result.project[0].user.id) {
-            return res.status(200).json({ state: true, message: "Project ", isMatch: true});
+            return res.status(200).json({ state: true, isMatch: true});
         }
         const projectsWithoutUser = result.project.map(project => {
             const { user, ...rest } = project;
             return rest;
         });
-        res.status(200).json({ state: true, message: "Project ", data: projectsWithoutUser});
+        res.status(200).json({ state: true, data: projectsWithoutUser});
     }catch (error) {
         console.error('Error in get project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -55,12 +55,14 @@ async function getProject(req,res){
 
 async function getProjects(req,res){
     const {user_id} = req.params;
+    const { page = 1, pageSize = 10 } = req.query;
     try {
-        const result = await projectService.getProjectByUserId(user_id);
+        const requestedId = user_id === 'me' ? req.senderData?.id : parseInt(user_id, 10);
+        const result = await projectService.getProjectByUserId(requestedId, page, pageSize);
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, message: "Project successfully update", data: result.projects });
+        res.status(200).json({ state: true, data: result.projects, currentPage: result.currentPage, totalPages: result.totalPages });
     }catch (error) {
         console.error('Error in update project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -76,7 +78,7 @@ async function deleteProject(req,res){
             return res.status(result.status).json({ state: false, message: result.message });
         }
         await rabbitService.publishDeleteProjectEvent(project_id);
-        res.status(200).json({ state: true, message: "Project successfully deleted" });
+        res.status(200).json({ state: true });
     }catch (error) {
         console.error('Error in delete project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });

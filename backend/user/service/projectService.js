@@ -50,24 +50,32 @@ async function createNewProject(project_name, userId) {
 }
 
 
-async function getProjectByUserId(userId){
+async function getProjectByUserId(userId, page, pageSize) {
     try {
-        if(userId === undefined){
+        if (userId === undefined) {
             return { status: 400, isMatch: false, message: "User ID is required" };
         }
-        const projects = await projectRepository.find({ where: { user: { id: userId }}});
-        if (!projects) {
-            return { status: 404, isMatch: false, message: "User not found" };
-        }
+        const [projects, total] = await projectRepository.findAndCount({
+            where: { user: { id: userId } },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        });
         if (!projects.length) {
-            return { status: 200, isMatch: true, message: "User has no projects" };
+            return { status: 200, isMatch: true, message: "User has no projects", projects: [] };
         }
-        return { isMatch: true, message: "User projects", projects: projects };
+        return {
+            isMatch: true,
+            message: "User projects",
+            projects: projects,
+            currentPage: page,
+            totalPages: Math.ceil(total / pageSize)
+        };
     } catch (error) {
-        console.error("Error get user projects:", error);
-        throw Error;
+        console.error("Error getting user projects:", error);
+        throw error;
     }
 }
+
 
 async function getProjectById(project_id) {
     try {
