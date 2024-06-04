@@ -64,7 +64,7 @@ function FontSelector({canvas}) {
                 value={projectSettings.fontFamily}
                 onChange={handleFontChange}
                 displayEmpty
-                sx={{width: '100%', '& .MuiSelect-select': {padding: '8px'}}}
+                sx={{width: '100%', '& .MuiSelect-select': {padding: '8px', marginBottom: 0}}}
             >
                 {fonts.map((font, index) => (
                     <MenuItem key={index} value={font}>

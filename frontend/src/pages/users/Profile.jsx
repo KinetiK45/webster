@@ -7,6 +7,7 @@ import Container from "@mui/material/Container";
 import {Stack} from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import {UserContext} from "../../RootLayout";
+import Button from "@mui/material/Button";
 
 function Profile() {
     const { user_id} = useParams();
@@ -48,7 +49,7 @@ function Profile() {
         >
             <Stack direction="row">
                 <Avatar
-                    src={profileData.photo}
+                    src={profileData.avatar}
                     sx={{ width: 200, height: 200 }}
                     variant="rounded"
                 >
@@ -65,6 +66,14 @@ function Profile() {
                     }
                 </Stack>
             </Stack>
+            <Button variant="outlined" onClick={async () => {
+                const newVar = await Requests.create_project('zaloopa proj');
+                console.log(newVar);
+            }}>Create project</Button>
+            <Button variant="outlined" onClick={async () => {
+                const resp = await Requests.getProjects();
+                console.log(resp);
+            }}>GET projs</Button>
         </Container>
     )
 }

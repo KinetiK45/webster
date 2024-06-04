@@ -37,6 +37,7 @@ function Layer({ canvas, item, index, sameItemNumber }) {
                onClick={selectObject}
                sx={{
                    display: "flex", p: 1, justifyContent: "space-between",
+                   width: '100%',
                    backgroundColor: projectSettings.activeObjects.indexOf(item) === -1 ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)",
                    // border: '0.5px solid white'
                }}
