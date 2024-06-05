@@ -3,7 +3,7 @@ import {logout} from "../utils/Utils";
 
 const ip = new URL(window.location.origin).hostname;
 // const ip = '192.168.1.2';
-const domain = `http://${ip}:3001/api/`;
+const domain = `https://${ip}:3001/api/`;
 
 const axiosInstance = axios.create({
     baseURL: domain,
@@ -12,14 +12,23 @@ const axiosInstance = axios.create({
         'Accept': 'application/json'
     },
     withCredentials: true
+})
+
+axiosInstance.interceptors.request.use(request => {
+    console.log(`${request.method.toUpperCase()} ${request.url}`, request);
+    return request;
+}, error => {
+    console.error('REQ FAIL: ', error);
+    return Promise.reject(error);
 });
 
 axiosInstance.interceptors.response.use(
     response => {
+        console.log('RES: ', response);
         return response;
     },
     async error => {
-        console.log(error);
+        console.error(`${error.config.method.toUpperCase()}: ${error.config.url} ${error.code}`, error);
         if (error.response?.status === 401) {
             await logout();
         }
@@ -88,7 +97,7 @@ export default class Requests {
 
     static async create_project(name) {
         const resp = await axiosInstance
-            .post('/api/projects/create', {project_name: name});
+            .post('/projects/create', {project_name: name});
         return resp.data;
     }
 
@@ -97,7 +106,12 @@ export default class Requests {
         // const { data, project_name } = req.body;
 
         const resp = await
-            axiosInstance.post(`/api/projects/${project_id}/save`, canvasJson);
+            axiosInstance.post(`/projects/${project_id}/save`, canvasJson);
+        return resp.data;
+    }
+
+    static async getProjects(user_id = '4'){
+        const resp = await axiosInstance.get(`/projects/${user_id}/all`);
         return resp.data;
     }
 }

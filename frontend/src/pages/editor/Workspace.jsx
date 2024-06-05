@@ -5,17 +5,24 @@ import {AddPhotoAlternateOutlined, Gesture, RectangleOutlined} from "@mui/icons-
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ProjectLayers from "../../components/editor/ProjectLayers";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import {fabric} from "fabric";
 import ProjectParams from "../../components/editor/ProjectParams";
 import {Editor} from "./Editor";
 import {EditorContext} from "./EditorContextProvider";
+import Container from "@mui/material/Container";
 
 export function Workspace() {
     const [canvas, setCanvas] = useState(undefined);
     const [isDrawingMode, setIsDrawingMode] = useState(false);
+    const canvasContainerRef = useRef(null);
     const projectSettings = useContext(EditorContext);
     const initCanvas = () => {
+        if (localStorage.getItem('project')){
+            let canvas = new fabric.Canvas('canvas');
+            canvas.loadFromJSON(localStorage.getItem('project'), canvas.renderAll.bind(canvas));
+            return canvas;
+        }
         // let width = 400;
         let width = document.getElementById('canvas').clientWidth;
         // let height = 300;
@@ -27,10 +34,45 @@ export function Workspace() {
             selectable: true,
         });
     };
+
     useEffect(() => {
         setCanvas(initCanvas());
     }, []);
+
+    // disable page scrolling
     useEffect(() => {
+        console.log('ds');
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+    // canvas resize listener
+    useEffect(() => {
+        console.log('resize set');
+        if (canvas) {
+            const resizeCanvas = () => {
+                if (canvas) {
+                    canvas.setWidth(canvasContainerRef.current.clientWidth);
+                    canvas.setHeight(canvasContainerRef.current.clientHeight);
+                    console.log('resized');
+                }
+            };
+            resizeCanvas();
+
+            window.addEventListener('resize', resizeCanvas);
+
+            return () => {
+                window.removeEventListener('resize', resizeCanvas);
+            };
+        }
+    }, [canvasContainerRef, canvas]);
+
+    // zoom TODO: fix Ivan
+    useEffect(() => {
+        console.log('zoom');
         if (canvas) {
             canvas.on('mouse:wheel', function (opt) {
                 var delta = opt.e.deltaY;
@@ -87,27 +129,27 @@ export function Workspace() {
             });
         }
     }, [canvas]);
-    function saveCanvas() {
-        const json = canvas.toJSON();
-        console.log(json);
-    }
 
     return (
-        <Grid container spacing={0} sx={{marginTop: 0, height: '100vh'}}>
+        <Grid container spacing={0} sx={{marginTop: 0,
+            height: `calc(100vh - ${128}px)`,
+        }}>
             <Grid item xs={12} style={{padding: 0}}>
                 {canvas &&
                     <Editor canvas={canvas}/>
                 }
             </Grid>
-            <Grid item xs={3} sx={{padding: 0, height: '100%'}}>
+            <Grid item xs={2} sx={{padding: 0, height: '100%'}}>
                 {canvas &&
                     <ProjectLayers canvas={canvas}/>
                 }
             </Grid>
-            <Grid item xs={7} sx={{padding: 0}}>
-                <canvas id="canvas" style={{width: '100%', height: '100%'}}/>
+            <Grid item xs={8} sx={{padding: 0, height: '100%'}}>
+                <Container ref={canvasContainerRef} disableGutters sx={{height: '100%'}}>
+                    <canvas id="canvas"/>
+                </Container>
             </Grid>
-            <Grid item xs={2} sx={{padding: 0}}>
+            <Grid item xs={2} sx={{padding: 0, height: '100%'}}>
                 {canvas &&
                     <ProjectParams canvas={canvas}/>
                 }

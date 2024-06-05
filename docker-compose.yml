@@ -90,17 +90,20 @@ services:
     image: redis:latest
     volumes:
       - webster_redis_data:/data
+    restart: always
 
   rabbitmq:
     image: rabbitmq:latest
     volumes:
       - webster_rabbit_data:/var/lib/rabbitmq
+    restart: always
 
   mongo:
     image: mongo:latest
     volumes:
       - webster_mongo_db:/data/db
       - webster_mongo_configdb:/data/configdb
+    restart: always
 
   postgres:
     image: postgres:latest
@@ -108,6 +111,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - webster_postgres:/var/lib/postgresql/data
+    restart: always
+#    ports:
+#      - "5432:5432"
 
 volumes:
   webster_postgres:
