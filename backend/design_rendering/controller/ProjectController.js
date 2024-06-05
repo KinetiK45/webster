@@ -23,7 +23,7 @@ async function getByProjectId(req, res) {
         if (!result.isMatch) {
             return res.status(result.status).json({state: false, message: result.message});
         }
-        res.status(200).json({state: true, data: result});
+        res.status(200).json({state: true, data: result.project});
     } catch (error) {
         console.error('Error in get project:', error);
         res.status(500).json({state: false, message: "Internal server error"});

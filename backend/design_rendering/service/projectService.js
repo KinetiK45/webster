@@ -41,7 +41,7 @@ async function getById(project_id){
             return { status: 404, isMatch: false, message: "Project not found" };
         }
         const resultObject = result.toObject({ versionKey: false });
-        return { isMatch: true, data: resultObject};
+        return { isMatch: true, project: resultObject};
     } catch (error) {
         throw error;
     }
