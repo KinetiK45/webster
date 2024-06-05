@@ -1,16 +1,14 @@
-import React, {useContext} from "react";
+import React, {useEffect, useState} from "react";
 import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {EditorContext} from "../pages/editor/EditorContextProvider";
 
-function Layer({ canvas, item, index, sameItemNumber }) {
-    const projectSettings = useContext(EditorContext);
+function Layer({canvas, item, index, sameItemNumber}) {
+    const [isActive, setIsActive] = useState(false);
 
     function selectObject() {
         const object = canvas.getObjects()[index];
-        console.log(object);
         canvas.setActiveObject(object);
         canvas.renderAll();
     }
@@ -18,19 +16,29 @@ function Layer({ canvas, item, index, sameItemNumber }) {
     function deleteObject(event) {
         event.stopPropagation();
         if (canvas) {
-            // console.log(canvas);
             const object = canvas.getObjects()[index];
             if (object) {
                 console.log(object);
-                if(object.withPoints){
+                if (object.withPoints) {
                     canvas.remove(object.p1);
                     canvas.remove(object.p2);
                 }
                 canvas.remove(object);
             }
-            // console.log(canvas);
         }
     }
+
+    useEffect(() => {
+        if (canvas) {
+            const checkAndSet = () => {
+                const activeObjects = canvas.getActiveObjects();
+                setIsActive(activeObjects.indexOf(item) !== -1)
+            }
+            canvas.on('selection:created', checkAndSet);
+            canvas.on('selection:updated', checkAndSet);
+            canvas.on('selection:cleared', checkAndSet);
+        }
+    }, [canvas]);
 
     return <React.Fragment>
         <Stack direction="row"
@@ -38,8 +46,7 @@ function Layer({ canvas, item, index, sameItemNumber }) {
                sx={{
                    display: "flex", p: 1, justifyContent: "space-between",
                    width: '100%',
-                   backgroundColor: projectSettings.activeObjects.indexOf(item) === -1 ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)",
-                   // border: '0.5px solid white'
+                   backgroundColor: isActive ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                }}
         >
             <Typography sx={{m: "auto"}}>

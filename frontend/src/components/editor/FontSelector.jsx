@@ -1,5 +1,5 @@
 import {MenuItem, Select, Stack, TextField} from "@mui/material";
-import React, {useContext, useEffect} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../utils/Utils";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import FontDownloadIcon from "@mui/icons-material/FontDownload";
@@ -7,6 +7,7 @@ import FontFaceObserver from "fontfaceobserver";
 
 function FontSelector({canvas}) {
     const projectSettings = useContext(EditorContext);
+    const [currentFontFamily, setCurrentFontFamily] = useState(projectSettings.fontFamily);
 
     const fonts = [
         'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
@@ -17,12 +18,14 @@ function FontSelector({canvas}) {
         myFont.load()
             .then(() => {
                 if (canvas) {
+                    // TODO: few objects selected + text filter
                     const activeObject = canvas.getActiveObject();
                     if (activeObject) {
                         activeObject.set("fontFamily", font);
                         canvas.requestRenderAll();
                     } else {
-                        projectSettings.setFontFamily(font);
+                        projectSettings.fontFamily = font;
+                        setCurrentFontFamily(font);
                     }
                 }
             })
@@ -34,7 +37,8 @@ function FontSelector({canvas}) {
 
     const handleFontChange = (event) => {
         const newFont = event.target.value;
-        projectSettings.setFontFamily(newFont);
+        projectSettings.fontFamily = newFont;
+        setCurrentFontFamily(newFont);
         loadAndUseFont(newFont);
     };
 
@@ -42,8 +46,9 @@ function FontSelector({canvas}) {
         if (canvas) {
             const onObjectSelected = () => {
                 const activeObject = canvas.getActiveObject();
-                if (activeObject) {
-                    projectSettings.setFontFamily(activeObject.fontFamily || projectSettings.fontFamily);
+                if (activeObject?.fontFamily) {
+                    projectSettings.fontFamily = activeObject.fontFamily;
+                    setCurrentFontFamily(activeObject.fontFamily);
                 }
             };
 
@@ -61,7 +66,7 @@ function FontSelector({canvas}) {
         <Stack direction="row" sx={{display: 'flex', alignItems: 'center'}}>
             <FontDownloadIcon/>
             <Select
-                value={projectSettings.fontFamily}
+                value={currentFontFamily}
                 onChange={handleFontChange}
                 displayEmpty
                 sx={{width: '100%', '& .MuiSelect-select': {padding: '8px', marginBottom: 0}}}

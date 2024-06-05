@@ -5,6 +5,7 @@ import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import Layer from "../Layer";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
 import Container from "@mui/material/Container";
+import {customAlert} from "../../utils/Utils";
 
 function ProjectLayers({canvas}) {
     const [objects, setObjects] = useState([]);
@@ -53,17 +54,14 @@ function ProjectLayers({canvas}) {
             canvas.on('selection:created', (opt) => {
                 const active = canvas.getActiveObjects();
                 makePointsVisible(active);
-                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:updated', () => {
                 const active = canvas.getActiveObjects();
                 setLinePoints(active);
                 makePointsVisible(active);
-                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:cleared', () => {
                 setLinePoints([]);
-                projectSettings.setActiveObjects([]);
             });
             canvas.on('object:modified', (opt) => {
                 if (opt.target.type === 'activeSelection') {

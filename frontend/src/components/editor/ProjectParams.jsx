@@ -8,28 +8,29 @@ import Button from "@mui/material/Button";
 import Requests from "../../api/Requests";
 import {UserContext} from "../../RootLayout";
 import Container from "@mui/material/Container";
+import {useParams} from "react-router-dom";
 
 function ProjectParams({canvas}) {
-    const projectSettings = useContext(EditorContext);
+    const { projectId} = useParams();
     const {userData} = useContext(UserContext);
 
-    async function saveProject(event) {
-        console.log(canvas.toJSON());
-        if (projectSettings.projectId === undefined && !userData) {
-            // TODO: save project & redirect to login page + create project after login
+    async function saveProject() {
+        if (projectId === 'create' && !userData) {
             localStorage.setItem('project', JSON.stringify(canvas.toJSON()));
             customAlert('Authorization is required', 'warning');
             window.location.href = '/auth/login';
-        } else if (projectSettings.projectId === undefined && userData) {
-            // TODO: check
-            const resp = await Requests.create_project(projectSettings.projectName);
+        } else if (projectId === 'create' && userData) {
+            // TODO: project name
+            const resp = await Requests.create_project('untitled');
             if (resp.state === true) {
                 const projId = resp.data;
                 await Requests.saveProject(projId, canvas.toJSON());
+                customAlert('Success', 'success');
             }
-            customAlert('Create project not specified =)', 'error');
+            else
+                customAlert(resp.message || 'Error', 'error');
         } else
-            Requests.saveProject(projectSettings.projectId, canvas.toJSON())
+            Requests.saveProject(projectId, canvas.toJSON())
                 .then((resp) => {
                     customAlert(resp.state ? 'Saved' : 'Error',
                         resp.state ? 'success' : 'error')
@@ -51,7 +52,7 @@ function ProjectParams({canvas}) {
                 <Divider sx={{margin: 1}}/>
                 <MainColorPicker canvas={canvas}/>
                 <Divider/>
-                <Button variant="outlined" onClick={saveProject}>Save local</Button>
+                <Button variant="outlined" onClick={saveProject}>Save</Button>
             </Stack>
         </Container>
     );

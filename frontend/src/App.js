@@ -21,7 +21,7 @@ function App() {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path="/" element={<RootLayout/>}>
-                <Route index element={<Navigate to={'/editor'}/>}/>
+                <Route index element={<Navigate to={'/projects'}/>}/>
                 <Route path="auth" element={<AuthLayout/>}>
                     <Route path="login" element={<Login/>}/>
                     <Route path="registration" element={<Registration/>}/>
@@ -32,10 +32,11 @@ function App() {
                     {/*<Route path="me/settings" element={<ProfileSettings />} />*/}
                     <Route path=":user_id" element={<Profile />} />
                 </Route>
-                <Route path="editor" element={<EditorContextProvider/>}>
-                    <Route index element={<Workspace/>}/>
+                <Route path="projects" element={<EditorContextProvider/>}>
+                    <Route index element={<Navigate to={'/projects/create'} />}/>
+                    <Route path=":projectId" element={<Workspace/>}/>
                 </Route>
-                <Route path="*" element={<Navigate to={'/editor'}/>}/>
+                <Route path="*" element={<Navigate to={'/projects'}/>}/>
             </Route>
         )
     );

@@ -1,9 +1,4 @@
 import {Grid} from "@mui/material";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import {AddPhotoAlternateOutlined, Gesture, RectangleOutlined} from "@mui/icons-material";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import ProjectLayers from "../../components/editor/ProjectLayers";
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {fabric} from "fabric";
@@ -11,21 +6,30 @@ import ProjectParams from "../../components/editor/ProjectParams";
 import {Editor} from "./Editor";
 import {EditorContext} from "./EditorContextProvider";
 import Container from "@mui/material/Container";
+import {useParams} from "react-router-dom";
+import Requests from "../../api/Requests";
 
 export function Workspace() {
+    const { projectId} = useParams();
     const [canvas, setCanvas] = useState(undefined);
     const [isDrawingMode, setIsDrawingMode] = useState(false);
     const canvasContainerRef = useRef(null);
     const projectSettings = useContext(EditorContext);
-    const initCanvas = () => {
-        if (localStorage.getItem('project')){
+    const initCanvas = async () => {
+        if (projectId !== 'create') {
+            const resp = await Requests.getProject(projectId);
+            if (resp.state === true){
+                let canvas = new fabric.Canvas('canvas');
+                canvas.loadFromJSON(resp.data.data, canvas.renderAll.bind(canvas));
+                return canvas;
+            }
+        }
+        if (localStorage.getItem('project')) {
             let canvas = new fabric.Canvas('canvas');
             canvas.loadFromJSON(localStorage.getItem('project'), canvas.renderAll.bind(canvas));
             return canvas;
         }
-        // let width = 400;
         let width = document.getElementById('canvas').clientWidth;
-        // let height = 300;
         let height = document.getElementById('canvas').clientHeight;
         return new fabric.Canvas('canvas', {
             width: width,
@@ -36,7 +40,9 @@ export function Workspace() {
     };
 
     useEffect(() => {
-        setCanvas(initCanvas());
+        initCanvas().then((canvas) => {
+            setCanvas(canvas)
+        })
     }, []);
 
     // disable page scrolling
