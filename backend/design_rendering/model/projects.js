@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ProjectsSchema = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
+    _id: mongoose.Schema.Types.Number,
     data: mongoose.Schema.Types.Mixed
 });
 
