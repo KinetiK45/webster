@@ -9,7 +9,7 @@ async function getUser(req, res) {
         if (!userResult.isMatch) {
             return res.status(404).json({ state: false, message: userResult.message });
         }
-        res.status(200).json({ state: true, message: "User found", data: userResult.user });
+        res.status(200).json({ state: true, data: userResult.user });
     } catch (error) {
         console.error('Error in getUser:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -24,7 +24,7 @@ async function updateUser(req,res){
             return res.status(result.status).json({ state: false, message: result.message });
         }
 
-        res.status(200).json({ state: true, message: "Successfully updated", data: result.user.id });
+        res.status(200).json({ state: true, data: result.user.id });
     } catch (error) {
         console.error('Error in updateUser:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -40,7 +40,7 @@ async function userAvatarUpload(req,res) {
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, message: "Avatar successfully updated" });
+        res.status(200).json({ state: true });
     }catch (error) {
         console.error('Error in updateUser:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -75,7 +75,7 @@ async function userAllAvatars(req,res) {
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, message: "Avatar successfully updated" });
+        res.status(200).json({ state: true });
     }catch (error) {
         console.error('Error in userAvatar:', error);
         res.status(500).json({ state: false, message: "Internal server error" });

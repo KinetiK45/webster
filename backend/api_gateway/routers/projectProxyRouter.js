@@ -21,6 +21,14 @@ projectProxyRouter.use(
         })(req, res, next)
     });
 
+projectProxyRouter.use(
+    "/:project_id/save",(req, res, next) => {
+        const targetUrl = `${projectHost}/v1/api/project/${req.params.project_id}/save`
+        createProxyMiddleware({
+            target: targetUrl,
+        })(req, res, next)
+    });
+
 projectProxyRouter.use("/:project_id", async (req, res, next) => {
     const { project_id } = req.params;
     try {
@@ -51,13 +59,7 @@ projectProxyRouter.use(
         })(req, res, next)
     });
 
-projectProxyRouter.use(
-    "/:project_id/save",(req, res, next) => {
-        const targetUrl = `${projectHost}/v1/api/project/${req.params.project_id}/save`
-        createProxyMiddleware({
-            target: targetUrl,
-        })(req, res, next)
-    });
+
 
 
 module.exports = projectProxyRouter;
