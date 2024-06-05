@@ -60,7 +60,6 @@ function CustomNavigation() {
                     >
                         FigSter
                     </Typography>
-
                     <Box sx={{ flexGrow: 1, display: { xs: 'compact', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Link key={page.text} to={page.to}>
@@ -76,7 +75,7 @@ function CustomNavigation() {
                                 <Box sx={{ flexGrow: 0 }}>
                                     <Tooltip title="Open settings">
                                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                            <Avatar alt="NN" src={userData.photo} />
+                                            <Avatar alt="NN" src={userData.avatar} />
                                         </IconButton>
                                     </Tooltip>
                                     <Menu

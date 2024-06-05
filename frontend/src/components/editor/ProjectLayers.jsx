@@ -1,35 +1,19 @@
 import {Divider, Stack} from "@mui/material";
-import Button from "@mui/material/Button";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from '@mui/icons-material/Delete';
+import {EditorContext} from "../../pages/editor/EditorContextProvider";
+import Layer from "../Layer";
+import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
+import Container from "@mui/material/Container";
 
-function ProjectLayers({
-                           canvas,
-                       }) {
-
-
+function ProjectLayers({canvas}) {
     const [objects, setObjects] = useState([]);
-    const [activeObjects, setActiveObjects] = useState([]);
+    const projectSettings = useContext(EditorContext);
+    const objectsRef = useRef([]);
 
-    function selectObject(index) {
-        const object = canvas.getObjects()[index];
-        canvas.setActiveObject(object);
-        canvas.renderAll();
-    }
-
-    function deleteObject(index) {
-        if (canvas) {
-            // console.log(canvas);
-            const object = canvas.getObjects()[index];
-            if (object) {
-                console.log(object);
-                canvas.remove(object);
-            }
-            // console.log(canvas);
-        }
-    }
+    useEffect(() => {
+        objectsRef.current = objects;
+    }, [objects]);
 
     function calculateItemNumber(item) {
         return objects
@@ -37,22 +21,59 @@ function ProjectLayers({
             .indexOf(item);
     }
 
+    function makePointsVisible(active) {
+        const object = active[0];
+        if (active.length === 1 && object.withPoints) {
+            object.p1.visible = object.p2.visible = true;
+        }
+    }
+
+    function setLinePoints(active) {
+        objectsRef.current.map((item, index) => {
+            if (item.withPoints) {
+                if (item.x1 !== item.p1.left) setLineCoordinates(item);
+                item.p1.visible = item.p2.visible = active.includes(item.p1) || active.includes(item.p2);
+            }
+        });
+    }
+
     useEffect(() => {
         if (canvas) {
+            setObjects(canvas.getObjects());
+            let startX = 0, startY = 0;
+            canvas.on('mouse:down', (opt) => {
+                ({startX, startY} = getPointerStart(canvas, opt))
+            });
             canvas.on('object:added', () => {
-                setObjects(canvas.getObjects())
+                setObjects(canvas.getObjects());
             });
             canvas.on('object:removed', () => {
-                setObjects(canvas.getObjects())
+                setObjects(canvas.getObjects());
             });
-            canvas.on('selection:created', () => {
-                setActiveObjects(canvas.getActiveObjects())
+            canvas.on('selection:created', (opt) => {
+                const active = canvas.getActiveObjects();
+                makePointsVisible(active);
+                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:updated', () => {
-                setActiveObjects(canvas.getActiveObjects())
+                const active = canvas.getActiveObjects();
+                setLinePoints(active);
+                makePointsVisible(active);
+                projectSettings.setActiveObjects(active);
             });
             canvas.on('selection:cleared', () => {
-                setActiveObjects([]);
+                setLinePoints([]);
+                projectSettings.setActiveObjects([]);
+            });
+            canvas.on('object:modified', (opt) => {
+                if (opt.target.type === 'activeSelection') {
+                    opt.target._objects.map((item, index) => {
+                        const {offsetX, offsetY} = getOffsets(canvas, opt, startX, startY);
+                        if (item.withPoints) {
+                            setPointsCoordinates(item, offsetX, offsetY);
+                        }
+                    });
+                }
             });
         }
     }, [canvas]);
@@ -62,47 +83,26 @@ function ProjectLayers({
     }
 
     return (
-        <>
+        <Container disableGutters sx={{
+            p: 0, m: 0,
+            overflow: 'hidden',
+            backgroundColor: 'background.default', height: '100%'
+        }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 1, m: 0, backgroundColor: 'background.default'}}>
-                <Typography variant="h3" sx={{m: 'auto'}}>
-                    Layouts:
-                </Typography>
-                <Divider/>
+            <Stack direction="column" sx={{p: 1, m: 0, height: '100%'}}>
                 {objects.length === 0 &&
                     <Typography sx={{m: 'auto'}}>
-                        Nothing here...
+                        No layouts here...
                     </Typography>
                 }
                 {objects.map((item, index) => (
-                    <React.Fragment key={index}>
-                        <Stack direction="row"
-                               onClick={() => {
-                                   selectObject(index)
-                               }}
-                               sx={{
-                                   display: 'flex', p: 1, justifyContent: 'space-between',
-                                   backgroundColor: activeObjects.indexOf(item) === -1 ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                                   // border: '0.5px solid white'
-                               }}
-                        >
-                            <Typography sx={{m: 'auto'}}>
-                                {item.type} {item.name ? item.name : calculateItemNumber(item)}
-                            </Typography>
-                            <IconButton
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    deleteObject(index)
-                                }}
-                            >
-                                <DeleteIcon/>
-                            </IconButton>
-                        </Stack>
-                        {index < objects.length - 1 && <Divider />}
-                    </React.Fragment>
+                    !item.needToHide && (
+                        <Layer key={index} item={item} canvas={canvas} index={index}
+                               sameItemNumber={calculateItemNumber(item)}/>
+                    )
                 ))}
             </Stack>
-        </>
+        </Container>
     )
 }
 

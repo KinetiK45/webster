@@ -1,91 +1,59 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Divider, Stack, Typography, Select, MenuItem, TextField} from '@mui/material';
-import FontFaceObserver from 'fontfaceobserver';
+import React, {useContext} from 'react';
+import {Divider, Stack, Typography} from '@mui/material';
 import {customAlert} from "../../utils/Utils";
-import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import CustomInputField from "../inputs/CustomInputField";
+import MainColorPicker from "./MainColorPicker";
+import FontSelector from "./FontSelector";
+import Button from "@mui/material/Button";
+import Requests from "../../api/Requests";
+import {UserContext} from "../../RootLayout";
+import Container from "@mui/material/Container";
 
 function ProjectParams({canvas}) {
     const projectSettings = useContext(EditorContext);
+    const {userData} = useContext(UserContext);
 
-    const fonts = [
-        'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
-    ]
-    const loadAndUseFont = (font) => {
-        const myFont = new FontFaceObserver(font);
-        console.log(myFont);
-        myFont.load()
-            .then(() => {
-                if (canvas) {
-                    const activeObject = canvas.getActiveObject();
-                    if (activeObject){
-                        activeObject.set("fontFamily", font);
-                        canvas.requestRenderAll();
-                    }
-                    else
-                        projectSettings.setFontFamily(font);
-                }
-            })
-            .catch((e) => {
-                console.error('Font loading failed:', e);
-                customAlert(`Font loading failed: ${font}`, 'error');
-            });
-    };
-
-    const handleFontChange = (event) => {
-        const newFont = event.target.value;
-        projectSettings.setFontFamily(newFont)
-        loadAndUseFont(newFont);
-    };
-
-    const handleColorChange = (event) => {
-        const color = event.target.value;
-        projectSettings.setFillColor(color);
-
-        if (canvas) {
-            const activeObject = canvas.getActiveObject();
-            if (activeObject) {
-                activeObject.set("fill", color);
-                canvas.requestRenderAll();
-            } else {
-                customAlert('Please select an object on the canvas first.', 'warning');
+    async function saveProject(event) {
+        console.log(canvas.toJSON());
+        if (projectSettings.projectId === undefined && !userData) {
+            // TODO: save project & redirect to login page + create project after login
+            localStorage.setItem('project', JSON.stringify(canvas.toJSON()));
+            customAlert('Authorization is required', 'warning');
+            window.location.href = '/auth/login';
+        } else if (projectSettings.projectId === undefined && userData) {
+            // TODO: check
+            const resp = await Requests.create_project(projectSettings.projectName);
+            if (resp.state === true) {
+                const projId = resp.data;
+                await Requests.saveProject(projId, canvas.toJSON());
             }
-        }
-    };
+            customAlert('Create project not specified =)', 'error');
+        } else
+            Requests.saveProject(projectSettings.projectId, canvas.toJSON())
+                .then((resp) => {
+                    customAlert(resp.state ? 'Saved' : 'Error',
+                        resp.state ? 'success' : 'error')
+                })
+                .catch((e) => {
+                    customAlert(e.toString(), 'error')
+                })
+    }
 
     return (
-        <>
+        <Container disableGutters sx={{
+            p: 0, m: 0,
+            overflow: 'hidden',
+            backgroundColor: 'background.default', height: '100%'
+        }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 1, m: 0, backgroundColor: 'background.default'}}>
-                <Typography variant="h3" sx={{m: 'auto'}}>
-                    Settings:
-                </Typography>
+            <Stack direction="column" sx={{p: 1, m: 0, height: '100%'}}>
+                <FontSelector canvas={canvas}/>
+                <Divider sx={{margin: 1}}/>
+                <MainColorPicker canvas={canvas}/>
                 <Divider/>
-                <Stack direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-                    <FontDownloadIcon/>
-                    <Select
-                        value={projectSettings.fontFamily}
-                        onChange={handleFontChange}
-                        displayEmpty
-                        sx={{width: '100%', '& .MuiSelect-select': { padding: '8px' }}}
-                    >
-                        {fonts.map((font, index) => (
-                            <MenuItem key={index} value={font}>
-                                {font}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Stack>
-                <TextField
-                    label="Choose Color"
-                    type="color"
-                    value={projectSettings.fillColor}
-                    onChange={handleColorChange}
-                    sx={{ width: '100%', margin: '8px 0' }}
-                />
+                <Button variant="outlined" onClick={saveProject}>Save local</Button>
             </Stack>
-        </>
+        </Container>
     );
 }
 

@@ -8,8 +8,12 @@ services:
     ports:
       - "3001:3001"
     environment:
+      CERTIFICATES_PATH: ${CERTIFICATES_PATH}
       AUTHENTICATION_URL: ${AUTHENTICATION_URL}
       USER_URL: ${USER_URL}
+      PROJECT_URL: ${PROJECT_URL}
+    volumes:
+      - ${CERTIFICATES_PATH}:/certificates
     restart: on-failure
 
 #3002
@@ -52,6 +56,7 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       BUCKET_NAME: ${BUCKET_NAME}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     restart: on-failure
 
   notification:
@@ -68,12 +73,12 @@ services:
     image: init-db:latest
     #    build: ./backend/initdb/
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      BACKUP_FILE: ${BACKUP_FILE}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_NAME: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_POSTGRES: ${BACKUP_POSTGRES}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       BUCKET_NAME: ${BUCKET_NAME}
@@ -85,24 +90,30 @@ services:
     image: redis:latest
     volumes:
       - webster_redis_data:/data
+    restart: always
 
   rabbitmq:
     image: rabbitmq:latest
     volumes:
       - webster_rabbit_data:/var/lib/rabbitmq
+    restart: always
 
   mongo:
     image: mongo:latest
     volumes:
       - webster_mongo_db:/data/db
       - webster_mongo_configdb:/data/configdb
+    restart: always
 
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - webster_postgres:/var/lib/postgresql/data
+    restart: always
+#    ports:
+#      - "5432:5432"
 
 volumes:
   webster_postgres:

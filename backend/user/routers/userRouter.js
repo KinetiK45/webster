@@ -9,5 +9,4 @@ const fileUploadMiddleware = require("../middleware/fileUpload");
 router.get('/:user_id', user.getUser);
 router.patch('/update', editProfileValidationChain, validateRequest, user.updateUser);
 router.patch('/avatarUpload', fileUploadMiddleware, user.userAvatarUpload);
-router.post('/create',project.createProject);
 module.exports = router;

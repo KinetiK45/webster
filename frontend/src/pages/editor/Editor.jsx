@@ -5,22 +5,28 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import RectangleOutlinedIcon from '@mui/icons-material/RectangleOutlined';
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
-import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined';
 import PermDataSettingIcon from '@mui/icons-material/PermDataSetting';
 import Menu from "@mui/material/Menu";
-import {Divider, ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
+import {ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {AddPhotoAlternateOutlined, Gesture} from "@mui/icons-material";
+import {
+    AddPhotoAlternateOutlined,
+    ChangeHistoryOutlined,
+    Edit,
+    Gesture,
+    RadioButtonUncheckedOutlined
+} from "@mui/icons-material";
 import Avatar from "@mui/material/Avatar";
 import {EditorContext} from "./EditorContextProvider";
+import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
+import Line from "../../components/shapes/Line";
+import Polygons from "../../components/shapes/Polygons";
 
 export function Editor({canvas}) {
     const projectSettings = useContext(EditorContext);
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
     const [imgPath, setImgPath] = useState('');
-    const [isDrawingMode, setIsDrawingMode] = useState(false);
 
     useEffect(() => {
         if (imgPath === '') return;
@@ -29,117 +35,20 @@ export function Editor({canvas}) {
             setImgPath('');
         });
     }, [imgPath]);
-
     const handleFiguresClick = (event) => {
         setFiguresAnchorEl(event.currentTarget);
     };
-
     const handleFiguresClose = () => {
         setFiguresAnchorEl(null);
     };
-
     const handleDrawClick = (event) => {
         setDrawingAnchorEl(event.currentTarget);
     };
-
     const handleDrawClose = () => {
         setDrawingAnchorEl(null);
     };
-
-    useEffect(() => {
-        if (canvas) {
-            canvas.on('mouse:wheel', function (opt) {
-                var delta = opt.e.deltaY;
-                var zoom = canvas.getZoom();
-                zoom *= 0.999 ** delta;
-                if (zoom > 20) zoom = 20;
-                if (zoom < 0.01) zoom = 0.01;
-                canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
-                opt.e.preventDefault();
-                opt.e.stopPropagation();
-                var vpt = this.viewportTransform;
-                if (zoom < 400 / 1000) {
-                    vpt[4] = 200 - 1000 * zoom / 2;
-                    vpt[5] = 200 - 1000 * zoom / 2;
-                } else {
-                    if (vpt[4] >= 0) {
-                        vpt[4] = 0;
-                    } else if (vpt[4] < canvas.getWidth() - 1000 * zoom) {
-                        vpt[4] = canvas.getWidth() - 1000 * zoom;
-                    }
-                    if (vpt[5] >= 0) {
-                        vpt[5] = 0;
-                    } else if (vpt[5] < canvas.getHeight() - 1000 * zoom) {
-                        vpt[5] = canvas.getHeight() - 1000 * zoom;
-                    }
-                }
-            })
-            canvas.on('mouse:down', function (opt) {
-                var evt = opt.e;
-                if (evt.altKey === true) {
-                    this.isDragging = true;
-                    this.selection = false;
-                    this.lastPosX = evt.clientX;
-                    this.lastPosY = evt.clientY;
-                }
-                if (canvas.isDrawingMode) setIsDrawingMode(true);
-            });
-            canvas.on('mouse:move', function (opt) {
-                if (this.isDragging) {
-                    var e = opt.e;
-                    var vpt = this.viewportTransform;
-                    vpt[4] += e.clientX - this.lastPosX;
-                    vpt[5] += e.clientY - this.lastPosY;
-                    this.requestRenderAll();
-                    this.lastPosX = e.clientX;
-                    this.lastPosY = e.clientY;
-                }
-            });
-            canvas.on('mouse:up', function (opt) {
-                if (canvas.isDrawingMode) setIsDrawingMode(false);
-                this.setViewportTransform(this.viewportTransform);
-                this.isDragging = false;
-                this.selection = true;
-            });
-        }
-    }, [canvas]);
-
-    function createRect() {
-        const rect = new fabric.Rect({
-            left: 100,
-            top: 100,
-            fill: 'red',
-            width: 20,
-            height: 20,
-            selectable: true,
-        });
-        canvas.add(rect);
-        handleFiguresClose();
-    }
-
-    function createLine() {
-        canvas.add(new fabric.Line([50, 100, 200, 200], {
-            left: 170,
-            top: 150,
-            stroke: 'red',
-        }));
-        handleFiguresClose();
-    }
-
-    function createCircle() {
-        const circle = new fabric.Circle({
-            left: 100,
-            top: 130,
-            radius: 20,
-            fill: 'red',
-            name: 'circle'
-        });
-        canvas.add(circle);
-        handleFiguresClose();
-    }
-
     function createText() {
-        const text = new fabric.IText('Hello', {
+        const text = new fabric.Textbox('Hello', {
             left: 100,
             top: 130,
             fontSize: projectSettings.fontSize,
@@ -149,7 +58,6 @@ export function Editor({canvas}) {
         canvas.add(text);
         handleFiguresClose();
     }
-
     function handleAddImage() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -161,40 +69,92 @@ export function Editor({canvas}) {
 
         input.click();
     }
-
     function handleEnableDrawing() {
         handleDrawClose();
-        if (canvas.isDrawingMode) {
-            canvas.isDrawingMode = false
-            return
-        }
-        canvas.isDrawingMode = true
+        canvas.isDrawingMode = !canvas.isDrawingMode;
     }
+    function editPolygon() {
+        const poly = canvas.getActiveObjects()[0];
+        poly.edit = !poly.edit;
 
-    const figuresActions = [
-        {icon: <RectangleOutlinedIcon fontSize="small" />, text: 'Rect', func: createRect},
-        {icon: <CircleOutlinedIcon fontSize="small" />, text: 'Circle', func: createCircle},
-        {icon: <RemoveOutlinedIcon fontSize="small" />, text: 'Line', func: createLine}
+        if (poly.edit) {
+            var lastControl = poly.points.length - 1;
+            poly.cornerStyle = 'circle';
+            poly.cornerColor = 'rgba(0,0,255,0.5)';
+            poly.controls = poly.points.reduce(function(acc, point, index) {
+                acc['p' + index] = new fabric.Control({
+                        positionHandler: polygonPositionHandler,
+                        actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
+                        actionName: 'modifyPolygon',
+                        pointIndex: index
+                });
+                return acc;
+            }, { });
+        } else {
+            poly.cornerColor = 'blue';
+            poly.cornerStyle = 'rect';
+            poly.controls = fabric.Object.prototype.controls;
+        }
+        poly.hasBorders = !poly.edit;
+        canvas.requestRenderAll();
+    }
+    const isDisabled = () => {
+        if (!canvas) return true;
+        const objects = canvas.getActiveObjects();
+        return !(objects.length === 1 && objects[0].type === 'polygon');
+    };
+
+    const shapesActions = [
+        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small" />} text={'Rectangle'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
+        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small" />} text={'Polygon'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
+        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small" />} text={'Ellipse'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
+        <Line key={'Line'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
+    ];
+    const drawActions = [
+        {icon: <Edit fontSize="small" />, text: 'Pen', func: handleEnableDrawing},
+        {icon: <Edit fontSize="small" />, text: 'Pencil', func: handleEnableDrawing},
+    ];
+    const iconButtonConfigs = [
+        { key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon /> },
+        { key: 'add-text', ariaLabel: 'add-text', onClick: createText, icon: <TextFieldsIcon /> },
+        { key: 'add-image', ariaLabel: 'add-image', onClick: handleAddImage, icon: <AddPhotoAlternateOutlined /> },
+        { key: 'draw', ariaLabel: 'menu', onClick: handleDrawClick, icon: <Gesture /> },
+        { key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture />, disabled: isDisabled() }
     ];
 
     return (
         <Toolbar variant="regular" sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
             <Stack direction="row" spacing={0.5}>
-                <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="menu"
-                    onClick={handleFiguresClick}
-                >
-                    <PermDataSettingIcon/>
-                </IconButton>
+                {iconButtonConfigs.map(({ key, ariaLabel, onClick, icon, disabled }) => (
+                    <IconButton
+                        key={key}
+                        edge="start"
+                        color="inherit"
+                        aria-label={ariaLabel}
+                        onClick={onClick}
+                        disabled={disabled}
+                    >
+                        {icon}
+                    </IconButton>
+                ))}
                 <Menu
                     anchorEl={figuresAnchorEl}
                     open={Boolean(figuresAnchorEl)}
                     onClose={handleFiguresClose}
                 >
                     <MenuList>
-                        {figuresActions.map((item) => {
+                        {shapesActions.map((item) => {
+                            return item;
+                        })}
+                    </MenuList>
+                </Menu>
+                <Menu
+                    anchorEl={drawingAnchorEl}
+                    open={Boolean(drawingAnchorEl)}
+                    onClose={handleDrawClose}
+                >
+                    <MenuList>
+                        {drawActions.map((item) => {
                             return <MenuItem key={item.text} onClick={item.func}>
                                 <ListItemIcon>{item.icon}</ListItemIcon>
                                 <ListItemText>{item.text}</ListItemText>
@@ -202,41 +162,9 @@ export function Editor({canvas}) {
                         })}
                     </MenuList>
                 </Menu>
-                <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="add-image"
-                    onClick={createText}
-                >
-                    <TextFieldsIcon/>
-                </IconButton>
-                <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="add-image"
-                    onClick={handleAddImage}
-                >
-                    <AddPhotoAlternateOutlined/>
-                </IconButton>
-                <IconButton
-                    edge="start"
-                    color="inherit"
-                    aria-label="menu"
-                    onClick={handleDrawClick}
-                >
-                    <Gesture/>
-                </IconButton>
-                <Menu
-                    anchorEl={drawingAnchorEl}
-                    open={Boolean(drawingAnchorEl)}
-                    onClose={handleDrawClose}
-                >
-                    <MenuItem onClick={handleEnableDrawing}>Pen</MenuItem>
-                    <MenuItem onClick={handleEnableDrawing}>Pencil</MenuItem>
-                </Menu>
             </Stack>
             <Typography>
-                Proj name
+                {projectSettings.projectName}
             </Typography>
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
                 <Avatar alt="Avatar" />

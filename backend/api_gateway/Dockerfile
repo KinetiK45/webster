@@ -10,6 +10,8 @@ COPY . ./
 
 ENV PORT=3001
 
+VOLUME /certificates
+
 EXPOSE 3001
 
 CMD ["node", "index.js"]
