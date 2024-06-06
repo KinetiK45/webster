@@ -87,7 +87,7 @@ function ProjectLayers({canvas}) {
             backgroundColor: 'background.default', height: '100%'
         }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 1, m: 0, height: '100%'}}>
+            <Stack direction="column" sx={{p: 1, m: 0, height: '100%', overflow: 'scroll'}}>
                 {objects.length === 0 &&
                     <Typography sx={{m: 'auto'}}>
                         No layouts here...

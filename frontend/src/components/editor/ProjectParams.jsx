@@ -1,17 +1,22 @@
 import React, {useContext} from 'react';
-import {Divider, Stack, Typography} from '@mui/material';
+import {Accordion, AccordionDetails, AccordionSummary, Divider, Stack, Typography} from '@mui/material';
 import {customAlert} from "../../utils/Utils";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import MainColorPicker from "./MainColorPicker";
-import FontSelector from "./FontSelector";
+import MainColorPicker from "./parameters/MainColorPicker";
+import FontSelector from "./parameters/FontSelector";
 import Button from "@mui/material/Button";
 import Requests from "../../api/Requests";
 import {UserContext} from "../../RootLayout";
 import Container from "@mui/material/Container";
 import {useParams} from "react-router-dom";
+import StrokeColorPicker from "./parameters/StrokeColorPicker";
+import StrokeWidth from "./parameters/StrokeWidth";
+import FontSize from "./parameters/FontSize";
+import PositionSizes from "./parameters/PositionSizes";
 
 function ProjectParams({canvas}) {
-    const { projectId} = useParams();
+    const {projectId} = useParams();
     const {userData} = useContext(UserContext);
 
     async function saveProject() {
@@ -26,8 +31,7 @@ function ProjectParams({canvas}) {
                 const projId = resp.data;
                 await Requests.saveProject(projId, canvas.toJSON());
                 customAlert('Success', 'success');
-            }
-            else
+            } else
                 customAlert(resp.message || 'Error', 'error');
         } else
             Requests.saveProject(projectId, canvas.toJSON())
@@ -47,10 +51,46 @@ function ProjectParams({canvas}) {
             backgroundColor: 'background.default', height: '100%'
         }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 1, m: 0, height: '100%'}}>
-                <FontSelector canvas={canvas}/>
-                <Divider sx={{margin: 1}}/>
-                <MainColorPicker canvas={canvas}/>
+            <Stack direction="column" sx={{p: 0, m: 0, height: '100%'}}>
+
+                <Accordion disableGutters>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography>Sizes</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <PositionSizes canvas={canvas}/>
+                        <Divider sx={{m: 1}}/>
+                        <StrokeWidth canvas={canvas}/>
+                    </AccordionDetails>
+                </Accordion>
+                <Divider/>
+                <Accordion disableGutters>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography>Text</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <FontSelector canvas={canvas}/>
+                        <FontSize canvas={canvas} />
+                    </AccordionDetails>
+                </Accordion>
+
+                {/*<Divider sx={{margin: 1}}/>*/}
+                <Accordion disableGutters>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography>Colors</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <MainColorPicker canvas={canvas}/>
+                        <StrokeColorPicker canvas={canvas}/>
+                    </AccordionDetails>
+                </Accordion>
+
                 <Divider/>
                 <Button variant="outlined" onClick={saveProject}>Save</Button>
             </Stack>

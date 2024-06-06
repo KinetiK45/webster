@@ -67,3 +67,7 @@ export function formatDate(dateString, minutes = false) {
     return `${day} ${month} ${year} in ${date.toLocaleTimeString('en-GB', {hour: "numeric", minute: "numeric"})}`;
 }
 
+export function formatDouble(number = 0){
+    return parseFloat(number.toFixed(2));
+}
+

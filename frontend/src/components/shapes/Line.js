@@ -1,11 +1,13 @@
-import React, {useRef, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {ListItemIcon, ListItemText} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import {HorizontalRuleOutlined} from "@mui/icons-material";
 import {fabric} from "fabric";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
+import {EditorContext} from "../../pages/editor/EditorContextProvider";
 
 function Line({canvas, handleFiguresClose}) {
+    const projectSettings = useContext(EditorContext);
     const isDrawing = useRef(false);
     const drawingLine = useRef(null);
     const pointProps = {
@@ -36,8 +38,8 @@ function Line({canvas, handleFiguresClose}) {
         const pointer = canvas.getPointer(opt.e);
         const points = [pointer.x, pointer.y, pointer.x, pointer.y];
         drawingLine.current = new fabric.Line(points, {
-            strokeWidth: 2,
-            stroke: 'black',
+            strokeWidth: projectSettings.strokeWidth,
+            stroke: projectSettings.strokeColor,
             originX: 'center',
             originY: 'center',
             perPixelTargetFind: true,
