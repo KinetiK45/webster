@@ -1,11 +1,12 @@
-import React, {useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {ListItemIcon, ListItemText} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
-import {HorizontalRuleOutlined} from "@mui/icons-material";
 import {fabric} from "fabric";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
+import {EditorContext} from "../../pages/editor/EditorContextProvider";
 
-function Line({canvas, handleFiguresClose}) {
+function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument}) {
+    const projectSettings = useContext(EditorContext);
     const isDrawing = useRef(false);
     const drawingLine = useRef(null);
     const pointProps = {
@@ -31,7 +32,11 @@ function Line({canvas, handleFiguresClose}) {
         drawingLine.setCoords();
         canvas.renderAll();
     };
-    const handleMouseDown = (opt) => {
+    const onMouseDown = function createShape(opt){
+        if (selectedInstrument.current !== 'line') {
+            removeListeners();
+            return;
+        }
         isDrawing.current = true;
         const pointer = canvas.getPointer(opt.e);
         const points = [pointer.x, pointer.y, pointer.x, pointer.y];
@@ -45,8 +50,8 @@ function Line({canvas, handleFiguresClose}) {
             hasControls: false,
             hasBorders: false
         });
-    };
-    const handleMouseMove = (opt) => {
+    }
+    const onMouseMove = function changeShape(opt){
         if (!isDrawing.current) return;
         if (!canvas.contains(drawingLine.current))
             canvas.add(drawingLine.current);
@@ -54,19 +59,17 @@ function Line({canvas, handleFiguresClose}) {
         drawingLine.current.set({ x2: pointer.x, y2: pointer.y });
         canvas.renderAll();
     };
-    const handleMouseUp = (opt) => {
+    const onMouseUp = function endShape(opt){
         if (!isDrawing.current) return;
         isDrawing.current = false;
-        canvas.selection = true;
         drawingLine.current.setCoords();
         if (drawingLine.current.x1 === drawingLine.current.x2 && drawingLine.current.y1 === drawingLine.current.y2) {
             drawingLine.current = null;
             return;
         }
+        changeInstrument('', false, true);
         addEndPoints();
-        canvas.off('mouse:down', handleMouseDown);
-        canvas.off('mouse:move', handleMouseMove);
-        canvas.off('mouse:up', handleMouseUp);
+        removeListeners();
     };
     const addEndPoints = () => {
         const p1 = new fabric.Circle({
@@ -109,17 +112,29 @@ function Line({canvas, handleFiguresClose}) {
         canvas.add(p2);
         canvas.renderAll();
     };
+    function removeListeners() {
+        canvas.off('mouse:down', onMouseDown);
+        canvas.off('mouse:move', onMouseMove);
+        canvas.off('mouse:up', onMouseUp);
+    }
+    function addListeners() {
+        canvas.on('mouse:down', onMouseDown);
+        canvas.on('mouse:move', onMouseMove);
+        canvas.on('mouse:up', onMouseUp);
+    }
     const createLine = () => {
-        canvas.selection = false;
-        canvas.on('mouse:down', handleMouseDown);
-        canvas.on('mouse:move',  handleMouseMove);
-        canvas.on('mouse:up', handleMouseUp);
         handleFiguresClose();
+        if (selectedInstrument.current === 'line') {
+            return;
+        }
+        removeListeners();
+        addListeners();
+        changeInstrument('line', false, false);
     };
 
     return (
         <MenuItem onClick={createLine}>
-            <ListItemIcon><HorizontalRuleOutlined fontSize="small" /></ListItemIcon>
+            <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText>Line</ListItemText>
         </MenuItem>
     );

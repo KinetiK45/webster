@@ -1,11 +1,12 @@
-import React, {useContext, useRef} from 'react';
+import React, {useContext, useEffect, useRef} from 'react';
 import MenuItem from "@mui/material/MenuItem";
 import {ListItemIcon, ListItemText} from "@mui/material";
 import {fabric} from "fabric";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import {getPointerStart} from "../../utils/CoordinatesUtils";
 
-function Polygons({ canvas, icon, text, handleFiguresClose }) {
+
+function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument }) {
     const projectSettings = useContext(EditorContext);
     const figure = useRef(null);
     const startX = useRef(0);
@@ -17,7 +18,11 @@ function Polygons({ canvas, icon, text, handleFiguresClose }) {
         objectCaching: false,
     };
 
-    function onMouseDown(options) {
+    const onMouseDown = function createShape(options) {
+        if (selectedInstrument.current !== name.current) {
+            removeListeners();
+            return;
+        }
         const pointer = getPointerStart(canvas, options);
         startX.current = pointer.startX;
         startY.current = pointer.startY;
@@ -28,8 +33,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose }) {
         });
         canvas.add(figure.current);
     }
-
-    function onMouseMove(options) {
+    const onMouseMove = function changeShape(options) {
         if (!figure.current) return;
 
         const pointer = canvas.getPointer(options.e);
@@ -86,42 +90,88 @@ function Polygons({ canvas, icon, text, handleFiguresClose }) {
         }
         canvas.renderAll();
     }
-
-    function onMouseUp(options) {
+    const onMouseUp = function endShape(options) {
         if (!figure.current) return;
-        removeListeners();
         const pointer = canvas.getPointer(options.e);
-        const width = Math.abs(startX.current - pointer.x);
-        const height = Math.abs(startY.current - pointer.y);
-        if (name.current !== 'ellipse') {
-            figure.current.set({
-                width: width,
-                height: height,
-                pathOffset: { x: width / 2, y: height / 2 }
-            });
+        const isPoint = figure.current.points.length === 0;
+        const width = isPoint ? 100 : Math.abs(startX.current - pointer.x);
+        const height = isPoint ? 100 : Math.abs(startY.current - pointer.y);
+        const shapesProps = {
+            width: width,
+            height: height,
+            pathOffset: { x: width / 2, y: height / 2 },
+            left: isPoint ? startX.current - 50 : figure.current.left,
+            top: isPoint ? startY.current - 50 : figure.current.top,
+        }
+        switch (name.current) {
+            case 'rectangle':
+                figure.current.set({
+                    ...shapesProps,
+                    points: [
+                        { x: 0, y: 0 },
+                        { x: width, y: 0 },
+                        { x: width, y: height },
+                        { x: 0, y: height },
+                    ],
+                });
+                break;
+
+            case 'polygon':
+                figure.current.set({
+                    ...shapesProps,
+                    points: [
+                        { x: width / 2, y: 0 },
+                        { x: width, y: height },
+                        { x: 0, y: height }
+                    ],
+                });
+                break;
+
+            case 'ellipse':
+                const ellipsePoints = [];
+                for (let i = 0; i < 50; i++) {
+                    const angle = (i * 2 * Math.PI) / 50;
+                    ellipsePoints.push({
+                        x: 50 * Math.cos(angle),
+                        y: 50 * Math.sin(angle)
+                    });
+                }
+                figure.current.set({
+                    ...shapesProps,
+                    points:  isPoint ? ellipsePoints : figure.current.points,
+                    pathOffset: { x: 0, y: 0 },
+                });
+                break;
+            default:
+                throw new Error('Непідтримувана фігура: ' + text);
         }
         figure.current.setCoords();
-        canvas.selection = true;
+        changeInstrument('', false, true);
         figure.current = null;
+        removeListeners();
     }
-
     function removeListeners() {
         canvas.off('mouse:down', onMouseDown);
         canvas.off('mouse:move', onMouseMove);
         canvas.off('mouse:up', onMouseUp);
     }
-
-    function addShape() {
-        canvas.selection = false;
-        handleFiguresClose();
-
+    function addListeners() {
         canvas.on('mouse:down', onMouseDown);
         canvas.on('mouse:move', onMouseMove);
         canvas.on('mouse:up', onMouseUp);
     }
+    function addShape() {
+        handleFiguresClose();
 
+        if (selectedInstrument.current === name.current ) {
+            return;
+        }
+        removeListeners();
+        addListeners();
+        changeInstrument(name.current, false, false);
+    }
     return (
-        <MenuItem onClick={() => addShape()}>
+        <MenuItem onClick={addShape}>
             <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText>{text}</ListItemText>
         </MenuItem>

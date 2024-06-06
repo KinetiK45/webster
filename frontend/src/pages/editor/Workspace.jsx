@@ -80,10 +80,8 @@ export function Workspace() {
                 }
             });
             canvas.on('mouse:up', function (opt) {
-                if (canvas.isDrawingMode) setIsDrawingMode(false);
                 this.setViewportTransform(this.viewportTransform);
                 this.isDragging = false;
-                this.selection = true;
             });
         }
     }, [canvas]);

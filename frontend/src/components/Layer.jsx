@@ -9,6 +9,7 @@ function Layer({ canvas, item, index, sameItemNumber }) {
     const projectSettings = useContext(EditorContext);
 
     function selectObject() {
+        canvas.isDrawingMode = false;
         const object = canvas.getObjects()[index];
         console.log(object);
         canvas.setActiveObject(object);

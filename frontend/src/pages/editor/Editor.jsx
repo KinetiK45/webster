@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {fabric} from 'fabric';
 import Toolbar from "@mui/material/Toolbar";
 import MenuItem from "@mui/material/MenuItem";
@@ -13,7 +13,7 @@ import {
     AddPhotoAlternateOutlined,
     ChangeHistoryOutlined,
     Edit,
-    Gesture,
+    Gesture, HorizontalRuleOutlined,
     RadioButtonUncheckedOutlined
 } from "@mui/icons-material";
 import Avatar from "@mui/material/Avatar";
@@ -27,14 +27,46 @@ export function Editor({canvas}) {
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
     const [imgPath, setImgPath] = useState('');
-
+    const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
+    const selectedInstrument = useRef('');
     useEffect(() => {
         if (imgPath === '') return;
         fabric.Image.fromURL(imgPath, function (img) {
             canvas.add(img);
+            selectedInstrument.current = '';
             setImgPath('');
         });
     }, [imgPath]);
+    useEffect(() => {
+        const updatedIcons = iconButtons.map(button => {
+            const activeIcon = getActiveIcon(button.key);
+            return activeIcon ? { ...button, icon: activeIcon } : button;
+        });
+        setIconButtons(updatedIcons);
+    }, [selectedInstrument.current]);
+
+    const getActiveIcon = (key) => {
+        switch (key) {
+            case 'figures':
+                return getActiveButtonFromActions(shapesActions)?.props.icon;
+            case 'draw':
+                return getActiveButtonFromActions(drawActions)?.icon;
+            default:
+                return null;
+        }
+    };
+    const getActiveButtonFromActions = (actions) => {
+        return actions.find(action => action.key?.toLowerCase() === selectedInstrument.current)
+    };
+    const changeInstrument = (name, isDrawing, selection)=> {
+        selectedInstrument.current = name;
+        canvas.selection = selection;
+        canvas.isDrawingMode = isDrawing;
+    };
+    const handleButtonClick = (event, key, onClick) => {
+        setActiveButtonFromIcons(key);
+        onClick(event);
+    };
     const handleFiguresClick = (event) => {
         setFiguresAnchorEl(event.currentTarget);
     };
@@ -48,6 +80,7 @@ export function Editor({canvas}) {
         setDrawingAnchorEl(null);
     };
     function createText() {
+        changeInstrument('text', false, true);
         const text = new fabric.Textbox('Hello', {
             left: 100,
             top: 130,
@@ -59,6 +92,7 @@ export function Editor({canvas}) {
         handleFiguresClose();
     }
     function handleAddImage() {
+        changeInstrument('image', false, true);
         const input = document.createElement('input');
         input.type = 'file';
         input.addEventListener('change', function (event) {
@@ -69,9 +103,13 @@ export function Editor({canvas}) {
 
         input.click();
     }
+    function enablePen() {
+        handleDrawClose();
+        changeInstrument('pen', false, false);
+    }
     function handleEnableDrawing() {
         handleDrawClose();
-        canvas.isDrawingMode = !canvas.isDrawingMode;
+        changeInstrument('pencil', true, canvas.selection);
     }
     function editPolygon() {
         const poly = canvas.getActiveObjects()[0];
@@ -104,35 +142,36 @@ export function Editor({canvas}) {
         return !(objects.length === 1 && objects[0].type === 'polygon');
     };
 
-    const shapesActions = [
-        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small" />} text={'Rectangle'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
-        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small" />} text={'Polygon'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
-        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small" />} text={'Ellipse'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
-        <Line key={'Line'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
+    const shapesActions= [
+        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small" />} text={'Rectangle'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
+        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small" />} text={'Polygon'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
+        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small" />} text={'Ellipse'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
+        <Line icon={<HorizontalRuleOutlined fontSize="small" />} key={'Line'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
     ];
     const drawActions = [
-        {icon: <Edit fontSize="small" />, text: 'Pen', func: handleEnableDrawing},
-        {icon: <Edit fontSize="small" />, text: 'Pencil', func: handleEnableDrawing},
+        {icon: <Gesture  />, text: 'Pencil', func: handleEnableDrawing},
+        {icon: <Edit />, text: 'Pen', func: enablePen},
     ];
-    const iconButtonConfigs = [
+    const [iconButtons, setIconButtons] = useState([
         { key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon /> },
         { key: 'add-text', ariaLabel: 'add-text', onClick: createText, icon: <TextFieldsIcon /> },
         { key: 'add-image', ariaLabel: 'add-image', onClick: handleAddImage, icon: <AddPhotoAlternateOutlined /> },
         { key: 'draw', ariaLabel: 'menu', onClick: handleDrawClick, icon: <Gesture /> },
-        { key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture />, disabled: isDisabled() }
-    ];
+        { key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture /> }
+    ]);
 
     return (
         <Toolbar variant="regular" sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
             <Stack direction="row" spacing={0.5}>
-                {iconButtonConfigs.map(({ key, ariaLabel, onClick, icon, disabled }) => (
+                {iconButtons.map(({ key, ariaLabel, onClick, icon }) => (
                     <IconButton
                         key={key}
                         edge="start"
                         color="inherit"
                         aria-label={ariaLabel}
-                        onClick={onClick}
-                        disabled={disabled}
+                        onClick={(event) => handleButtonClick(event, key, onClick)}
+                        disabled={key === 'edit-polygon' && isDisabled()}
+                        style={{ backgroundColor: activeButtonFromIcons === key ? 'grey' : 'initial' }}
                     >
                         {icon}
                     </IconButton>
