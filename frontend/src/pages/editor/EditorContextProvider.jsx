@@ -1,43 +1,14 @@
-import React, {useState, createContext, useContext, useEffect} from "react";
+import React, {createContext, useState} from "react";
 import {Outlet} from "react-router-dom";
-import Typography from "@mui/material/Typography";
+import {EditorSettings} from "../../utils/EditorSettings";
 
-export const EditorContext = createContext();
+export const EditorContext = createContext(new EditorSettings());
 
 function EditorContextProvider({ children }) {
-    // PROJECT:
-    const [projectName, setProjectName] = useState('untitled');
-    const [projectId, setProjectId] = useState(undefined);
-    const [projectHeight, setProjectHeight] = useState(400);
-    const [projectWidth, setProjectWidth] = useState(500);
-    // COLORS:
-    const [fillColor, setFillColor] = useState('#be0303');
-    const [backgroundColor, setBackgroundColor] = useState('#696969');
-    // SIZES:
-    const [lineSize, setLineSize] = useState(3);
-    const [fontSize, setFontSize] = useState(16);
-    // OBJECTS:
-    const [fillStyleEnable, setFillStyleEnable] = useState(true);
-    // FONTS:
-    const [fontFamily, setFontFamily] = useState('Times New Roman');
-    const [activeObjects, setActiveObjects] = useState([]);
-
-    const value = {
-        projectName, setProjectName,
-        projectId, setProjectId,
-        projectHeight, setProjectHeight,
-        projectWidth, setProjectWidth,
-        fillColor, setFillColor,
-        backgroundColor, setBackgroundColor,
-        lineSize, setLineSize,
-        fontSize, setFontSize,
-        fillStyleEnable, setFillStyleEnable,
-        fontFamily, setFontFamily,
-        activeObjects, setActiveObjects
-    };
+    const [projectSettings, setProjectSettings] = useState(new EditorSettings());
 
     return (
-        <EditorContext.Provider value={value}>
+        <EditorContext.Provider value={projectSettings}>
             <Outlet />
         </EditorContext.Provider>
     );

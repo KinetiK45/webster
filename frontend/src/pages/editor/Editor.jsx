@@ -203,7 +203,8 @@ export function Editor({canvas}) {
                 </Menu>
             </Stack>
             <Typography>
-                {projectSettings.projectName}
+                {/*TODO: project name*/}
+                Untitled
             </Typography>
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
                 <Avatar alt="Avatar" />

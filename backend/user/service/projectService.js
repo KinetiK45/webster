@@ -65,7 +65,6 @@ async function getProjectByUserId(userId, page, pageSize) {
         }
         return {
             isMatch: true,
-            message: "User projects",
             projects: projects,
             currentPage: page,
             totalPages: Math.ceil(total / pageSize)

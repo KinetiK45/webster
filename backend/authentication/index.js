@@ -14,13 +14,6 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(
-    session({
-        secret: 'session secret',
-        resave: false,
-        saveUninitialized: true
-    })
-);
 app.use(morgan('dev'));
 
 app.use(cookieParser());

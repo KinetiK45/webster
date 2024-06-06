@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import Requests from "../../api/Requests";
 import {passwordValidation, usernameValidation} from "../../utils/InputHandlers";
 import CustomInputField from "../../components/inputs/CustomInputField";
-import {enqueueSnackbar} from "notistack";
 import Container from "@mui/material/Container";
 import {customAlert} from "../../utils/Utils";
 

@@ -1,30 +1,36 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {Divider, MenuItem, Select, Stack, TextField, Typography} from '@mui/material';
-import FontFaceObserver from 'fontfaceobserver';
+import React, {useContext} from 'react';
+import {Divider, Stack, Typography} from '@mui/material';
 import {customAlert} from "../../utils/Utils";
-import FontDownloadIcon from '@mui/icons-material/FontDownload';
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import MainColorPicker from "./MainColorPicker";
 import FontSelector from "./FontSelector";
 import Button from "@mui/material/Button";
 import Requests from "../../api/Requests";
 import {UserContext} from "../../RootLayout";
+import Container from "@mui/material/Container";
+import {useParams} from "react-router-dom";
 
 function ProjectParams({canvas}) {
-    const projectSettings = useContext(EditorContext);
+    const { projectId} = useParams();
     const {userData} = useContext(UserContext);
 
-
-    function saveProject(event) {
-        console.log(canvas.toJSON());
-        if (projectSettings.projectId === undefined && !userData) {
-            // TODO: save project & redirect to login page + create project after login
-            customAlert('Authorization is required', 'warning')
-        } else if (projectSettings.projectId === undefined && userData) {
-            // TODO: project create
-            customAlert('Create project not specified =)', 'error');
+    async function saveProject() {
+        if (projectId === 'create' && !userData) {
+            localStorage.setItem('project', JSON.stringify(canvas.toJSON()));
+            customAlert('Authorization is required', 'warning');
+            window.location.href = '/auth/login';
+        } else if (projectId === 'create' && userData) {
+            // TODO: project name
+            const resp = await Requests.create_project('untitled');
+            if (resp.state === true) {
+                const projId = resp.data;
+                await Requests.saveProject(projId, canvas.toJSON());
+                customAlert('Success', 'success');
+            }
+            else
+                customAlert(resp.message || 'Error', 'error');
         } else
-            Requests.saveProject(projectSettings.projectId, canvas.toJSON())
+            Requests.saveProject(projectId, canvas.toJSON())
                 .then((resp) => {
                     customAlert(resp.state ? 'Saved' : 'Error',
                         resp.state ? 'success' : 'error')
@@ -33,43 +39,22 @@ function ProjectParams({canvas}) {
                     customAlert(e.toString(), 'error')
                 })
     }
-    const fonts = [
-        'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
-    ]
-    const loadAndUseFont = (font) => {
-        const myFont = new FontFaceObserver(font);
-        console.log(myFont);
-        myFont.load()
-            .then(() => {
-                if (canvas) {
-                    const activeObject = canvas.getActiveObject();
-                    if (activeObject){
-                        activeObject.set("fontFamily", font);
-                        canvas.requestRenderAll();
-                    }
-                    else
-                        projectSettings.setFontFamily(font);
-                }
-            })
-            .catch((e) => {
-                console.error('Font loading failed:', e);
-                customAlert(`Font loading failed: ${font}`, 'error');
-            });
-    };
 
     return (
-        <>
+        <Container disableGutters sx={{
+            p: 0, m: 0,
+            overflow: 'hidden',
+            backgroundColor: 'background.default', height: '100%'
+        }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 1, m: 0, backgroundColor: 'background.default'}}>
-                <Typography variant="h3" sx={{m: 'auto'}}>
-                    Settings:
-                </Typography>
-                <Divider/>
+            <Stack direction="column" sx={{p: 1, m: 0, height: '100%'}}>
                 <FontSelector canvas={canvas}/>
+                <Divider sx={{margin: 1}}/>
                 <MainColorPicker canvas={canvas}/>
-                <Button variant="outlined" onClick={saveProject}>Save project</Button>
+                <Divider/>
+                <Button variant="outlined" onClick={saveProject}>Save</Button>
             </Stack>
-        </>
+        </Container>
     );
 }
 

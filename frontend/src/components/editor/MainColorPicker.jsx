@@ -1,17 +1,19 @@
 import {TextField} from "@mui/material";
-import React, {useContext, useEffect} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../utils/Utils";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 
 function MainColorPicker({canvas}) {
     const projectSettings = useContext(EditorContext);
+    const [fillColorCurrent, setFillColorCurrent] = useState(projectSettings.fillColor);
 
     useEffect(() => {
         if (canvas) {
             const onObjectSelected = () => {
                 const activeObject = canvas.getActiveObject();
-                if (activeObject) {
-                    projectSettings.setFillColor(activeObject.fill || projectSettings.fillColor);
+                if (activeObject?.fill) {
+                    setFillColorCurrent(activeObject.fill);
+                    projectSettings.fillColor = activeObject.fill;
                 }
             };
 
@@ -27,7 +29,8 @@ function MainColorPicker({canvas}) {
 
     const handleColorChange = (event) => {
         const color = event.target.value;
-        projectSettings.setFillColor(color);
+        projectSettings.fillColor = color;
+        setFillColorCurrent(color);
 
         if (canvas) {
             const activeObject = canvas.getActiveObject();
@@ -44,7 +47,7 @@ function MainColorPicker({canvas}) {
         <TextField
             label="Choose Color"
             type="color"
-            value={projectSettings.fillColor}
+            value={fillColorCurrent}
             onChange={handleColorChange}
             sx={{ width: '100%', margin: '8px 0' }}
         />

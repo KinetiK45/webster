@@ -4,6 +4,13 @@ const host = process.env.USER_URL;
 
 const userProxyRouter = express.Router();
 
+userProxyRouter.use(
+    "/create",
+    createProxyMiddleware({
+        target: `${host}/v1/api/projects/create`,
+    })
+)
+
 userProxyRouter.use("/:user_id", (req, res, next) => {
     const targetUrl = `${host}/v1/api/users/${req.params.user_id}`;
     createProxyMiddleware({
@@ -25,11 +32,5 @@ userProxyRouter.use(
     })
 );
 
-userProxyRouter.use(
-    "/create",
-    createProxyMiddleware({
-        target: `${host}/v1/api/users/create`,
-    })
-)
 
 module.exports = userProxyRouter;

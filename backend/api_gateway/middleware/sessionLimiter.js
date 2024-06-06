@@ -21,7 +21,7 @@ function rateLimitAndTimeout(req, res, next) {
         });
     }
 
-    req.setTimeout(1500, () => {
+    req.setTimeout(15000, () => {
         res.status(504).json({
             code: 504,
             status: "Error",
