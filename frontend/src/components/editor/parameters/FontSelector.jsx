@@ -1,7 +1,7 @@
 import {MenuItem, Select, Stack, TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
-import {customAlert} from "../../utils/Utils";
-import {EditorContext} from "../../pages/editor/EditorContextProvider";
+import {customAlert} from "../../../utils/Utils";
+import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 import FontDownloadIcon from "@mui/icons-material/FontDownload";
 import FontFaceObserver from "fontfaceobserver";
 
@@ -46,6 +46,7 @@ function FontSelector({canvas}) {
         if (canvas) {
             const onObjectSelected = () => {
                 const activeObject = canvas.getActiveObject();
+                console.log(activeObject);
                 if (activeObject?.fontFamily) {
                     projectSettings.fontFamily = activeObject.fontFamily;
                     setCurrentFontFamily(activeObject.fontFamily);
@@ -68,8 +69,9 @@ function FontSelector({canvas}) {
             <Select
                 value={currentFontFamily}
                 onChange={handleFontChange}
+                size="small"
                 displayEmpty
-                sx={{width: '100%', '& .MuiSelect-select': {padding: '8px', marginBottom: 0}}}
+                sx={{width: '100%'}}
             >
                 {fonts.map((font, index) => (
                     <MenuItem key={index} value={font}>

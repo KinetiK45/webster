@@ -1,7 +1,7 @@
 import {TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
-import {customAlert} from "../../utils/Utils";
-import {EditorContext} from "../../pages/editor/EditorContextProvider";
+import {customAlert} from "../../../utils/Utils";
+import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 
 function MainColorPicker({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -45,11 +45,13 @@ function MainColorPicker({canvas}) {
 
     return (
         <TextField
-            label="Choose Color"
+            label="Fill"
             type="color"
+            margin="none"
             value={fillColorCurrent}
             onChange={handleColorChange}
-            sx={{ width: '100%', margin: '8px 0' }}
+            size="small"
+            sx={{ width: 50, height: 50}}
         />
     )
 }

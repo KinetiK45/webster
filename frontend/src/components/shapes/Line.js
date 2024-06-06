@@ -1,4 +1,5 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useContext, useRef} from 'react';
+import React, {useContext, useRef} from 'react';
 import {ListItemIcon, ListItemText} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import {fabric} from "fabric";
@@ -38,8 +39,8 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         const pointer = canvas.getPointer(opt.e);
         const points = [pointer.x, pointer.y, pointer.x, pointer.y];
         drawingLine.current = new fabric.Line(points, {
-            strokeWidth: 2,
-            stroke: 'black',
+            strokeWidth: projectSettings.strokeWidth,
+            stroke: projectSettings.strokeColor,
             originX: 'center',
             originY: 'center',
             perPixelTargetFind: true,

@@ -4,7 +4,8 @@ export class EditorSettings {
                     projectWidth = 500,
                     fillColor = '#be0303',
                     backgroundColor = '#696969',
-                    lineSize = 3,
+                    strokeColor = '#be0303',
+                    strokeWidth = 1,
                     fontSize = 16,
                     fillStyleEnable = true,
                     fontFamily = 'Times New Roman',
@@ -13,7 +14,8 @@ export class EditorSettings {
         this.projectWidth = projectWidth;
         this.fillColor = fillColor;
         this.backgroundColor = backgroundColor;
-        this.lineSize = lineSize;
+        this.strokeColor = strokeColor;
+        this.strokeWidth = strokeWidth;
         this.fontSize = fontSize;
         this.fillStyleEnable = fillStyleEnable;
         this.fontFamily = fontFamily;
