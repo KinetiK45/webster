@@ -1,5 +1,4 @@
 import React, {useContext, useRef} from 'react';
-import React, {useContext, useRef} from 'react';
 import {ListItemIcon, ListItemText} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import {fabric} from "fabric";
