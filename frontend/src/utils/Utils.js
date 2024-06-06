@@ -67,3 +67,20 @@ export function formatDate(dateString, minutes = false) {
     return `${day} ${month} ${year} in ${date.toLocaleTimeString('en-GB', {hour: "numeric", minute: "numeric"})}`;
 }
 
+function getListenerIndex(array, name) {
+    return array.findIndex(item => item.name === name);
+}
+
+export function removeShapeListeners(listeners) {
+    const eventTypes = ['mouse:down', 'mouse:move', 'mouse:up'];
+    const listenerNames = ['createShape', 'changeShape', 'endShape'];
+
+    eventTypes.forEach((eventType, index) => {
+        const listenerArray = listeners[eventType];
+        const listenerIndex = getListenerIndex(listenerArray, listenerNames[index]);
+
+        if (listenerIndex > -1) {
+            listenerArray.splice(listenerIndex, 1);
+        }
+    });
+}

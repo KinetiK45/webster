@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {fabric} from 'fabric';
 import Toolbar from "@mui/material/Toolbar";
 import MenuItem from "@mui/material/MenuItem";
@@ -21,6 +21,7 @@ import {EditorContext} from "./EditorContextProvider";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import Line from "../../components/shapes/Line";
 import Polygons from "../../components/shapes/Polygons";
+import {removeShapeListeners} from "../../utils/Utils";
 
 export function Editor({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -29,6 +30,7 @@ export function Editor({canvas}) {
     const [imgPath, setImgPath] = useState('');
     const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
     const selectedInstrument = useRef('');
+    const [disabled, setDisabled] = useState(true);
     useEffect(() => {
         if (imgPath === '') return;
         fabric.Image.fromURL(imgPath, function (img) {
@@ -44,7 +46,17 @@ export function Editor({canvas}) {
         });
         setIconButtons(updatedIcons);
     }, [selectedInstrument.current]);
-
+    useEffect(() => {
+        if(canvas){
+            const isDisabled = () => {
+                const activeObjects = canvas.getActiveObjects();
+                setDisabled(!(activeObjects.length === 1 && activeObjects[0].type === 'polygon'));
+            }
+            canvas.on('selection:created', isDisabled);
+            canvas.on('selection:updated', isDisabled);
+            canvas.on('selection:cleared', isDisabled);
+        }
+    }, [canvas]);
     const getActiveIcon = (key) => {
         switch (key) {
             case 'figures':
@@ -59,6 +71,7 @@ export function Editor({canvas}) {
         return actions.find(action => action.key?.toLowerCase() === selectedInstrument.current)
     };
     const changeInstrument = (name, isDrawing, selection)=> {
+        removeShapeListeners(canvas.__eventListeners);
         selectedInstrument.current = name;
         canvas.selection = selection;
         canvas.isDrawingMode = isDrawing;
@@ -136,11 +149,6 @@ export function Editor({canvas}) {
         poly.hasBorders = !poly.edit;
         canvas.requestRenderAll();
     }
-    const isDisabled = () => {
-        if (!canvas) return true;
-        const objects = canvas.getActiveObjects();
-        return !(objects.length === 1 && objects[0].type === 'polygon');
-    };
 
     const shapesActions= [
         <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small" />} text={'Rectangle'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
@@ -170,7 +178,7 @@ export function Editor({canvas}) {
                         color="inherit"
                         aria-label={ariaLabel}
                         onClick={(event) => handleButtonClick(event, key, onClick)}
-                        disabled={key === 'edit-polygon' && isDisabled()}
+                        disabled={key === 'edit-polygon' && disabled}
                         style={{ backgroundColor: activeButtonFromIcons === key ? 'grey' : 'initial' }}
                     >
                         {icon}

@@ -1,159 +1,150 @@
-import React, {useContext, useEffect, useRef} from 'react';
+import React, {useContext, useRef} from 'react';
 import MenuItem from "@mui/material/MenuItem";
 import {ListItemIcon, ListItemText} from "@mui/material";
 import {fabric} from "fabric";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import {getPointerStart} from "../../utils/CoordinatesUtils";
-
+import {
+    findMaxValue,
+    getEllipsePoints,
+    getPointerStart, setPolygonProps, setRectangleProps,
+    setShapeProps
+} from "../../utils/CoordinatesUtils";
+import {removeShapeListeners} from "../../utils/Utils";
 
 function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument }) {
     const projectSettings = useContext(EditorContext);
     const figure = useRef(null);
     const startX = useRef(0);
     const startY = useRef(0);
+    const pointerLastX = useRef(0);
+    const pointerLastY = useRef(0);
     const name = useRef(text.toLowerCase());
+    const shiftPressed = useRef(false);
     const polyOptions = {
         fill: projectSettings.fillColor,
         selectable: true,
         objectCaching: false,
     };
+    function shiftDown(event) {
+        if (event.key === 'Shift' && !shiftPressed.current) {
+            shiftPressed.current = true;
+            const shape = figure.current;
+            if (shape) {
+                let sideSize = name.current === 'ellipse' ?
+                    Math.max(shape.width, shape.height) :
+                    findMaxValue(shape.points);
+                const shapesProps = {
+                    left: shape.left < startX.current ? startX.current - sideSize : shape.left,
+                    top: shape.top < startY.current ? startY.current - sideSize : shape.top
+                }
 
-    const onMouseDown = function createShape(options) {
-        if (selectedInstrument.current !== name.current) {
-            removeListeners();
-            return;
+                setShapeProps(name.current, shape, shapesProps, sideSize, sideSize);
+                canvas.renderAll();
+            }
         }
-        const pointer = getPointerStart(canvas, options);
-        startX.current = pointer.startX;
-        startY.current = pointer.startY;
+    }
+    function shiftUp(event) {
+        if (event.key === 'Shift') {
+            shiftPressed.current= false;
+            const shape = figure.current;
+            if(shape){
+                let width = Math.abs(pointerLastX.current - startX.current);
+                let height = Math.abs(pointerLastY.current - startY.current);
+
+                const shapesProps = {
+                    left: shape.left < startX.current ? pointerLastX.current : shape.left,
+                    top: shape.top < startY.current ? pointerLastY.current : shape.top
+                }
+
+                setShapeProps(name.current, shape, shapesProps, width, height);
+                canvas.renderAll();
+            }
+        }
+    }
+    const onMouseDown = function createShape(options) {
+        const pointerStart = getPointerStart(canvas, options);
+        startX.current = pointerStart.startX;
+        startY.current = pointerStart.startY;
         figure.current = new fabric.Polygon([], {
             ...polyOptions,
             left: startX.current,
             top: startY.current,
         });
         canvas.add(figure.current);
+        document.addEventListener('keydown', shiftDown);
+        document.addEventListener('keyup', shiftUp);
     }
     const onMouseMove = function changeShape(options) {
-        if (!figure.current) return;
-
+        const shape = figure.current;
+        if (!shape) return;
         const pointer = canvas.getPointer(options.e);
-        const width = Math.abs(startX.current - pointer.x);
-        const height = Math.abs(startY.current - pointer.y);
-
-        switch (name.current) {
-            case 'rectangle':
-                figure.current.set({
-                    points: [
-                        { x: 0, y: 0 },
-                        { x: width, y: 0 },
-                        { x: width, y: height },
-                        { x: 0, y: height },
-                    ],
-                    left: Math.min(pointer.x, startX.current),
-                    top: Math.min(pointer.y, startY.current),
-                });
-                break;
-
-            case 'polygon':
-                figure.current.set({
-                    points: [
-                        { x: width / 2, y: 0 },
-                        { x: width, y: height },
-                        { x: 0, y: height }
-                    ],
-                    left: Math.min(pointer.x, startX.current),
-                    top: Math.min(pointer.y, startY.current),
-                });
-                break;
-
-            case 'ellipse':
-                const rx = Math.abs((startX.current - pointer.x) / 2);
-                const ry = Math.abs((startY.current - pointer.y) / 2);
-                const ellipsePoints = [];
-                for (let i = 0; i < 50; i++) {
-                    const angle = (i * 2 * Math.PI) / 50;
-                    ellipsePoints.push({
-                        x: rx * Math.cos(angle),
-                        y: ry * Math.sin(angle)
-                    });
-                }
-                figure.current.set({
-                    points: ellipsePoints,
-                    width: width,
-                    height: height,
-                    left: Math.min(pointer.x, startX.current),
-                    top: Math.min(pointer.y, startY.current),
-                });
-                break;
-            default:
-                throw new Error('Непідтримувана фігура: ' + text);
+        let width = Math.abs(startX.current - pointer.x);
+        let height = Math.abs(startY.current - pointer.y);
+        const shapesProps = {
+            left: Math.min(pointer.x, startX.current),
+            top: Math.min(pointer.y, startY.current)
         }
+
+        if (options.e.shiftKey) {
+            width = height = Math.max(width, height);
+            if(startX.current >= pointer.x){
+                shapesProps.left = startX.current - height;
+            }
+            if(startY.current >= pointer.y) {
+                shapesProps.top = startY.current - height;
+            }
+        }
+
+        setShapeProps(name.current, shape, shapesProps, width, height);
+        pointerLastX.current = pointer.x;
+        pointerLastY.current = pointer.y;
         canvas.renderAll();
     }
     const onMouseUp = function endShape(options) {
-        if (!figure.current) return;
+        const shape = figure.current;
+        if (!shape) return;
         const pointer = canvas.getPointer(options.e);
-        const isPoint = figure.current.points.length === 0;
-        const width = isPoint ? 100 : Math.abs(startX.current - pointer.x);
-        const height = isPoint ? 100 : Math.abs(startY.current - pointer.y);
+        const isPoint = shape.points.length === 0;
+        let width = isPoint ? 100 : Math.abs(startX.current - pointer.x);
+        let height = isPoint ? 100 : Math.abs(startY.current - pointer.y);
+
+        if (options.e.shiftKey) {
+            width = height = Math.max(width, height);
+        }
+        const pathOffset = name.current !== 'ellipse' ?
+            { x: width / 2, y: height / 2 } :
+            { x: 0, y: 0 };
+
         const shapesProps = {
             width: width,
             height: height,
-            pathOffset: { x: width / 2, y: height / 2 },
-            left: isPoint ? startX.current - 50 : figure.current.left,
-            top: isPoint ? startY.current - 50 : figure.current.top,
+            pathOffset: pathOffset,
+            left: isPoint ? startX.current - 50 : shape.left,
+            top: isPoint ? startY.current - 50 : shape.top,
         }
+
         switch (name.current) {
             case 'rectangle':
-                figure.current.set({
-                    ...shapesProps,
-                    points: [
-                        { x: 0, y: 0 },
-                        { x: width, y: 0 },
-                        { x: width, y: height },
-                        { x: 0, y: height },
-                    ],
-                });
+                setRectangleProps(shape, shapesProps, width, height);
                 break;
-
             case 'polygon':
-                figure.current.set({
-                    ...shapesProps,
-                    points: [
-                        { x: width / 2, y: 0 },
-                        { x: width, y: height },
-                        { x: 0, y: height }
-                    ],
-                });
+                setPolygonProps(shape, shapesProps, width, height);
                 break;
-
             case 'ellipse':
-                const ellipsePoints = [];
-                for (let i = 0; i < 50; i++) {
-                    const angle = (i * 2 * Math.PI) / 50;
-                    ellipsePoints.push({
-                        x: 50 * Math.cos(angle),
-                        y: 50 * Math.sin(angle)
-                    });
-                }
-                figure.current.set({
+                shape.set({
                     ...shapesProps,
-                    points:  isPoint ? ellipsePoints : figure.current.points,
-                    pathOffset: { x: 0, y: 0 },
+                    points:  isPoint ? getEllipsePoints(50,50) : shape.points,
                 });
                 break;
             default:
                 throw new Error('Непідтримувана фігура: ' + text);
         }
-        figure.current.setCoords();
+        shape.setCoords();
         changeInstrument('', false, true);
         figure.current = null;
-        removeListeners();
-    }
-    function removeListeners() {
-        canvas.off('mouse:down', onMouseDown);
-        canvas.off('mouse:move', onMouseMove);
-        canvas.off('mouse:up', onMouseUp);
+        removeShapeListeners(canvas.__eventListeners);
+        document.removeEventListener('keydown', shiftDown);
+        document.removeEventListener('keyup', shiftUp);
     }
     function addListeners() {
         canvas.on('mouse:down', onMouseDown);
@@ -162,13 +153,11 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
     }
     function addShape() {
         handleFiguresClose();
-
         if (selectedInstrument.current === name.current ) {
             return;
         }
-        removeListeners();
-        addListeners();
         changeInstrument(name.current, false, false);
+        addListeners();
     }
     return (
         <MenuItem onClick={addShape}>
@@ -177,6 +166,5 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         </MenuItem>
     );
 }
-
 
 export default Polygons;

@@ -4,6 +4,7 @@ import MenuItem from "@mui/material/MenuItem";
 import {fabric} from "fabric";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
+import {removeShapeListeners} from "../../utils/Utils";
 
 function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument}) {
     const projectSettings = useContext(EditorContext);
@@ -33,10 +34,6 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         canvas.renderAll();
     };
     const onMouseDown = function createShape(opt){
-        if (selectedInstrument.current !== 'line') {
-            removeListeners();
-            return;
-        }
         isDrawing.current = true;
         const pointer = canvas.getPointer(opt.e);
         const points = [pointer.x, pointer.y, pointer.x, pointer.y];
@@ -69,7 +66,7 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         }
         changeInstrument('', false, true);
         addEndPoints();
-        removeListeners();
+        removeShapeListeners(canvas.__eventListeners);
     };
     const addEndPoints = () => {
         const p1 = new fabric.Circle({
@@ -112,11 +109,6 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         canvas.add(p2);
         canvas.renderAll();
     };
-    function removeListeners() {
-        canvas.off('mouse:down', onMouseDown);
-        canvas.off('mouse:move', onMouseMove);
-        canvas.off('mouse:up', onMouseUp);
-    }
     function addListeners() {
         canvas.on('mouse:down', onMouseDown);
         canvas.on('mouse:move', onMouseMove);
@@ -127,11 +119,9 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         if (selectedInstrument.current === 'line') {
             return;
         }
-        removeListeners();
-        addListeners();
         changeInstrument('line', false, false);
+        addListeners();
     };
-
     return (
         <MenuItem onClick={createLine}>
             <ListItemIcon>{icon}</ListItemIcon>
