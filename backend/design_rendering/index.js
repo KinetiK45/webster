@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mongoose = require("mongoose");
 const router = require('./routers/router');
 const {listenForDeleteProjectEvents} = require("./service/rabbitService");
+const {registerFonts} = require("./helpers/loadFont");
 const app = express();
 
 app.use(cors({
@@ -32,6 +33,11 @@ mongoose.connect(process.env.MONGO_DB_URL).then(() => {
     console.log('Connect to MongoDB success');
 }).catch(err => {
     console.error('Error connecting to MongoDB:', err);
+});
+registerFonts().then(() => {
+    console.log('registered font success');
+}).catch(err => {
+    console.error('Error registered font:', err);
 });
 
 listenForDeleteProjectEvents().catch((error) => {

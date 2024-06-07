@@ -10,7 +10,7 @@ const morgan = require('morgan');
 const app = express();
 
 app.use(cors({
-    origin: ['http://api_gateway'],
+    origin: ['*'],
     credentials: true,
 }));
 

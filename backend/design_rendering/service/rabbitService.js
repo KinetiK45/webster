@@ -1,4 +1,5 @@
 const amqplib = require('amqplib');
+const uuid = require('uuid');
 const {deleteProject} = require("./projectService");
 
 async function createRabbitMQConnection() {

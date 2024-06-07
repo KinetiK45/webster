@@ -6,7 +6,7 @@ export class Projects {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ type: 'varchar', length: 45, unique: true, nullable: false })
+    @Column({ type: 'varchar', length: 45, nullable: false })
     project_name!: string;
 
     @Column({ type: 'varchar',length: 256, nullable: false })

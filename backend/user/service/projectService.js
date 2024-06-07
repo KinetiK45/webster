@@ -14,29 +14,35 @@ let projectRepository;
     }
 })();
 
-async function createNewProject(project_name, userId) {
+async function createNewProject(project_name = "Untitled", userId) {
     try {
         if (userId === undefined) {
             return { status: 401, isMatch: false, message: "Authorization required" };
         }
-        const user = await userRepository.findOne( {where: { id: userId }});
+        const user = await userRepository.findOne({ where: { id: userId } });
         if (!user) {
             return { status: 404, isMatch: false, message: "User not found" };
         }
-
-        const existingProject = await projectRepository.findOne({
+        const existingProjects = await projectRepository.find({
             where: {
                 project_name: project_name,
                 user: user,
             }
         });
-
-        if (existingProject) {
-            return { status: 400, isMatch: false, message: "Project with this name already exists" };
+        let newIndex = 1;
+        if (existingProjects.length > 0) {
+            const maxIndex = Math.max(...existingProjects.map(project => {
+                const match = project.project_name.match(/\((\d+)\)$/);
+                if (match) {
+                    return parseInt(match[1]);
+                }
+                return 0;
+            }));
+            newIndex = maxIndex + 1;
         }
-
+        const newProjectName = newIndex > 1 ? `${project_name}(${newIndex})` : project_name;
         const newUserProject = projectRepository.create({
-            project_name: project_name,
+            project_name: newProjectName,
             user: user,
             projectImageUrl: ''
         });
@@ -48,6 +54,7 @@ async function createNewProject(project_name, userId) {
         throw Error;
     }
 }
+
 
 
 async function getProjectByUserId(userId, page, pageSize) {
