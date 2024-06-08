@@ -43,6 +43,9 @@ services:
     environment:
       MONGO_DB_URL: ${MONGO_DB_URL}
       RABBITMQ_URL: ${RABBITMQ_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
     restart: unless-stopped
 
   #3004

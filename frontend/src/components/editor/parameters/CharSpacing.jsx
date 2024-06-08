@@ -1,43 +1,43 @@
 import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../../utils/Utils";
-import {EditorContext} from "../../../pages/editor/EditorContextProvider";
-import FormatSizeIcon from '@mui/icons-material/FormatSize';
+import TextRotationNoneIcon from '@mui/icons-material/TextRotationNone';
 import EditorNumberInput from "../../inputs/EditorNumberInput";
 import Tooltip from "@mui/material/Tooltip";
+import FormatSizeIcon from "@mui/icons-material/FormatSize";
 
-function FontSize({canvas}) {
-    const projectSettings = useContext(EditorContext);
-    const [fontSizeCurrent, setFontSizeCurrent] = useState(projectSettings.fontSize);
+function CharSpacing({canvas}) {
+    const [charSpacing, setCharSpacing] = useState(0);
 
     useEffect(() => {
         if (canvas) {
             const onObjectSelected = () => {
                 const activeObject = canvas.getActiveObject();
-                if (activeObject?.fontSize) {
-                    setFontSizeCurrent(activeObject.fontSize);
-                    projectSettings.fontSize = activeObject.fontSize;
+                if (activeObject?.charSpacing) {
+                    setCharSpacing(activeObject.charSpacing);
                 }
+                else
+                    setCharSpacing(0);
             };
 
             canvas.on('selection:created', onObjectSelected);
             canvas.on('selection:updated', onObjectSelected);
+            canvas.on('selection:cleared', onObjectSelected);
 
             return () => {
                 canvas.off('selection:created', onObjectSelected);
                 canvas.off('selection:updated', onObjectSelected);
+                canvas.off('selection:cleared', onObjectSelected);
             };
         }
-    }, [canvas, projectSettings]);
+    }, [canvas]);
 
-    const handleFontSizeChange = (input) => {
-        const fontSize = Number.parseInt(input);
-        projectSettings.fontSize = fontSize;
-        setFontSizeCurrent(fontSize);
+    const handleCharSpacingChange = (input = 0) => {
+        setCharSpacing(input);
 
         if (canvas) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
-                activeObject.set("fontSize", fontSize);
+                activeObject.set("charSpacing", Number.parseInt(input));
                 canvas.requestRenderAll();
             } else {
                 customAlert('Please select an object on the canvas first.', 'warning');
@@ -47,13 +47,13 @@ function FontSize({canvas}) {
 
     return (
         <EditorNumberInput
-            value={fontSizeCurrent}
-            onChange={handleFontSizeChange}
-            min={1} max={100}
-            icon={<Tooltip title="Font size"><FormatSizeIcon fontSize="small" /></Tooltip>}
+            value={charSpacing}
+            onChange={handleCharSpacingChange}
+            min={0} max={999}
+            icon={<Tooltip title="Char spacing"><TextRotationNoneIcon fontSize="small" /></Tooltip>}
             postfixText="px"
         />
     )
 }
 
-export default FontSize;
+export default CharSpacing;

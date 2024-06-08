@@ -1,9 +1,10 @@
-import {MenuItem, Select, Stack, TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 import FontDownloadIcon from "@mui/icons-material/FontDownload";
 import FontFaceObserver from "fontfaceobserver";
+import EditorSelector from "../../inputs/EditorSelector";
+import Tooltip from "@mui/material/Tooltip";
 
 function FontSelector({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -18,7 +19,6 @@ function FontSelector({canvas}) {
         myFont.load()
             .then(() => {
                 if (canvas) {
-                    // TODO: few objects selected + text filter
                     const activeObject = canvas.getActiveObject();
                     if (activeObject) {
                         activeObject.set("fontFamily", font);
@@ -35,8 +35,7 @@ function FontSelector({canvas}) {
             });
     };
 
-    const handleFontChange = (event) => {
-        const newFont = event.target.value;
+    const handleFontChange = (newFont) => {
         projectSettings.fontFamily = newFont;
         setCurrentFontFamily(newFont);
         loadAndUseFont(newFont);
@@ -64,22 +63,12 @@ function FontSelector({canvas}) {
     }, [canvas, projectSettings]);
 
     return (
-        <Stack direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-            <FontDownloadIcon/>
-            <Select
-                value={currentFontFamily}
-                onChange={handleFontChange}
-                size="small"
-                displayEmpty
-                sx={{width: '100%'}}
-            >
-                {fonts.map((font, index) => (
-                    <MenuItem key={index} value={font}>
-                        {font}
-                    </MenuItem>
-                ))}
-            </Select>
-        </Stack>
+        <EditorSelector
+            value={currentFontFamily}
+            options={fonts.map((font) => ({ label: font, value: font }))}
+            icon={<Tooltip title="Font family"><FontDownloadIcon fontSize="small"/></Tooltip>}
+            onChange={handleFontChange}
+        />
     )
 }
 
