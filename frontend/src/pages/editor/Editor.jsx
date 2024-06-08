@@ -21,7 +21,8 @@ import {EditorContext} from "./EditorContextProvider";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import Line from "../../components/shapes/Line";
 import Polygons from "../../components/shapes/Polygons";
-import {removeShapeListeners} from "../../utils/Utils";
+import {formatDouble, removeShapeListeners} from "../../utils/Utils";
+import {findMinMaxValues, setShapeProps} from "../../utils/CoordinatesUtils";
 
 export function Editor({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -55,6 +56,73 @@ export function Editor({canvas}) {
             canvas.on('selection:created', isDisabled);
             canvas.on('selection:updated', isDisabled);
             canvas.on('selection:cleared', isDisabled);
+            canvas.on('object:modified', (opt) => {
+                const target = opt.target;
+                if(target.type === 'polygon'){
+                    let oldPoints = target.points;
+                    let newPoints = [];
+                    const isEllipse = target.name === 'ellipse';
+                    if(!target.edit){
+                       if(target.scaleX !== 1 || target.scaleY !== 1){
+                           const newWidth = formatDouble(target.width * target.scaleX);
+                           const newHeight = formatDouble(target.height * target.scaleY);
+                           const ellipseOffset = {
+                               x: (target.pathOffset.x * newWidth) / target.width,
+                               y: (target.pathOffset.y * newHeight) / target.height
+                           }
+                           const shapeProps = {
+                               width: newWidth,
+                               height: newHeight,
+                               scaleX: 1,
+                               scaleY: 1,
+                               pathOffset: isEllipse ? ellipseOffset : {x: newWidth / 2, y: newHeight / 2}
+                           }
+                           for (let i = 0; i < oldPoints.length; i++) {
+                               newPoints.push({
+                                   x: (newWidth * oldPoints[i].x) / target.width,
+                                   y: (newHeight * oldPoints[i].y) / target.height
+                               });
+                           }
+                           target.set({
+                               ...shapeProps,
+                               points: newPoints
+                           });
+                       }
+                        if(target.flipX || target.flipY){
+                            // oldPoints = target.points;
+                            // const newPoints = [
+                            //     // {x: , y: }
+                            //     oldPoints[3], oldPoints[2],
+                            //     oldPoints[0], oldPoints[1]
+                            // ];
+                            // target.set({
+                            //     points: newPoints,
+                            //     flipX: false,
+                            //     flipY: false
+                            // });
+                        }
+                    }
+                    else{
+                        if(isEllipse){
+                            newPoints = oldPoints;
+                        }
+                        else{
+                            const { minX, minY, maxX, maxY } = findMinMaxValues(oldPoints);
+                            for (let i = 0; i < oldPoints.length; i++) {
+                                let x = (oldPoints[i].x - minX) / (maxX - minX) * target.width;
+                                let y = (oldPoints[i].y - minY) / (maxY - minY) * target.height;
+                                newPoints.push({ x, y });
+                            }
+                        }
+                        target.set({
+                            points: newPoints,
+                            pathOffset: isEllipse ? target.pathOffset : { x: target.width / 2, y: target.height / 2 }
+                        });
+                    }
+                    target.setCoords();
+                    console.log(opt.target)
+                }
+            });
         }
     }, [canvas]);
     const getActiveIcon = (key) => {
@@ -93,16 +161,60 @@ export function Editor({canvas}) {
         setDrawingAnchorEl(null);
     };
     function createText() {
-        changeInstrument('text', false, true);
-        const text = new fabric.Textbox('Hello', {
-            left: 100,
-            top: 130,
-            fontSize: projectSettings.fontSize,
-            fill: projectSettings.fillColor,
-            fontFamily: projectSettings.fontFamily,
-        });
-        canvas.add(text);
+        if(selectedInstrument.current === 'text') return;
+        changeInstrument('text', false, false);
         handleFiguresClose();
+        let isDown, origX, origY, textBox;
+        function onMouseDown(o) {
+            if (textBox) return;
+            isDown = true;
+            const pointer = canvas.getPointer(o.e);
+            origX = pointer.x;
+            origY = pointer.y;
+            textBox = new fabric.IText('', {
+                left: origX,
+                top: origY,
+                fontSize: projectSettings.fontSize,
+                fill: projectSettings.fillColor,
+                fontFamily: projectSettings.fontFamily,
+                width: 1,
+                height: 1,
+            });
+            canvas.add(textBox);
+            canvas.setActiveObject(textBox);
+        }
+        function onMouseMove(o) {
+            if (!isDown) return;
+            const pointer = canvas.getPointer(o.e);
+            textBox.set({
+                width: Math.abs(origX - pointer.x),
+                height:  Math.abs(origY - pointer.y),
+            });
+            canvas.renderAll();
+        }
+        function onMouseUp(o) {
+            isDown = false;
+            changeInstrument('', false, true);
+            canvas.off('mouse:down', onMouseDown);
+            canvas.off('mouse:move', onMouseMove);
+            canvas.off('mouse:up', onMouseUp);
+            canvas.setActiveObject(textBox)
+            // textBox.on('editing:entered', function() {
+            //     textBox.__skipDimension = true;
+            //     console.log('Editing started');
+            // });
+            // textBox.on('editing:exited', function() {
+            //     textBox.__skipDimension = false;
+            //     console.log('Editing ended');
+            // });
+            // textBox.on('changed', function() {
+            //     console.log('Text changed:', textBox.text);
+            // });
+        }
+        
+        canvas.on('mouse:down', onMouseDown);
+        canvas.on('mouse:move', onMouseMove);
+        canvas.on('mouse:up', onMouseUp);
     }
     function handleAddImage() {
         changeInstrument('image', false, true);

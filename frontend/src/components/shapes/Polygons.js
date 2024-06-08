@@ -21,6 +21,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
     const name = useRef(text.toLowerCase());
     const shiftPressed = useRef(false);
     const polyOptions = {
+        name: name.current,
         fill: projectSettings.fillColor,
         selectable: true,
         objectCaching: false,
@@ -101,12 +102,16 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         canvas.renderAll();
     }
     const onMouseUp = function endShape(options) {
+        //TODO: make shapes active after creating
         const shape = figure.current;
         if (!shape) return;
         const pointer = canvas.getPointer(options.e);
-        const isPoint = shape.points.length === 0;
-        let width = isPoint ? 100 : Math.abs(startX.current - pointer.x);
-        let height = isPoint ? 100 : Math.abs(startY.current - pointer.y);
+        let width =  Math.abs(startX.current - pointer.x);
+        let height = Math.abs(startY.current - pointer.y);
+        const isPoint = width === 0 || height === 0;
+        if(isPoint){
+            width = height = 100;
+        }
 
         if (options.e.shiftKey) {
             width = height = Math.max(width, height);
@@ -140,6 +145,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
                 throw new Error('Непідтримувана фігура: ' + text);
         }
         shape.setCoords();
+        canvas.setActiveObject(shape);
         changeInstrument('', false, true);
         figure.current = null;
         removeShapeListeners(canvas.__eventListeners);
