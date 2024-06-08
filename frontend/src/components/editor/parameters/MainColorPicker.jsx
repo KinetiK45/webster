@@ -2,6 +2,8 @@ import {TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
+import EditorColorPicker from "../../inputs/EditorColorPicker";
+import Typography from "@mui/material/Typography";
 
 function MainColorPicker({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -27,8 +29,7 @@ function MainColorPicker({canvas}) {
         }
     }, [canvas, projectSettings]);
 
-    const handleColorChange = (event) => {
-        const color = event.target.value;
+    const handleColorChange = (color) => {
         projectSettings.fillColor = color;
         setFillColorCurrent(color);
 
@@ -44,15 +45,22 @@ function MainColorPicker({canvas}) {
     };
 
     return (
-        <TextField
-            label="Fill"
-            type="color"
-            margin="none"
-            value={fillColorCurrent}
-            onChange={handleColorChange}
-            size="small"
-            sx={{ width: 50, height: 50}}
-        />
+        <>
+            {/*<TextField*/}
+            {/*    label="Fill"*/}
+            {/*    type="color"*/}
+            {/*    margin="none"*/}
+            {/*    value={fillColorCurrent}*/}
+            {/*    onChange={handleColorChange}*/}
+            {/*    size="small"*/}
+            {/*    sx={{ width: 50, height: 50}}*/}
+            {/*/>*/}
+            <EditorColorPicker
+                icon={<Typography>Fill</Typography>}
+                value={fillColorCurrent}
+                onChange={handleColorChange}
+            />
+        </>
     )
 }
 

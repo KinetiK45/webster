@@ -1,59 +1,122 @@
-import {Grid, TextField} from "@mui/material";
-import React, {useContext, useEffect, useState} from "react";
-import {customAlert, formatDouble} from "../../../utils/Utils";
-import {EditorContext} from "../../../pages/editor/EditorContextProvider";
+import {Grid} from "@mui/material";
+import React, {useEffect, useState} from "react";
+import {formatDouble} from "../../../utils/Utils";
+import ThreeSixtyIcon from '@mui/icons-material/ThreeSixty';
 import Typography from "@mui/material/Typography";
+import EditorNumberInput from "../../inputs/EditorNumberInput";
+import Tooltip from "@mui/material/Tooltip";
 
 function PositionSizes({canvas}) {
     const [w, setW] = useState(0);
     const [h, setH] = useState(0);
-
     const [top, setTop] = useState(0);
     const [left, setLeft] = useState(0);
+    const [angle, setAngle] = useState(0);
 
+    const changeNumbers = (activeSelection) => {
+        if (activeSelection) {
+            setW(formatDouble(activeSelection.width * activeSelection.scaleX));
+            setH(formatDouble(activeSelection.height * activeSelection.scaleY));
+            setLeft(formatDouble(activeSelection.left));
+            setTop(formatDouble(activeSelection.top));
+            setAngle(formatDouble(activeSelection.angle));
+        } else {
+            setW(0);
+            setH(0);
+            setTop(0);
+            setLeft(0);
+            setAngle(0);
+        }
+    }
     useEffect(() => {
         if (canvas) {
-            const onObjectSelected = () => {
+            const onTargetAction = () => {
                 const activeObject = canvas.getActiveObject();
-                setW(formatDouble(activeObject.width * activeObject.scaleX));
-                setH(formatDouble(activeObject.height * activeObject.scaleY));
-                setLeft(formatDouble(activeObject.left));
-                setTop(formatDouble(activeObject.top));
-            };
-
-            const onMove = () => {
-                const activeObject = canvas.getActiveObject();
-                setLeft(formatDouble(activeObject.left));
-                setTop(formatDouble(activeObject.top));
+                changeNumbers(activeObject);
             }
 
-            canvas.on('selection:created', onObjectSelected);
-            canvas.on('selection:updated', onObjectSelected);
-            canvas.on('object:scaling', onObjectSelected);
-            canvas.on('object:moving', onMove);
+            const selectionCleared = () => {
+                changeNumbers();
+            }
+
+            canvas.on('selection:created', onTargetAction);
+            canvas.on('selection:updated', onTargetAction);
+            canvas.on('selection:cleared', selectionCleared);
+            canvas.on('object:scaling', onTargetAction);
+            canvas.on('object:moving', onTargetAction);
+            canvas.on('object:rotating', onTargetAction);
 
             return () => {
-                canvas.off('selection:created', onObjectSelected);
-                canvas.off('selection:updated', onObjectSelected);
-                canvas.off('object:scaling', onObjectSelected);
-                canvas.off('object:moving', onMove);
+                canvas.off('selection:created', onTargetAction);
+                canvas.off('selection:updated', onTargetAction);
+                canvas.off('selection:cleared', selectionCleared);
+                canvas.off('object:scaling', onTargetAction);
+                canvas.off('object:moving', onTargetAction);
+                canvas.off('object:rotating', onTargetAction);
             };
         }
     }, [canvas]);
 
+    function onWChange(input) {
+        //TODO: Vlad set new width + render fix
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+            const newWidth = input / (activeObject.scaleX);
+
+            activeObject.set('width', newWidth);
+
+            activeObject.setCoords();
+            canvas.requestRenderAll();
+        }
+    }
+
+    function onParamChange(input, key) {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+
+            activeObject.set(key, input);
+
+            activeObject.setCoords();
+            canvas.requestRenderAll();
+        }
+    }
+
     return (
         <Grid container spacing={1}>
             <Grid item xs={6}>
-                <Typography>W: {w}px</Typography>
+                <EditorNumberInput
+                    value={w} step={0.01}
+                    onChange={onWChange}
+                    icon={<Tooltip title="Element width"><Typography>W:</Typography></Tooltip>}
+                />
             </Grid>
             <Grid item xs={6}>
-                <Typography>H: {h}px</Typography>
+                <EditorNumberInput
+                    value={h} step={0.01}
+                    icon={<Tooltip title="Element height"><Typography>H:</Typography></Tooltip>}
+                />
             </Grid>
             <Grid item xs={6}>
-                <Typography>L: {left}px</Typography>
+                <EditorNumberInput
+                    value={left}
+                    onChange={(input) => onParamChange(input, 'left')}
+                    icon={<Tooltip title="Left margin"><Typography>L:</Typography></Tooltip>}
+                />
             </Grid>
             <Grid item xs={6}>
-                <Typography>T: {top}px</Typography>
+                <EditorNumberInput
+                    value={top}
+                    onChange={(input) => onParamChange(input, 'top')}
+                    icon={<Tooltip title="Top margin"><Typography>T:</Typography></Tooltip>}
+                />
+            </Grid>
+            <Grid item xs={6}>
+                <EditorNumberInput
+                    min={0} max={359} value={angle} step={0.01}
+                    icon={<Tooltip title="Rotation"><ThreeSixtyIcon fontSize="small"/></Tooltip>}
+                    postfixText="deg"
+                    onChange={(input) => onParamChange(input, 'angle')}
+                />
             </Grid>
         </Grid>
     )

@@ -2,7 +2,7 @@ const projectService = require('../service/projectService');
 
 async function saveProject(req,res){
     const { project_id } = req.params;
-    console.log(req.body);
+    // console.log(req.body);
     try {
         const result = await projectService.saveProject(Number.parseInt(project_id,10), req.body);
         if (!result.isMatch) {

@@ -2,7 +2,6 @@ import React, {useContext} from 'react';
 import {Accordion, AccordionDetails, AccordionSummary, Divider, Stack, Typography} from '@mui/material';
 import {customAlert} from "../../utils/Utils";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import MainColorPicker from "./parameters/MainColorPicker";
 import FontSelector from "./parameters/FontSelector";
 import Button from "@mui/material/Button";
@@ -14,6 +13,7 @@ import StrokeColorPicker from "./parameters/StrokeColorPicker";
 import StrokeWidth from "./parameters/StrokeWidth";
 import FontSize from "./parameters/FontSize";
 import PositionSizes from "./parameters/PositionSizes";
+import CharSpacing from "./parameters/CharSpacing";
 
 function ProjectParams({canvas}) {
     const {projectId} = useParams();
@@ -52,8 +52,7 @@ function ProjectParams({canvas}) {
         }}>
             <Divider/>
             <Stack direction="column" sx={{p: 0, m: 0, height: '100%'}}>
-
-                <Accordion disableGutters>
+                <Accordion defaultExpanded disableGutters>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                     >
@@ -65,7 +64,7 @@ function ProjectParams({canvas}) {
                         <StrokeWidth canvas={canvas}/>
                     </AccordionDetails>
                 </Accordion>
-                <Divider/>
+                <Divider style={{ borderWidth: '1px' }} />
                 <Accordion disableGutters>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
@@ -75,10 +74,11 @@ function ProjectParams({canvas}) {
                     <AccordionDetails>
                         <FontSelector canvas={canvas}/>
                         <FontSize canvas={canvas} />
+                        <CharSpacing canvas={canvas}/>
                     </AccordionDetails>
                 </Accordion>
 
-                {/*<Divider sx={{margin: 1}}/>*/}
+                <Divider style={{ borderWidth: '1px' }} />
                 <Accordion disableGutters>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}

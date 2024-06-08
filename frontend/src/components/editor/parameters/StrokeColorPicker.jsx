@@ -1,7 +1,8 @@
-import {TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
+import EditorColorPicker from "../../inputs/EditorColorPicker";
+import Typography from "@mui/material/Typography";
 
 function StrokeColorPicker({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -27,8 +28,7 @@ function StrokeColorPicker({canvas}) {
         }
     }, [canvas, projectSettings]);
 
-    const handleColorChange = (event) => {
-        const color = event.target.value;
+    const handleColorChange = (color) => {
         projectSettings.strokeColor = color;
         setStrokeColorCurrent(color);
 
@@ -44,14 +44,10 @@ function StrokeColorPicker({canvas}) {
     };
 
     return (
-        <TextField
-            label="Border"
-            type="color"
-            margin="none"
+        <EditorColorPicker
+            icon={<Typography>Stroke</Typography>}
             value={strokeColorCurrent}
             onChange={handleColorChange}
-            size="small"
-            sx={{ width: 70, height: 50}}
         />
     )
 }

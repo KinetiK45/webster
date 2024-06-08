@@ -1,7 +1,9 @@
-import {TextField} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
+import EditorNumberInput from "../../inputs/EditorNumberInput";
+import LineWeightIcon from '@mui/icons-material/LineWeight';
+import Tooltip from "@mui/material/Tooltip";
 
 function StrokeWidth({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -27,11 +29,8 @@ function StrokeWidth({canvas}) {
         }
     }, [canvas, projectSettings]);
 
-    const handleStrokeWidthChange = (event) => {
-        const input = event.target.value;
-        if (input.trim() === '')
-            return;
-        const strokeWidth = Number.parseInt(input);
+    const handleStrokeWidthChange = (input = 0) => {
+        const strokeWidth = input;
         projectSettings.strokeWidth = strokeWidth;
         setStrokeWidthCurrent(strokeWidth);
 
@@ -47,16 +46,12 @@ function StrokeWidth({canvas}) {
     };
 
     return (
-
-        <TextField
-            label="Stroke width"
-            type="number"
-            margin="none"
+        <EditorNumberInput
             value={strokeWidthCurrent}
             onChange={handleStrokeWidthChange}
-            size="small"
-            inputProps={{ min: 0, max: 999 }}
-            // sx={{ width: 50, height: 50}}
+            min={0} max={999}
+            icon={<Tooltip title="Stroke width"><LineWeightIcon fontSize="small" /></Tooltip>}
+            postfixText="px"
         />
     )
 }

@@ -20,7 +20,7 @@ export function Workspace() {
             const resp = await Requests.getProject(projectId);
             if (resp.state === true){
                 let canvas = new fabric.Canvas('canvas');
-                canvas.loadFromJSON(resp.data.data, canvas.renderAll.bind(canvas));
+                canvas.loadFromJSON(resp.data, canvas.renderAll.bind(canvas));
                 return canvas;
             }
         }
