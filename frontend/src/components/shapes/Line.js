@@ -66,6 +66,7 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         }
         changeInstrument('', false, true);
         addEndPoints();
+        canvas.setActiveObject(drawingLine.current)
         removeShapeListeners(canvas.__eventListeners);
     };
     const addEndPoints = () => {

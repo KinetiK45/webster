@@ -105,3 +105,27 @@ export function setShapeProps(name, shape, shapesProps, width, height) {
             throw new Error('Непідтримувана фігура: ' + shape.name);
     }
 }
+
+export function findMinMaxValues(points) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < points.length; i++) {
+        if (points[i].x < minX) {
+            minX = points[i].x;
+        }
+        if (points[i].y < minY) {
+            minY = points[i].y;
+        }
+        if (points[i].x > maxX) {
+            maxX = points[i].x;
+        }
+        if (points[i].y > maxY) {
+            maxY = points[i].y;
+        }
+    }
+
+    return { minX, minY, maxX, maxY };
+}

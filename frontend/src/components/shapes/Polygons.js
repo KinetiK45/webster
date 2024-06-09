@@ -21,6 +21,9 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
     const name = useRef(text.toLowerCase());
     const shiftPressed = useRef(false);
     const polyOptions = {
+        strokeWidth: projectSettings.strokeWidth,
+        stroke: projectSettings.strokeColor,
+        name: name.current,
         fill: projectSettings.fillColor,
         selectable: true,
         objectCaching: false,
@@ -71,6 +74,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
             top: startY.current,
         });
         canvas.add(figure.current);
+        canvas.setActiveObject(figure.current)
         document.addEventListener('keydown', shiftDown);
         document.addEventListener('keyup', shiftUp);
     }
@@ -82,7 +86,10 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         let height = Math.abs(startY.current - pointer.y);
         const shapesProps = {
             left: Math.min(pointer.x, startX.current),
-            top: Math.min(pointer.y, startY.current)
+            top: Math.min(pointer.y, startY.current),
+            pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: width / 2, y: height / 2},
+            width: width,
+            height: height
         }
 
         if (options.e.shiftKey) {
@@ -101,12 +108,16 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         canvas.renderAll();
     }
     const onMouseUp = function endShape(options) {
+        //TODO: make shapes active after creating
         const shape = figure.current;
         if (!shape) return;
         const pointer = canvas.getPointer(options.e);
-        const isPoint = shape.points.length === 0;
-        let width = isPoint ? 100 : Math.abs(startX.current - pointer.x);
-        let height = isPoint ? 100 : Math.abs(startY.current - pointer.y);
+        let width =  Math.abs(startX.current - pointer.x);
+        let height = Math.abs(startY.current - pointer.y);
+        const isPoint = width === 0 || height === 0;
+        if(isPoint){
+            width = height = 100;
+        }
 
         if (options.e.shiftKey) {
             width = height = Math.max(width, height);

@@ -3,9 +3,30 @@ import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 function Layer({canvas, item, index, sameItemNumber}) {
     const [isActive, setIsActive] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+
+    const toggleLock = () => {
+        item.set({
+            evented: isLocked,
+            selectable: isLocked,
+            hasControls: isLocked
+        })
+        setIsLocked(!isLocked);
+        canvas.discardActiveObject();
+    };
+
+    const toggleVisibility = () => {
+        item.visible = !isVisible;
+        setIsVisible(!isVisible);
+        canvas.discardActiveObject();
+    };
 
     function selectObject() {
         canvas.isDrawingMode = false;
@@ -57,6 +78,12 @@ function Layer({canvas, item, index, sameItemNumber}) {
                 onClick={deleteObject}
             >
                 <DeleteIcon/>
+            </IconButton>
+            <IconButton onClick={toggleLock}>
+                {isLocked ? <LockIcon /> : <LockOpenIcon />}
+            </IconButton>
+            <IconButton onClick={toggleVisibility}>
+                {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
         </Stack>
     </React.Fragment>;
