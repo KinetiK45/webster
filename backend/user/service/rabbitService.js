@@ -1,5 +1,6 @@
 const amqplib = require ('amqplib');
 const uuid = require('uuid');
+const {updateProject} = require("./projectService");
 
 async function createRabbitMQConnection() {
     const connection = await amqplib.connect(process.env.RABBITMQ_URL);
@@ -36,7 +37,33 @@ async function publishDeleteProjectEvent(project_id) {
     }
 }
 
+async function listenForUpdateProjectEvents() {
+    const queueName = 'project_update';
+    const connection = await createRabbitMQConnection();
+    const channel = await connection.createChannel();
+
+    await channel.assertQueue(queueName, { durable: true });
+    console.log(`Listening for messages in queue: ${queueName}`);
+    await channel.consume(queueName, async (message) => {
+        if (!message) {
+            return;
+        }
+
+        const event = JSON.parse(message.content.toString());
+        console.log('Received event:', event);
+
+        const { project_id, url } = event;
+        if (eventName === 'UpdateProject') {
+            await updateProject(project_id);
+        }
+        console.log("message: " + message);
+        channel.ack(message);
+    });
+}
+
+
 module.exports = {
-   publishDeleteProjectEvent
+   publishDeleteProjectEvent,
+   listenForUpdateProjectEvents
 }
 
