@@ -12,8 +12,8 @@ import Typography from "@mui/material/Typography";
 import {
     AddPhotoAlternateOutlined,
     ChangeHistoryOutlined,
-    Edit,
-    Gesture, HorizontalRuleOutlined,
+    Edit, FilterFrames,
+    Gesture, Group, HorizontalRuleOutlined,
     RadioButtonUncheckedOutlined
 } from "@mui/icons-material";
 import Avatar from "@mui/material/Avatar";
@@ -21,12 +21,12 @@ import {EditorContext} from "./EditorContextProvider";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import Line from "../../components/shapes/Line";
 import Polygons from "../../components/shapes/Polygons";
-import {customAlert, removeShapeListeners} from "../../utils/Utils";
 import EditorTextInput from "../../components/inputs/EditorTextInput";
 import Requests from "../../api/Requests";
 import {debounce} from "lodash";
-import {formatDouble, removeShapeListeners} from "../../utils/Utils";
+import {customAlert, formatDouble, removeShapeListeners} from "../../utils/Utils";
 import {findMinMaxValues, setShapeProps} from "../../utils/CoordinatesUtils";
+import strokeWidth from "../../components/editor/parameters/StrokeWidth";
 
 export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -36,6 +36,23 @@ export function ToolBar({canvas}) {
     const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
     const selectedInstrument = useRef('');
     const [disabled, setDisabled] = useState(true);
+    const [projectName, setProjectName] = useState(projectSettings.projectName);
+
+    const debouncedFetchData = debounce(async () => {
+        const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectSettings.projectName);
+        if (resp.state === true){
+            projectSettings.projectName = projectName;
+        }
+        else
+            customAlert(resp.message || 'Error');
+    }, 1000);
+
+    useEffect(() => {
+        if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
+            debouncedFetchData();
+            return debouncedFetchData.cancel;
+        }
+    }, [projectName]);
     useEffect(() => {
         if (imgPath === '') return;
         fabric.Image.fromURL(imgPath, function (img) {
@@ -57,56 +74,27 @@ export function ToolBar({canvas}) {
                 const activeObjects = canvas.getActiveObjects();
                 setDisabled(!(activeObjects.length === 1 && activeObjects[0].type === 'polygon'));
             }
-            canvas.on('selection:created', isDisabled);
-            canvas.on('selection:updated', isDisabled);
-            canvas.on('selection:cleared', isDisabled);
+            canvas.on('selection:created',isDisabled);
+            canvas.on('selection:updated', (opt) => {
+                isDisabled();
+                clearGroupScale(opt.deselected);
+            });
+            canvas.on('selection:cleared', (opt) => {
+                isDisabled();
+                clearGroupScale(opt.deselected);
+            });
+            canvas.on('object:scaling', (opt)  => {
+                if(opt.target.type === 'polygon') {
+                   clearScale(opt.target)
+                }
+            })
             canvas.on('object:modified', (opt) => {
                 const target = opt.target;
                 if(target.type === 'polygon'){
                     let oldPoints = target.points;
                     let newPoints = [];
                     const isEllipse = target.name === 'ellipse';
-                    if(!target.edit){
-                       if(target.scaleX !== 1 || target.scaleY !== 1){
-                           const newWidth = formatDouble(target.width * target.scaleX);
-                           const newHeight = formatDouble(target.height * target.scaleY);
-                           const ellipseOffset = {
-                               x: (target.pathOffset.x * newWidth) / target.width,
-                               y: (target.pathOffset.y * newHeight) / target.height
-                           }
-                           const shapeProps = {
-                               width: newWidth,
-                               height: newHeight,
-                               scaleX: 1,
-                               scaleY: 1,
-                               pathOffset: isEllipse ? ellipseOffset : {x: newWidth / 2, y: newHeight / 2}
-                           }
-                           for (let i = 0; i < oldPoints.length; i++) {
-                               newPoints.push({
-                                   x: (newWidth * oldPoints[i].x) / target.width,
-                                   y: (newHeight * oldPoints[i].y) / target.height
-                               });
-                           }
-                           target.set({
-                               ...shapeProps,
-                               points: newPoints
-                           });
-                       }
-                        if(target.flipX || target.flipY){
-                            // oldPoints = target.points;
-                            // const newPoints = [
-                            //     // {x: , y: }
-                            //     oldPoints[3], oldPoints[2],
-                            //     oldPoints[0], oldPoints[1]
-                            // ];
-                            // target.set({
-                            //     points: newPoints,
-                            //     flipX: false,
-                            //     flipY: false
-                            // });
-                        }
-                    }
-                    else{
+                    if(target.edit) {
                         if(isEllipse){
                             newPoints = oldPoints;
                         }
@@ -122,9 +110,21 @@ export function ToolBar({canvas}) {
                             points: newPoints,
                             pathOffset: isEllipse ? target.pathOffset : { x: target.width / 2, y: target.height / 2 }
                         });
+                        target.setCoords();
                     }
-                    target.setCoords();
-                    console.log(opt.target)
+                }
+            });
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Backspace' || event.key === 'Delete') {
+                    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    event.preventDefault();
+                    const activeObjects = canvas.getActiveObjects();
+                    if (activeObjects.length) {
+                        activeObjects.map(item => canvas.remove(item));
+                        canvas.discardActiveObject();
+                    }
                 }
             });
         }
@@ -164,7 +164,13 @@ export function ToolBar({canvas}) {
     const handleDrawClose = () => {
         setDrawingAnchorEl(null);
     };
-
+    function clearGroupScale(group) {
+        if(group?.length){
+            group.map(item => {
+                if(item.type === 'polygon') clearScale(item)
+            })
+        }
+    }
     function createText() {
         if(selectedInstrument.current === 'text') return;
         changeInstrument('text', false, false);
@@ -272,6 +278,95 @@ export function ToolBar({canvas}) {
         poly.hasBorders = !poly.edit;
         canvas.requestRenderAll();
     }
+    function clearScale(shape, scaleX, scaleY) {
+        if (!scaleX) scaleX = shape.scaleX;
+        if (!scaleY) scaleY = shape.scaleY;
+        if (scaleX === 1 && scaleY === 1) return;
+        let oldPoints = shape.points;
+        const isEllipse = shape.name === 'ellipse';
+        let newPoints = [];
+        const newWidth = formatDouble((shape.width * scaleX));
+        const newHeight = formatDouble((shape.height * scaleY));
+        const ellipseOffset = {
+            x: (shape.pathOffset.x * newWidth) / shape.width,
+            y: (shape.pathOffset.y * newHeight) / shape.height
+        }
+        const shapeProps = {
+            width: newWidth,
+            height: newHeight,
+            scaleX: 1,
+            scaleY: 1,
+            pathOffset: isEllipse ? ellipseOffset : {x: newWidth / 2, y: newHeight / 2}
+        }
+        for (let i = 0; i < oldPoints.length; i++) {
+            newPoints.push({
+                x: (newWidth * oldPoints[i].x) / shape.width,
+                y: (newHeight * oldPoints[i].y) / shape.height
+            });
+        }
+        shape.set({
+            ...shapeProps,
+            points: newPoints
+        });
+        shape.setCoords();
+    }
+    function createGroup(){
+        const object = canvas.getActiveObject();
+        if(object.type === 'activeSelection') object.toGroup()
+    }
+
+    function createFrame(){
+        changeInstrument('frame', false, false);
+        let isDrawing = false;
+        let startX, startY;
+        let frame;
+        function onMouseDown(options) {
+            isDrawing = true;
+            const pointer = canvas.getPointer(options.e);
+            startX = pointer.x;
+            startY = pointer.y;
+
+            frame = new fabric.Rect({
+                left: startX,
+                top: startY,
+                width: 0,
+                height: 0,
+                fill: 'white',
+                stroke: 'black',
+                strokeWidth: 1,
+                selectable: false,
+            });
+            canvas.add(frame);
+        }
+
+        function onMouseMove(options) {
+            if (!isDrawing) return;
+
+            const pointer = canvas.getPointer(options.e);
+            const width = pointer.x - startX;
+            const height = pointer.y - startY;
+
+            frame.set({
+                width: Math.abs(width),
+                height: Math.abs(height),
+                left: width < 0 ? pointer.x : startX,
+                top: height < 0 ? pointer.y : startY
+            });
+
+            canvas.renderAll();
+        }
+
+        function onMouseUp(options) {
+            isDrawing = false;
+            frame.set({ selectable: true });
+            canvas.off('mouse:down', onMouseDown);
+            canvas.off('mouse:move', onMouseMove);
+            canvas.off('mouse:up', onMouseUp);
+        }
+        canvas.on('mouse:down', onMouseDown);
+        canvas.on('mouse:move', onMouseMove);
+        canvas.on('mouse:up', onMouseUp);
+    }
 
     const shapesActions = [
         <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small"/>} text={'Rectangle'} canvas={canvas}
@@ -296,26 +391,10 @@ export function ToolBar({canvas}) {
         {key: 'add-text', ariaLabel: 'add-text', onClick: createText, icon: <TextFieldsIcon/>},
         {key: 'add-image', ariaLabel: 'add-image', onClick: handleAddImage, icon: <AddPhotoAlternateOutlined/>},
         {key: 'draw', ariaLabel: 'menu', onClick: handleDrawClick, icon: <Gesture/>},
-        {key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture/>}
+        {key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture/>},
+        {key: 'group', ariaLabel: 'create-group', onClick: createGroup, icon: <Group/>},
+        {key: 'frame', ariaLabel: 'create-frame', onClick: createFrame, icon: <FilterFrames/>}
     ]);
-
-    const [projectName, setProjectName] = useState(projectSettings.projectName);
-
-    const debouncedFetchData = debounce(async () => {
-        const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectSettings.projectName);
-        if (resp.state === true){
-            projectSettings.projectName = projectName;
-        }
-        else
-            customAlert(resp.message || 'Error');
-    }, 1000);
-
-    useEffect(() => {
-        if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
-            debouncedFetchData();
-            return debouncedFetchData.cancel;
-        }
-    }, [projectName]);
 
     return (
         <Toolbar variant="regular"

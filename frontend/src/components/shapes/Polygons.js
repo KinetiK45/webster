@@ -21,6 +21,8 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
     const name = useRef(text.toLowerCase());
     const shiftPressed = useRef(false);
     const polyOptions = {
+        strokeWidth: projectSettings.strokeWidth,
+        stroke: projectSettings.strokeColor,
         name: name.current,
         fill: projectSettings.fillColor,
         selectable: true,
@@ -72,6 +74,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
             top: startY.current,
         });
         canvas.add(figure.current);
+        canvas.setActiveObject(figure.current)
         document.addEventListener('keydown', shiftDown);
         document.addEventListener('keyup', shiftUp);
     }
@@ -83,7 +86,10 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         let height = Math.abs(startY.current - pointer.y);
         const shapesProps = {
             left: Math.min(pointer.x, startX.current),
-            top: Math.min(pointer.y, startY.current)
+            top: Math.min(pointer.y, startY.current),
+            pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: width / 2, y: height / 2},
+            width: width,
+            height: height
         }
 
         if (options.e.shiftKey) {
@@ -145,7 +151,6 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
                 throw new Error('Непідтримувана фігура: ' + text);
         }
         shape.setCoords();
-        canvas.setActiveObject(shape);
         changeInstrument('', false, true);
         figure.current = null;
         removeShapeListeners(canvas.__eventListeners);

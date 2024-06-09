@@ -62,12 +62,50 @@ function PositionSizes({canvas}) {
         const activeObject = canvas.getActiveObject();
         if (activeObject) {
             const newWidth = input / (activeObject.scaleX);
-
-            activeObject.set('width', newWidth);
-
+            if(activeObject.type === 'polygon')
+                setNewShapeSize(activeObject, newWidth, 'width', 'x', 'y');
+            else
+                activeObject.set('width', newWidth);
             activeObject.setCoords();
             canvas.requestRenderAll();
         }
+    }
+
+    function onHChange(input) {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+            const newHeight = input / (activeObject.scaleY);
+            if(activeObject.type === 'polygon')
+                setNewShapeSize(activeObject, newHeight, 'height', 'y', 'x');
+            else
+                activeObject.set('height', newHeight);
+            activeObject.setCoords();
+            canvas.requestRenderAll();
+        }
+    }
+
+    function setNewShapeSize(activeObject, newSize, sizeToChange, coordToChange, coordToStay){
+        let newPoints = [];
+        let oldPoints = activeObject.points;
+        const isEllipse = activeObject.name === 'ellipse';
+        const ellipseOffset = {
+            [coordToChange]: (activeObject.pathOffset[coordToChange] * newSize) / activeObject[sizeToChange],
+            [coordToStay]: activeObject.pathOffset[coordToStay]
+        }
+        const shapeProps = {
+            [sizeToChange]: newSize,
+            pathOffset: isEllipse ? ellipseOffset : {[coordToChange]: newSize / 2, [coordToStay]: activeObject.pathOffset[coordToStay]}
+        }
+        for (let i = 0; i < oldPoints.length; i++) {
+            newPoints.push({
+                [coordToChange]: (newSize * oldPoints[i][coordToChange]) / activeObject[sizeToChange],
+                [coordToStay]: oldPoints[i][coordToStay]
+            });
+        }
+        activeObject.set({
+            ...shapeProps,
+            points: newPoints
+        });
     }
 
     function onParamChange(input, key) {
@@ -93,6 +131,7 @@ function PositionSizes({canvas}) {
             <Grid item xs={6}>
                 <EditorNumberInput
                     value={h} step={0.01}
+                    onChange={onHChange}
                     icon={<Tooltip title="Element height"><Typography>H:</Typography></Tooltip>}
                 />
             </Grid>
