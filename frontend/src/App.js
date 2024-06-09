@@ -5,7 +5,6 @@ import {SnackbarProvider} from "notistack";
 import {lazy} from "react";
 import RootLayout from "./RootLayout";
 import AuthLayout from "./pages/auth/AuthLayout";
-import {Editor} from "./pages/editor/Editor";
 import EditorContextProvider from "./pages/editor/EditorContextProvider";
 import {Workspace} from "./pages/editor/Workspace";
 import Profile from "./pages/users/Profile";

@@ -119,8 +119,19 @@ export default class Requests {
         return resp.data;
     }
 
-    static async getProject(project_id){
+    static async getProjectCanvas(project_id){
         const resp = await axiosInstance.get(`/projects/${project_id}`);
+        return resp.data;
+    }
+
+    static async getProjectDetails(project_id){
+        const resp = await axiosInstance.get(`/project_details/${project_id}`);
+        return resp.data;
+    }
+
+    static async updateProjectDetails(project_id, project_name){
+        const resp = await axiosInstance
+            .patch(`/project_details/${project_id}`, {project_name});
         return resp.data;
     }
 }

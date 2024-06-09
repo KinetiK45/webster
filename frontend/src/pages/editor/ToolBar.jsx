@@ -21,9 +21,12 @@ import {EditorContext} from "./EditorContextProvider";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import Line from "../../components/shapes/Line";
 import Polygons from "../../components/shapes/Polygons";
-import {removeShapeListeners} from "../../utils/Utils";
+import {customAlert, removeShapeListeners} from "../../utils/Utils";
+import EditorTextInput from "../../components/inputs/EditorTextInput";
+import Requests from "../../api/Requests";
+import {debounce} from "lodash";
 
-export function Editor({canvas}) {
+export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
     const [figuresAnchorEl, setFiguresAnchorEl] = useState(null);
     const [drawingAnchorEl, setDrawingAnchorEl] = useState(null);
@@ -42,12 +45,12 @@ export function Editor({canvas}) {
     useEffect(() => {
         const updatedIcons = iconButtons.map(button => {
             const activeIcon = getActiveIcon(button.key);
-            return activeIcon ? { ...button, icon: activeIcon } : button;
+            return activeIcon ? {...button, icon: activeIcon} : button;
         });
         setIconButtons(updatedIcons);
     }, [selectedInstrument.current]);
     useEffect(() => {
-        if(canvas){
+        if (canvas) {
             const isDisabled = () => {
                 const activeObjects = canvas.getActiveObjects();
                 setDisabled(!(activeObjects.length === 1 && activeObjects[0].type === 'polygon'));
@@ -70,7 +73,7 @@ export function Editor({canvas}) {
     const getActiveButtonFromActions = (actions) => {
         return actions.find(action => action.key?.toLowerCase() === selectedInstrument.current)
     };
-    const changeInstrument = (name, isDrawing, selection)=> {
+    const changeInstrument = (name, isDrawing, selection) => {
         removeShapeListeners(canvas.__eventListeners);
         selectedInstrument.current = name;
         canvas.selection = selection;
@@ -92,6 +95,7 @@ export function Editor({canvas}) {
     const handleDrawClose = () => {
         setDrawingAnchorEl(null);
     };
+
     function createText() {
         changeInstrument('text', false, true);
         const text = new fabric.Textbox('Hello', {
@@ -99,11 +103,14 @@ export function Editor({canvas}) {
             top: 130,
             fontSize: projectSettings.fontSize,
             fill: projectSettings.fillColor,
+            stroke: projectSettings.strokeColor,
+            strokeWidth: projectSettings.strokeWidth,
             fontFamily: projectSettings.fontFamily,
         });
         canvas.add(text);
         handleFiguresClose();
     }
+
     function handleAddImage() {
         changeInstrument('image', false, true);
         const input = document.createElement('input');
@@ -116,14 +123,17 @@ export function Editor({canvas}) {
 
         input.click();
     }
+
     function enablePen() {
         handleDrawClose();
         changeInstrument('pen', false, false);
     }
+
     function handleEnableDrawing() {
         handleDrawClose();
         changeInstrument('pencil', true, canvas.selection);
     }
+
     function editPolygon() {
         const poly = canvas.getActiveObjects()[0];
         poly.edit = !poly.edit;
@@ -132,15 +142,15 @@ export function Editor({canvas}) {
             var lastControl = poly.points.length - 1;
             poly.cornerStyle = 'circle';
             poly.cornerColor = 'rgba(0,0,255,0.5)';
-            poly.controls = poly.points.reduce(function(acc, point, index) {
+            poly.controls = poly.points.reduce(function (acc, point, index) {
                 acc['p' + index] = new fabric.Control({
-                        positionHandler: polygonPositionHandler,
-                        actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
-                        actionName: 'modifyPolygon',
-                        pointIndex: index
+                    positionHandler: polygonPositionHandler,
+                    actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
+                    actionName: 'modifyPolygon',
+                    pointIndex: index
                 });
                 return acc;
-            }, { });
+            }, {});
         } else {
             poly.cornerColor = 'blue';
             poly.cornerStyle = 'rect';
@@ -150,28 +160,55 @@ export function Editor({canvas}) {
         canvas.requestRenderAll();
     }
 
-    const shapesActions= [
-        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small" />} text={'Rectangle'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
-        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small" />} text={'Polygon'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
-        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small" />} text={'Ellipse'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
-        <Line icon={<HorizontalRuleOutlined fontSize="small" />} key={'Line'} canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument} changeInstrument={changeInstrument}/>,
+    const shapesActions = [
+        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small"/>} text={'Rectangle'} canvas={canvas}
+                  handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
+                  changeInstrument={changeInstrument}/>,
+        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small"/>} text={'Polygon'} canvas={canvas}
+                  handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
+                  changeInstrument={changeInstrument}/>,
+        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small"/>} text={'Ellipse'}
+                  canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
+                  changeInstrument={changeInstrument}/>,
+        <Line icon={<HorizontalRuleOutlined fontSize="small"/>} key={'Line'} canvas={canvas}
+              handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
+              changeInstrument={changeInstrument}/>,
     ];
     const drawActions = [
-        {icon: <Gesture  />, text: 'Pencil', func: handleEnableDrawing},
-        {icon: <Edit />, text: 'Pen', func: enablePen},
+        {icon: <Gesture/>, text: 'Pencil', func: handleEnableDrawing},
+        {icon: <Edit/>, text: 'Pen', func: enablePen},
     ];
     const [iconButtons, setIconButtons] = useState([
-        { key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon /> },
-        { key: 'add-text', ariaLabel: 'add-text', onClick: createText, icon: <TextFieldsIcon /> },
-        { key: 'add-image', ariaLabel: 'add-image', onClick: handleAddImage, icon: <AddPhotoAlternateOutlined /> },
-        { key: 'draw', ariaLabel: 'menu', onClick: handleDrawClick, icon: <Gesture /> },
-        { key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture /> }
+        {key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon/>},
+        {key: 'add-text', ariaLabel: 'add-text', onClick: createText, icon: <TextFieldsIcon/>},
+        {key: 'add-image', ariaLabel: 'add-image', onClick: handleAddImage, icon: <AddPhotoAlternateOutlined/>},
+        {key: 'draw', ariaLabel: 'menu', onClick: handleDrawClick, icon: <Gesture/>},
+        {key: 'edit-polygon', ariaLabel: 'menu', onClick: editPolygon, icon: <Gesture/>}
     ]);
 
+    const [projectName, setProjectName] = useState(projectSettings.projectName);
+
+    const debouncedFetchData = debounce(async () => {
+        const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectSettings.projectName);
+        if (resp.state === true){
+            projectSettings.projectName = projectName;
+        }
+        else
+            customAlert(resp.message || 'Error');
+    }, 1000);
+
+    useEffect(() => {
+        if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
+            debouncedFetchData();
+            return debouncedFetchData.cancel;
+        }
+    }, [projectName]);
+
     return (
-        <Toolbar variant="regular" sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
+        <Toolbar variant="regular"
+                 sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
             <Stack direction="row" spacing={0.5}>
-                {iconButtons.map(({ key, ariaLabel, onClick, icon }) => (
+                {iconButtons.map(({key, ariaLabel, onClick, icon}) => (
                     <IconButton
                         key={key}
                         edge="start"
@@ -179,7 +216,7 @@ export function Editor({canvas}) {
                         aria-label={ariaLabel}
                         onClick={(event) => handleButtonClick(event, key, onClick)}
                         disabled={key === 'edit-polygon' && disabled}
-                        style={{ backgroundColor: activeButtonFromIcons === key ? 'grey' : 'initial' }}
+                        style={{backgroundColor: activeButtonFromIcons === key ? 'grey' : 'initial'}}
                     >
                         {icon}
                     </IconButton>
@@ -210,12 +247,13 @@ export function Editor({canvas}) {
                     </MenuList>
                 </Menu>
             </Stack>
-            <Typography>
-                {/*TODO: project name*/}
-                Untitled
-            </Typography>
+            <EditorTextInput
+                icon={<Typography>Name:</Typography>}
+                value={projectSettings.projectName}
+                onChange={(input) => setProjectName(input)}
+            />
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-                <Avatar alt="Avatar" />
+                <Avatar alt="Avatar"/>
                 <Typography>
                     Creator Name
                 </Typography>
