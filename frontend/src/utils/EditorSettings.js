@@ -1,5 +1,7 @@
 export class EditorSettings {
     constructor({
+                    projectName = 'untitled',
+                    projectId = undefined,
                     projectHeight = 400,
                     projectWidth = 500,
                     fillColor = '#be0303',
@@ -10,6 +12,8 @@ export class EditorSettings {
                     fillStyleEnable = true,
                     fontFamily = 'Times New Roman',
                 } = {}) {
+        this.projectName = projectName;
+        this.projectId = projectId;
         this.projectHeight = projectHeight;
         this.projectWidth = projectWidth;
         this.fillColor = fillColor;

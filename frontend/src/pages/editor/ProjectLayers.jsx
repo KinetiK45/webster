@@ -1,8 +1,8 @@
 import {Divider, Stack} from "@mui/material";
 import React, {useContext, useEffect, useRef, useState} from "react";
 import Typography from "@mui/material/Typography";
-import {EditorContext} from "../../pages/editor/EditorContextProvider";
-import Layer from "../Layer";
+import {EditorContext} from "./EditorContextProvider";
+import Layer from "../../components/Layer";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
 import Container from "@mui/material/Container";
 import {customAlert} from "../../utils/Utils";

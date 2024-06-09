@@ -1,9 +1,9 @@
 import {Grid} from "@mui/material";
-import ProjectLayers from "../../components/editor/ProjectLayers";
+import ProjectLayers from "./ProjectLayers";
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {fabric} from "fabric";
-import ProjectParams from "../../components/editor/ProjectParams";
-import {Editor} from "./Editor";
+import ProjectParams from "./ProjectParams";
+import {ToolBar} from "./ToolBar";
 import {EditorContext} from "./EditorContextProvider";
 import Container from "@mui/material/Container";
 import {useParams} from "react-router-dom";
@@ -17,8 +17,9 @@ export function Workspace() {
     const projectSettings = useContext(EditorContext);
     const initCanvas = async () => {
         if (projectId !== 'create') {
-            const resp = await Requests.getProject(projectId);
+            const resp = await Requests.getProjectCanvas(projectId);
             if (resp.state === true){
+                // TODO: canvas size to params
                 let canvas = new fabric.Canvas('canvas');
                 canvas.loadFromJSON(resp.data, canvas.renderAll.bind(canvas));
                 return canvas;
@@ -122,7 +123,7 @@ export function Workspace() {
         }}>
             <Grid item xs={12} style={{padding: 0}}>
                 {canvas &&
-                    <Editor canvas={canvas}/>
+                    <ToolBar canvas={canvas}/>
                 }
             </Grid>
             <Grid item xs={2} sx={{padding: 0, height: '100%'}}>
