@@ -99,7 +99,7 @@ async function getProjectById(project_id) {
     }
 }
 
-async function updateProject(project_id,project_name, userId){
+async function updateProject(project_id,project_name, userId,projectImageUrl){
     try {
         if (userId === undefined) {
             return { status: 401, isMatch: false, message: "Authorization required" };
@@ -115,14 +115,24 @@ async function updateProject(project_id,project_name, userId){
         if (project_name) {
             updates.project_name = project_name;
         }
+        if(projectImageUrl) {
+            updates.projectImageUrl = projectImageUrl;
+        }
         const hasUpdates = Object.keys(updates).length > 0;
+        if (hasUpdates) {
+            projectRepository.merge(project, updates);
+            await projectRepository.save(project);
+        }
+        
         return {
             isMatch: hasUpdates,
             message: hasUpdates ? "Project updated successfully" : "No changes to update",
             ...(hasUpdates && {
                 user: {
                     id: project.id,
+                    updated_at: new Date().toISOString(),
                     ...(project_name && { project_name }),
+                    ...(projectImageUrl && {projectImageUrl}),
                 },
             }),
         };
