@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const router = require("./routers/router");
 const morgan = require('morgan');
 const tokenMiddleware = require("./middleware/verifyToken");
+const {listenForUpdateProjectEvents} = require("./service/rabbitService");
 
 
 const app = express();
@@ -33,6 +34,9 @@ app.use(express.static('images'));
 
 const PORT = process.env.PORT;
 
+listenForUpdateProjectEvents().catch((error) => {
+    console.error('Error starting listener login:', error);
+});
 app.listen(PORT, () => {
     console.log(`Сервер запущен http://localhost:${PORT}`);
 });

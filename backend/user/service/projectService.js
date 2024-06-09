@@ -99,48 +99,59 @@ async function getProjectById(project_id) {
     }
 }
 
-async function updateProject(project_id,project_name, userId,projectImageUrl){
+async function updateProject(project_id, project_name, userId, projectImageUrl) {
     try {
         if (userId === undefined) {
             return { status: 401, isMatch: false, message: "Authorization required" };
         }
-        const project = await projectRepository.findOne({ where: { id: Number.parseInt(project_id) } });
-        if(userId !== project.user.id){
-            return { status: 400, isMatch: false, message: "It's not your project" };
-        }
-        if (!project) {
+
+        const projects = await projectRepository.find({ where: { id: project_id }, relations: ['user'], select: ["user.id"] });
+
+        if (projects.length === 0) {
             return { status: 404, isMatch: false, message: "Project not found" };
         }
+
+        const project = projects[0];
+
+        // if (userId !== project.user.id) {
+        //     return { status: 400, isMatch: false, message: "It's not your project" };
+        // }
+
         const updates = {};
         if (project_name) {
             updates.project_name = project_name;
         }
-        if(projectImageUrl) {
+        if (projectImageUrl) {
             updates.projectImageUrl = projectImageUrl;
         }
+
+        updates.updated_at = new Date().toISOString()
+
         const hasUpdates = Object.keys(updates).length > 0;
         if (hasUpdates) {
-            projectRepository.merge(project, updates);
+            Object.assign(project, updates);
             await projectRepository.save(project);
         }
-        
+
         return {
             isMatch: hasUpdates,
             message: hasUpdates ? "Project updated successfully" : "No changes to update",
-            ...(hasUpdates && {
-                user: {
-                    id: project.id,
-                    updated_at: new Date().toISOString(),
-                    ...(project_name && { project_name }),
-                    ...(projectImageUrl && {projectImageUrl}),
-                },
-            }),
+            // ...(hasUpdates && {
+            //     user: {
+            //         id: project.id,
+            //         updated_at: new Date().toISOString(),
+            //         ...(project_name && { project_name }),
+            //         ...(projectImageUrl && { projectImageUrl }),
+            //     },
+            // }),
         };
-    }catch (error) {
-        console.error("Error update project:", error);
-        throw Error;
+    } catch (error) {
+        console.error("Error updating project:", error);
+        throw error;
     }
 }
+
+
 async function deleteProject(project_id){
     try {
         const projectToDelete = await projectRepository.findOne(project_id);
