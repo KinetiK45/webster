@@ -52,9 +52,9 @@ async function listenForUpdateProjectEvents() {
         const event = JSON.parse(message.content.toString());
         console.log('Received event:', event);
 
-        const { project_id, url } = event;
+        const { project_id, url, eventName } = event;
         if (eventName === 'UpdateProject') {
-            await updateProject(project_id);
+            await updateProject(project_id,"","",url);
         }
         console.log("message: " + message);
         channel.ack(message);
