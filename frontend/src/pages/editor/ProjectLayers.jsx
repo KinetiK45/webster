@@ -5,7 +5,7 @@ import {EditorContext} from "./EditorContextProvider";
 import Layer from "../../components/Layer";
 import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} from "../../utils/CoordinatesUtils";
 import Container from "@mui/material/Container";
-import {customAlert} from "../../utils/Utils";
+import {CustomStack} from "../../components/styled/CustomStack";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 function ProjectLayers({canvas}) {
@@ -98,16 +98,16 @@ function ProjectLayers({canvas}) {
     return (
         <Container disableGutters sx={{
             p: 0, m: 0,
-            overflow: 'hidden',
+            // overflow: 'hidden',
             backgroundColor: 'background.default', height: '100%'
         }}>
             <Divider/>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">
                     {(provided) => (
-                        <Stack
+                        <CustomStack
                             direction="column"
-                            sx={{ p: 1, m: 0, height: '100%', overflow: 'scroll' }}
+                            sx={{ p: 1, m: 0, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
@@ -137,7 +137,7 @@ function ProjectLayers({canvas}) {
                                 )
                             ))}
                             {provided.placeholder}
-                        </Stack>
+                        </CustomStack>
                     )}
                 </Droppable>
             </DragDropContext>

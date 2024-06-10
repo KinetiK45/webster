@@ -38,6 +38,7 @@ function FontSize({canvas}) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
                 activeObject.set("fontSize", fontSize);
+                canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             } else {
                 customAlert('Please select an object on the canvas first.', 'warning');

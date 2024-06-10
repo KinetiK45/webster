@@ -19,14 +19,15 @@ function Shadow({canvas}) {
     }, [shadowBlur, offsetY, offsetX, opacity, color]);
 
     function addShadow() {
-        const obj = canvas.getActiveObject();
-        if (obj){
-            obj.set('shadow', {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject){
+            activeObject.set('shadow', {
                 color: hexToRgba(color, opacity),
                 blur: shadowBlur,
                 offsetX: offsetX,
                 offsetY: offsetY,
             });
+            canvas.fire('object:modified', { target: activeObject });
             canvas.requestRenderAll();
         }
     }

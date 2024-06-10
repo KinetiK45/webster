@@ -8,9 +8,10 @@ import {EditorContext} from "./EditorContextProvider";
 import Container from "@mui/material/Container";
 import {useParams} from "react-router-dom";
 import Requests from "../../api/Requests";
+import {customAlert} from "../../utils/Utils";
 
 export function Workspace() {
-    const { projectId} = useParams();
+    const {projectId} = useParams();
     const [canvas, setCanvas] = useState(undefined);
     const [isDrawingMode, setIsDrawingMode] = useState(false);
     const canvasContainerRef = useRef(null);
@@ -18,7 +19,7 @@ export function Workspace() {
     const initCanvas = async () => {
         if (projectId !== 'create') {
             const resp = await Requests.getProjectCanvas(projectId);
-            if (resp.state === true){
+            if (resp.state === true) {
                 // TODO: canvas size to params
                 let canvas = new fabric.Canvas('canvas');
                 canvas.loadFromJSON(resp.data, canvas.renderAll.bind(canvas));
@@ -117,8 +118,90 @@ export function Workspace() {
         }
     }, [canvas]);
 
+
+    useEffect(() => {
+        if (canvas) {
+            // let objectIdCounter = 0;
+            let history = [];
+            let objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
+
+            canvas.on('object:added', function (event) {
+                let object = event.target;
+                // if (!object.id) {
+                //     object.id = 'object_' + objectIdCounter++;
+                // }
+                objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
+                history.push({
+                    action: 'object:added',
+                    object: object
+                });
+            });
+            canvas.on('object:removed', function (event) {
+                let object = event.target;
+
+                history.push({
+                    action: 'object:removed',
+                    object: object,
+                    index: objectsPrev.indexOf(object)
+                });
+                objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
+            });
+            canvas.on('object:modified', function (event) {
+                const object = event.target;
+                const index = canvas.getObjects().indexOf(object);
+                const oldObj = objectsPrev[index];
+                history.push({
+                    action: 'object:modified',
+                    object: oldObj,
+                    index: index,
+                });
+                console.log(`modified ${object.top} ${oldObj.top}`);
+                objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
+            })
+
+            function undo() {
+                let lastChange = history.pop();
+                const histLen = history.length;
+                if (lastChange) {
+                    const objectData = lastChange.object;
+                    if (lastChange.action === 'object:removed') {
+                        canvas.insertAt(objectData, lastChange.index);
+                        canvas.renderAll();
+                    }
+                    if (lastChange.action === 'object:added') {
+                        if (objectData.withPoints) {
+                            canvas.remove(objectData.p1);
+                            canvas.remove(objectData.p2);
+                        }
+                        canvas.remove(objectData);
+                    }
+                    if (lastChange.action === 'object:modified') {
+                        canvas.remove(canvas.getObjects()[lastChange.index]);
+                        canvas.insertAt(objectData, lastChange.index);
+                        canvas.renderAll();
+                    }
+                    console.log(lastChange.action);
+                }
+                history = history.slice(0, histLen);
+            }
+
+            document.addEventListener('keydown', function (event) {
+                // customAlert(event.keyCode, 'info');
+                if (
+                    // (event.metaKey || event.ctrlKey) &&
+                    event.keyCode === 90) {
+                    event.preventDefault();
+                    undo();
+                }
+            });
+
+        }
+    }, [canvas]);
+
+
     return (
-        <Grid container spacing={0} sx={{marginTop: 0,
+        <Grid container spacing={0} sx={{
+            marginTop: 0,
             height: `calc(100vh - ${128}px)`,
         }}>
             <Grid item xs={12} style={{padding: 0}}>
@@ -131,10 +214,8 @@ export function Workspace() {
                     <ProjectLayers canvas={canvas}/>
                 }
             </Grid>
-            <Grid item xs={8} sx={{padding: 0, height: '100%'}}>
-                <Container ref={canvasContainerRef} disableGutters sx={{height: '100%'}}>
-                    <canvas id="canvas"/>
-                </Container>
+            <Grid ref={canvasContainerRef} item xs={8} sx={{padding: 0}}>
+                <canvas style={{height: '100%', margin: '0'}} id="canvas"/>
             </Grid>
             <Grid item xs={2} sx={{padding: 0, height: '100%'}}>
                 {canvas &&

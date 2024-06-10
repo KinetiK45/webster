@@ -10,6 +10,18 @@ export function hexToRgba(hex, alpha = 1) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+export const rgbaToHex = (rgba) => {
+    const match = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)$/);
+    if (match) {
+        const [r, g, b, a = 1] = match.slice(1, 5).map(Number);
+        const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+        return [hex, a];
+    }
+    return ['#000000', 1];
+};
+
+
+
 export async function logout(){
     localStorage.removeItem('user_id');
     const resp = await Requests.logout();

@@ -38,9 +38,8 @@ function StrokeWidth({canvas}) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
                 activeObject.set("strokeWidth", strokeWidth);
+                canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
-            } else {
-                customAlert('Please select an object on the canvas first.', 'warning');
             }
         }
     };
