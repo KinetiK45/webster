@@ -7,7 +7,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-function Layer({canvas, item, index, sameItemNumber}) {
+import {customAlert} from "../utils/Utils";
+function Layer({canvas, item}) {
     const [isActive, setIsActive] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
@@ -30,7 +31,8 @@ function Layer({canvas, item, index, sameItemNumber}) {
 
     function selectObject() {
         canvas.isDrawingMode = false;
-        const object = canvas.getObjects()[index];
+        const object = canvas.getObjects()[item.index];
+        setIsActive(true);
         canvas.setActiveObject(object);
         canvas.renderAll();
     }
@@ -38,9 +40,8 @@ function Layer({canvas, item, index, sameItemNumber}) {
     function deleteObject(event) {
         event.stopPropagation();
         if (canvas) {
-            const object = canvas.getObjects()[index];
+            const object = canvas.getObjects()[item.index];
             if (object) {
-                console.log(object);
                 if (object.withPoints) {
                     canvas.remove(object.p1);
                     canvas.remove(object.p2);
@@ -54,13 +55,17 @@ function Layer({canvas, item, index, sameItemNumber}) {
         if (canvas) {
             const checkAndSet = () => {
                 const activeObjects = canvas.getActiveObjects();
-                setIsActive(activeObjects.indexOf(item) !== -1)
-            }
+                const canvasObjects = canvas.getObjects();
+                const currentIndex = item.index;
+                setIsActive(activeObjects.some(obj => canvasObjects[currentIndex] === obj));
+            };
+
             canvas.on('selection:created', checkAndSet);
             canvas.on('selection:updated', checkAndSet);
             canvas.on('selection:cleared', checkAndSet);
         }
-    }, [canvas]);
+    }, [canvas, item]);
+
 
     return <React.Fragment>
         <Stack direction="row"
@@ -72,7 +77,7 @@ function Layer({canvas, item, index, sameItemNumber}) {
                }}
         >
             <Typography sx={{m: "auto"}}>
-                {item.name ? item.name : item.type} {sameItemNumber}
+                {item.name ? item.name : item.type} {item.itemNumber}
             </Typography>
             <IconButton
                 onClick={deleteObject}

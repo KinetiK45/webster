@@ -10,19 +10,18 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 function ProjectLayers({canvas}) {
     const [objects, setObjects] = useState([]);
-    const projectSettings = useContext(EditorContext);
     const objectsRef = useRef([]);
 
     useEffect(() => {
-        objectsRef.current = objects;
+        objectsRef.current = canvas.getObjects();
     }, [objects]);
 
-    function calculateItemNumber(item) {
+    function calculateItemNumber(item, canvasObjects) {
         return item.name ?
-            objects
+            canvasObjects
             .filter((value) => value.name === item.name)
             .indexOf(item) :
-            objects
+            canvasObjects
             .filter((value) => value.type === item.type)
             .indexOf(item);
     }
@@ -43,28 +42,60 @@ function ProjectLayers({canvas}) {
         });
     }
 
+    const moveObjectToIndex = (currentIndex, targetIndex) => {
+        const canvasObjects = canvas.getObjects();
+        const canvasObj = canvasObjects[currentIndex];
+
+        if (!canvasObj || targetIndex < 0 || targetIndex >= canvasObjects.length) {
+            return;
+        }
+
+        while (currentIndex < targetIndex) {
+            canvas.bringForward(canvasObj);
+            currentIndex++;
+        }
+
+        while (currentIndex > targetIndex) {
+            canvas.sendBackwards(canvasObj);
+            currentIndex--;
+        }
+
+        canvas.discardActiveObject();
+        canvas.renderAll();
+        updateObjects(canvas.getObjects());
+    };
+
     const onDragEnd = (result) => {
         if (!result.destination) return;
-        const reorderedObjects = Array.from(objects);
-        const [movedItem] = reorderedObjects.splice(result.source.index, 1);
-        reorderedObjects.splice(result.destination.index, 0, movedItem);
-        canvas.remove(...objects);
-        reorderedObjects.forEach(obj => canvas.add(obj));
-        canvas.renderAll();
+
+        const { source, destination } = result;
+        const objlen = canvas.getObjects().length;
+        moveObjectToIndex(objlen - 1 - source.index, objlen - 1 - destination.index);
+    };
+
+    const updateObjects = (canvasObjects) => {
+        const updatedObjects = canvasObjects.map((item, index) => ({
+            needToHide: item.needToHide,
+            name: item.name,
+            type: item.type,
+            index: index,
+            itemNumber: calculateItemNumber(item, canvasObjects)
+        }));
+        setObjects(updatedObjects.reverse());
     };
 
     useEffect(() => {
         if (canvas) {
-            setObjects(canvas.getObjects());
+            updateObjects(canvas.getObjects());
             let startX = 0, startY = 0;
             canvas.on('mouse:down', (opt) => {
                 ({startX, startY} = getPointerStart(canvas, opt))
             });
             canvas.on('object:added', () => {
-                setObjects(canvas.getObjects());
+                updateObjects(canvas.getObjects());
             });
             canvas.on('object:removed', () => {
-                setObjects(canvas.getObjects());
+                updateObjects(canvas.getObjects());
             });
             canvas.on('selection:created', (opt) => {
                 const active = canvas.getActiveObjects();
@@ -128,8 +159,6 @@ function ProjectLayers({canvas}) {
                                                 <Layer
                                                     item={item}
                                                     canvas={canvas}
-                                                    index={index}
-                                                    sameItemNumber={calculateItemNumber(item)}
                                                 />
                                             </div>
                                         )}

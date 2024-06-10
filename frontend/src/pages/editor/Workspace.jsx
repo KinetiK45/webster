@@ -182,6 +182,8 @@ export function Workspace() {
                     }
                     console.log(lastChange.action);
                 }
+                else
+                    customAlert('history empty!', "info");
                 history = history.slice(0, histLen);
             }
 
