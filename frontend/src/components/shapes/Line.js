@@ -6,7 +6,7 @@ import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} f
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import {removeShapeListeners} from "../../utils/Utils";
 
-function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument}) {
+function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument, setObjectsSelectable}) {
     const projectSettings = useContext(EditorContext);
     const isDrawing = useRef(false);
     const drawingLine = useRef(null);
@@ -38,6 +38,7 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         const pointer = canvas.getPointer(opt.e);
         const points = [pointer.x, pointer.y, pointer.x, pointer.y];
         drawingLine.current = new fabric.Line(points, {
+            name: 'line',
             strokeWidth: projectSettings.strokeWidth,
             stroke: projectSettings.strokeColor,
             originX: 'center',
@@ -65,9 +66,9 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
             return;
         }
         changeInstrument('', false, true);
+        setObjectsSelectable(true);
         addEndPoints();
         canvas.setActiveObject(drawingLine.current)
-        removeShapeListeners(canvas.__eventListeners);
     };
     const addEndPoints = () => {
         const p1 = new fabric.Circle({
@@ -120,6 +121,7 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         if (selectedInstrument.current === 'line') {
             return;
         }
+        setObjectsSelectable(false);
         changeInstrument('line', false, false);
         addListeners();
     };

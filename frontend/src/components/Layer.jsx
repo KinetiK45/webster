@@ -72,7 +72,7 @@ function Layer({canvas, item, index, sameItemNumber}) {
                }}
         >
             <Typography sx={{m: "auto"}}>
-                {item.type} {item.name ? item.name : sameItemNumber}
+                {item.name ? item.name : item.type} {sameItemNumber}
             </Typography>
             <IconButton
                 onClick={deleteObject}

@@ -11,7 +11,7 @@ import {
 } from "../../utils/CoordinatesUtils";
 import {removeShapeListeners} from "../../utils/Utils";
 
-function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument }) {
+function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument, setObjectsSelectable }) {
     const projectSettings = useContext(EditorContext);
     const figure = useRef(null);
     const startX = useRef(0);
@@ -152,8 +152,8 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         }
         shape.setCoords();
         changeInstrument('', false, true);
+        setObjectsSelectable(true);
         figure.current = null;
-        removeShapeListeners(canvas.__eventListeners);
         document.removeEventListener('keydown', shiftDown);
         document.removeEventListener('keyup', shiftUp);
     }
@@ -167,6 +167,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         if (selectedInstrument.current === name.current ) {
             return;
         }
+        setObjectsSelectable(false);
         changeInstrument(name.current, false, false);
         addListeners();
     }

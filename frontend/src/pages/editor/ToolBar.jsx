@@ -35,7 +35,8 @@ export function ToolBar({canvas}) {
     const [imgPath, setImgPath] = useState('');
     const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
     const selectedInstrument = useRef('');
-    const [disabled, setDisabled] = useState(true);
+    const [disabledEditPolygon, setDisabledEditPolygon] = useState(true);
+    const [disabledGroup, setDisabledGroup] = useState(true);
     const [projectName, setProjectName] = useState(projectSettings.projectName);
 
     const debouncedFetchData = debounce(async () => {
@@ -71,8 +72,9 @@ export function ToolBar({canvas}) {
     useEffect(() => {
         if (canvas) {
             const isDisabled = () => {
-                const activeObjects = canvas.getActiveObjects();
-                setDisabled(!(activeObjects.length === 1 && activeObjects[0].type === 'polygon'));
+                const object = canvas.getActiveObject();
+                setDisabledEditPolygon(object?.type !== 'polygon');
+                setDisabledGroup(object?.type !== 'activeSelection')
             }
             canvas.on('selection:created',isDisabled);
             canvas.on('selection:updated', (opt) => {
@@ -129,6 +131,12 @@ export function ToolBar({canvas}) {
             });
         }
     }, [canvas]);
+    function setObjectsSelectable(selectable) {
+        canvas.getObjects().forEach(obj => {
+            obj.selectable = selectable;
+            obj.evented = selectable;
+        });
+    }
     const getActiveIcon = (key) => {
         switch (key) {
             case 'figures':
@@ -176,13 +184,14 @@ export function ToolBar({canvas}) {
         changeInstrument('text', false, false);
         handleFiguresClose();
         let isDown, origX, origY, textBox;
-        function onMouseDown(o) {
+        function createShape(o) {
             if (textBox) return;
             isDown = true;
             const pointer = canvas.getPointer(o.e);
             origX = pointer.x;
             origY = pointer.y;
             textBox = new fabric.IText('', {
+                name: 'text',
                 left: origX,
                 top: origY,
                 fontSize: projectSettings.fontSize,
@@ -196,7 +205,7 @@ export function ToolBar({canvas}) {
             canvas.add(textBox);
             canvas.setActiveObject(textBox);
         }
-        function onMouseMove(o) {
+        function changeShape(o) {
             if (!isDown) return;
             const pointer = canvas.getPointer(o.e);
             textBox.set({
@@ -205,31 +214,17 @@ export function ToolBar({canvas}) {
             });
             canvas.renderAll();
         }
-        function onMouseUp(o) {
+        function endShape(o) {
             isDown = false;
             changeInstrument('', false, true);
-            canvas.off('mouse:down', onMouseDown);
-            canvas.off('mouse:move', onMouseMove);
-            canvas.off('mouse:up', onMouseUp);
-            canvas.setActiveObject(textBox)
-            // textBox.on('editing:entered', function() {
-            //     textBox.__skipDimension = true;
-            //     console.log('Editing started');
-            // });
-            // textBox.on('editing:exited', function() {
-            //     textBox.__skipDimension = false;
-            //     console.log('Editing ended');
-            // });
-            // textBox.on('changed', function() {
-            //     console.log('Text changed:', textBox.text);
-            // });
+            setObjectsSelectable(true);
+            canvas.setActiveObject(textBox);
         }
-
-        canvas.on('mouse:down', onMouseDown);
-        canvas.on('mouse:move', onMouseMove);
-        canvas.on('mouse:up', onMouseUp);
+        canvas.on('mouse:down', createShape);
+        canvas.on('mouse:move', changeShape);
+        canvas.on('mouse:up', endShape);
+        setObjectsSelectable(false);
     }
-
     function handleAddImage() {
         changeInstrument('image', false, true);
         const input = document.createElement('input');
@@ -242,17 +237,14 @@ export function ToolBar({canvas}) {
 
         input.click();
     }
-
     function enablePen() {
         handleDrawClose();
         changeInstrument('pen', false, false);
     }
-
     function handleEnableDrawing() {
         handleDrawClose();
         changeInstrument('pencil', true, canvas.selection);
     }
-
     function editPolygon() {
         const poly = canvas.getActiveObjects()[0];
         poly.edit = !poly.edit;
@@ -312,21 +304,23 @@ export function ToolBar({canvas}) {
     }
     function createGroup(){
         const object = canvas.getActiveObject();
-        if(object.type === 'activeSelection') object.toGroup()
+        if(object.type === 'activeSelection') {
+            object.toGroup();
+        }
     }
-
     function createFrame(){
         changeInstrument('frame', false, false);
         let isDrawing = false;
         let startX, startY;
         let frame;
-        function onMouseDown(options) {
+        function createShape(options) {
             isDrawing = true;
             const pointer = canvas.getPointer(options.e);
             startX = pointer.x;
             startY = pointer.y;
 
             frame = new fabric.Rect({
+                name: 'frame',
                 left: startX,
                 top: startY,
                 width: 0,
@@ -338,8 +332,7 @@ export function ToolBar({canvas}) {
             });
             canvas.add(frame);
         }
-
-        function onMouseMove(options) {
+        function changeShape(options) {
             if (!isDrawing) return;
 
             const pointer = canvas.getPointer(options.e);
@@ -355,32 +348,31 @@ export function ToolBar({canvas}) {
 
             canvas.renderAll();
         }
-
-        function onMouseUp(options) {
+        function endShape(options) {
             isDrawing = false;
             frame.set({ selectable: true });
-            canvas.off('mouse:down', onMouseDown);
-            canvas.off('mouse:move', onMouseMove);
-            canvas.off('mouse:up', onMouseUp);
+            changeInstrument('', false, true);
+            setObjectsSelectable(true);
         }
-        canvas.on('mouse:down', onMouseDown);
-        canvas.on('mouse:move', onMouseMove);
-        canvas.on('mouse:up', onMouseUp);
+        canvas.on('mouse:down', createShape);
+        canvas.on('mouse:move', changeShape);
+        canvas.on('mouse:up', endShape);
+        setObjectsSelectable(false);
     }
 
     const shapesActions = [
         <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small"/>} text={'Rectangle'} canvas={canvas}
                   handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
-                  changeInstrument={changeInstrument}/>,
+                  changeInstrument={changeInstrument} setObjectsSelectable={setObjectsSelectable}/>,
         <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small"/>} text={'Polygon'} canvas={canvas}
                   handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
-                  changeInstrument={changeInstrument}/>,
+                  changeInstrument={changeInstrument} setObjectsSelectable={setObjectsSelectable}/>,
         <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small"/>} text={'Ellipse'}
                   canvas={canvas} handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
-                  changeInstrument={changeInstrument}/>,
+                  changeInstrument={changeInstrument} setObjectsSelectable={setObjectsSelectable}/>,
         <Line icon={<HorizontalRuleOutlined fontSize="small"/>} key={'Line'} canvas={canvas}
               handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
-              changeInstrument={changeInstrument}/>,
+              changeInstrument={changeInstrument} setObjectsSelectable={setObjectsSelectable}/>,
     ];
     const drawActions = [
         {icon: <Gesture/>, text: 'Pencil', func: handleEnableDrawing},
@@ -407,7 +399,7 @@ export function ToolBar({canvas}) {
                         color="inherit"
                         aria-label={ariaLabel}
                         onClick={(event) => handleButtonClick(event, key, onClick)}
-                        disabled={key === 'edit-polygon' && disabled}
+                        disabled={(key === 'edit-polygon' && disabledEditPolygon) || (key === 'group' && disabledGroup)}
                         style={{backgroundColor: activeButtonFromIcons === key ? 'grey' : 'initial'}}
                     >
                         {icon}

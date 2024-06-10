@@ -16,6 +16,7 @@ import PositionSizes from "../../components/editor/parameters/PositionSizes";
 import CharSpacing from "../../components/editor/parameters/CharSpacing";
 import Shadow from "../../components/editor/effects/Shadow";
 import {EditorContext} from "./EditorContextProvider";
+import FrameSelector from "../../components/editor/parameters/FrameSelector";
 
 function ProjectParams({canvas}) {
     const {projectId} = useParams();
@@ -93,7 +94,7 @@ function ProjectParams({canvas}) {
                     </AccordionDetails>
                 </Accordion>
                 <Divider style={{ borderWidth: '1px' }} />
-                <Accordion disableGutters sx={{display: currentSelectedType === 'textbox' ? '' : 'none'}}>
+                <Accordion disableGutters sx={{display: currentSelectedType === 'i-text' ? '' : 'none'}}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                     >
@@ -130,6 +131,8 @@ function ProjectParams({canvas}) {
                     </AccordionDetails>
                 </Accordion>
 
+                <Divider style={{ borderWidth: '1px' }} />
+                <FrameSelector canvas={canvas}/>
                 <Divider/>
                 <Button variant="outlined" onClick={saveProject}>Save</Button>
             </Stack>
