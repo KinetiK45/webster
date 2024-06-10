@@ -12,6 +12,12 @@ function PositionSizes({canvas}) {
     const [top, setTop] = useState(0);
     const [left, setLeft] = useState(0);
     const [angle, setAngle] = useState(0);
+    const [lastChangedObject, setLastChangedObject] = useState(undefined);
+
+    const onBlurMarkModified = () => {
+        if (lastChangedObject)
+            canvas.fire('object:modified', { target: lastChangedObject });
+    }
 
     const changeNumbers = (activeSelection) => {
         if (activeSelection) {
@@ -58,8 +64,8 @@ function PositionSizes({canvas}) {
     }, [canvas]);
 
     function onWChange(input) {
-        //TODO: Vlad set new width + render fix
         const activeObject = canvas.getActiveObject();
+        setLastChangedObject(activeObject);
         if (activeObject) {
             const newWidth = input / (activeObject.scaleX);
             if(activeObject.type === 'polygon')
@@ -73,6 +79,7 @@ function PositionSizes({canvas}) {
 
     function onHChange(input) {
         const activeObject = canvas.getActiveObject();
+        setLastChangedObject(activeObject);
         if (activeObject) {
             const newHeight = input / (activeObject.scaleY);
             if(activeObject.type === 'polygon')
@@ -110,6 +117,7 @@ function PositionSizes({canvas}) {
 
     function onParamChange(input, key) {
         const activeObject = canvas.getActiveObject();
+        setLastChangedObject(activeObject);
         if (activeObject) {
 
             activeObject.set(key, input);
@@ -125,6 +133,7 @@ function PositionSizes({canvas}) {
                 <EditorNumberInput
                     value={w} step={0.01}
                     onChange={onWChange}
+                    onBlur={onBlurMarkModified}
                     icon={<Tooltip title="Element width"><Typography>W:</Typography></Tooltip>}
                 />
             </Grid>
@@ -132,6 +141,7 @@ function PositionSizes({canvas}) {
                 <EditorNumberInput
                     value={h} step={0.01}
                     onChange={onHChange}
+                    onBlur={onBlurMarkModified}
                     icon={<Tooltip title="Element height"><Typography>H:</Typography></Tooltip>}
                 />
             </Grid>
@@ -139,6 +149,7 @@ function PositionSizes({canvas}) {
                 <EditorNumberInput
                     value={left}
                     onChange={(input) => onParamChange(input, 'left')}
+                    onBlur={onBlurMarkModified}
                     icon={<Tooltip title="Left margin"><Typography>L:</Typography></Tooltip>}
                 />
             </Grid>
@@ -146,6 +157,7 @@ function PositionSizes({canvas}) {
                 <EditorNumberInput
                     value={top}
                     onChange={(input) => onParamChange(input, 'top')}
+                    onBlur={onBlurMarkModified}
                     icon={<Tooltip title="Top margin"><Typography>T:</Typography></Tooltip>}
                 />
             </Grid>
@@ -155,6 +167,7 @@ function PositionSizes({canvas}) {
                     icon={<Tooltip title="Rotation"><ThreeSixtyIcon fontSize="small"/></Tooltip>}
                     postfixText="deg"
                     onChange={(input) => onParamChange(input, 'angle')}
+                    onBlur={onBlurMarkModified}
                 />
             </Grid>
         </Grid>

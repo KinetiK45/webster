@@ -8,6 +8,7 @@ import {formatDouble} from "../../utils/Utils";
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
+        height: 36,
         '& fieldset': {
             border: 'none',
         },
@@ -36,7 +37,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
 function EditorNumberInput({ value = 0, min = 0, max = 999, step = 1,
                                icon = <LineStyleIcon fontSize="small" />,
                                postfixText = '',
-                               onChange }) {
+                               onChange, onBlur }) {
     const [internalValue, setInternalValue] = useState(value);
     const [prevValue, setPrevValue] = useState(value);
     const inputRef = useRef(null);
@@ -70,6 +71,9 @@ function EditorNumberInput({ value = 0, min = 0, max = 999, step = 1,
             setInternalValue(prevValue);
         } else {
             setPrevValue(internalValue);
+        }
+        if (onBlur){
+            onBlur();
         }
     };
 

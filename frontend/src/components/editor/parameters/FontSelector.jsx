@@ -22,6 +22,7 @@ function FontSelector({canvas}) {
                     const activeObject = canvas.getActiveObject();
                     if (activeObject) {
                         activeObject.set("fontFamily", font);
+                        canvas.fire('object:modified', { target: activeObject });
                         canvas.requestRenderAll();
                     } else {
                         projectSettings.fontFamily = font;

@@ -27,6 +27,7 @@ import {debounce} from "lodash";
 import {customAlert, formatDouble, removeShapeListeners} from "../../utils/Utils";
 import {findMinMaxValues, setShapeProps} from "../../utils/CoordinatesUtils";
 import strokeWidth from "../../components/editor/parameters/StrokeWidth";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -38,18 +39,22 @@ export function ToolBar({canvas}) {
     const [disabledEditPolygon, setDisabledEditPolygon] = useState(true);
     const [disabledGroup, setDisabledGroup] = useState(true);
     const [projectName, setProjectName] = useState(projectSettings.projectName);
+    const [projectSaving, setProjectSaving] = useState(false);
 
     const debouncedFetchData = debounce(async () => {
-        const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectSettings.projectName);
+        setProjectSaving(true);
+        const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectName);
         if (resp.state === true){
             projectSettings.projectName = projectName;
         }
         else
             customAlert(resp.message || 'Error');
+        setProjectSaving(false);
     }, 1000);
 
     useEffect(() => {
         if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
+            setProjectSaving(true);
             debouncedFetchData();
             return debouncedFetchData.cancel;
         }
@@ -432,7 +437,7 @@ export function ToolBar({canvas}) {
                 </Menu>
             </Stack>
             <EditorTextInput
-                icon={<Typography>Name:</Typography>}
+                icon={projectSaving ? <CircularProgress /> : <Typography>Name:</Typography>}
                 value={projectSettings.projectName}
                 onChange={(input) => setProjectName(input)}
             />

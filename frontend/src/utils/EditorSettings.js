@@ -8,8 +8,9 @@ export class EditorSettings {
                     backgroundColor = '#696969',
                     strokeColor = '#be0303',
                     strokeWidth = 1,
+                    strokeOpacityPercent = 100,
                     fontSize = 16,
-                    fillStyleEnable = true,
+                    fillOpacityPercent = 100,
                     fontFamily = 'Times New Roman',
                 } = {}) {
         this.projectName = projectName;
@@ -20,8 +21,9 @@ export class EditorSettings {
         this.backgroundColor = backgroundColor;
         this.strokeColor = strokeColor;
         this.strokeWidth = strokeWidth;
+        this.strokeOpacityPercent = strokeOpacityPercent;
         this.fontSize = fontSize;
-        this.fillStyleEnable = fillStyleEnable;
+        this.fillOpacityPercent = fillOpacityPercent;
         this.fontFamily = fontFamily;
     }
 }

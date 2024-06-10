@@ -38,6 +38,7 @@ function CharSpacing({canvas}) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
                 activeObject.set("charSpacing", Number.parseInt(input));
+                canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             } else {
                 customAlert('Please select an object on the canvas first.', 'warning');

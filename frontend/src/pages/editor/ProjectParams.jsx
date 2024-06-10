@@ -16,6 +16,7 @@ import PositionSizes from "../../components/editor/parameters/PositionSizes";
 import CharSpacing from "../../components/editor/parameters/CharSpacing";
 import Shadow from "../../components/editor/effects/Shadow";
 import {EditorContext} from "./EditorContextProvider";
+import {CustomStack} from "../../components/styled/CustomStack";
 import FrameSelector from "../../components/editor/parameters/FrameSelector";
 
 function ProjectParams({canvas}) {
@@ -80,7 +81,7 @@ function ProjectParams({canvas}) {
             backgroundColor: 'background.default', height: '100%'
         }}>
             <Divider/>
-            <Stack direction="column" sx={{p: 0, m: 0, height: '100%', overflow: 'scroll'}}>
+            <CustomStack direction="column" sx={{p: 0, m: 0, height: '100%', overflow: 'scroll'}}>
                 <Accordion defaultExpanded disableGutters>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
@@ -135,7 +136,7 @@ function ProjectParams({canvas}) {
                 <FrameSelector canvas={canvas}/>
                 <Divider/>
                 <Button variant="outlined" onClick={saveProject}>Save</Button>
-            </Stack>
+            </CustomStack>
         </Container>
     );
 }
