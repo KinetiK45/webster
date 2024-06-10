@@ -14,7 +14,8 @@ function Layer({canvas, item}) {
     const [isVisible, setIsVisible] = useState(true);
 
     const toggleLock = () => {
-        item.set({
+        const object = canvas.getObjects()[item.index];
+        object.set({
             evented: isLocked,
             selectable: isLocked,
             hasControls: isLocked
@@ -24,7 +25,8 @@ function Layer({canvas, item}) {
     };
 
     const toggleVisibility = () => {
-        item.visible = !isVisible;
+        const object = canvas.getObjects()[item.index];
+        object.visible = !isVisible;
         setIsVisible(!isVisible);
         canvas.discardActiveObject();
     };
