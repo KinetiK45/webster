@@ -6,7 +6,7 @@ import {getOffsets, getPointerStart, setLineCoordinates, setPointsCoordinates} f
 import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import {removeShapeListeners} from "../../utils/Utils";
 
-function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument, setObjectsSelectable}) {
+function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstrument, setObjectsSelectable, handleShapeClick }) {
     const projectSettings = useContext(EditorContext);
     const isDrawing = useRef(false);
     const drawingLine = useRef(null);
@@ -126,7 +126,10 @@ function Line({canvas, handleFiguresClose, icon, selectedInstrument, changeInstr
         addListeners();
     };
     return (
-        <MenuItem onClick={createLine}>
+        <MenuItem onClick={() => {
+            handleShapeClick('Line', icon, createLine);
+            createLine();
+        }}>
             <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText>Line</ListItemText>
         </MenuItem>

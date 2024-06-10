@@ -1,3 +1,5 @@
+import {formatDouble} from "./Utils";
+
 export function getOffsets(canvas, opt, startX, startY) {
     const pointer = canvas.getPointer(opt.e);
     const offsetX = pointer.x - startX;
@@ -128,4 +130,61 @@ export function findMinMaxValues(points) {
     }
 
     return { minX, minY, maxX, maxY };
+}
+
+export  function clearScale(shape, scaleX, scaleY) {
+    if (!scaleX) scaleX = shape.scaleX;
+    if (!scaleY) scaleY = shape.scaleY;
+    if (scaleX === 1 && scaleY === 1) return;
+    let oldPoints = shape.points;
+    const isEllipse = shape.name === 'ellipse';
+    let newPoints = [];
+    const newWidth = formatDouble((shape.width * scaleX));
+    const newHeight = formatDouble((shape.height * scaleY));
+    const ellipseOffset = {
+        x: (shape.pathOffset.x * newWidth) / shape.width,
+        y: (shape.pathOffset.y * newHeight) / shape.height
+    }
+    const shapeProps = {
+        width: newWidth,
+        height: newHeight,
+        scaleX: 1,
+        scaleY: 1,
+        pathOffset: isEllipse ? ellipseOffset : {x: newWidth / 2, y: newHeight / 2}
+    }
+    for (let i = 0; i < oldPoints.length; i++) {
+        newPoints.push({
+            x: (newWidth * oldPoints[i].x) / shape.width,
+            y: (newHeight * oldPoints[i].y) / shape.height
+        });
+    }
+    shape.set({
+        ...shapeProps,
+        points: newPoints
+    });
+    shape.setCoords();
+}
+
+export function handleEditedPolygon(target) {
+    let oldPoints = target.points;
+    let newPoints = [];
+    const isEllipse = target.name === 'ellipse';
+    if(target.edit) {
+        if(isEllipse){
+            newPoints = oldPoints;
+        }
+        else{
+            const { minX, minY, maxX, maxY } = findMinMaxValues(oldPoints);
+            for (let i = 0; i < oldPoints.length; i++) {
+                let x = (oldPoints[i].x - minX) / (maxX - minX) * target.width;
+                let y = (oldPoints[i].y - minY) / (maxY - minY) * target.height;
+                newPoints.push({ x, y });
+            }
+        }
+        target.set({
+            points: newPoints,
+            pathOffset: isEllipse ? target.pathOffset : { x: target.width / 2, y: target.height / 2 }
+        });
+        target.setCoords();
+    }
 }

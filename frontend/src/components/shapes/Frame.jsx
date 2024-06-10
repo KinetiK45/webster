@@ -13,24 +13,21 @@ import {ListItemIcon, ListItemText} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import {FilterFrames} from "@mui/icons-material";
 
-function Frame({ canvas, icon, text, changeInstrument, setObjectsSelectable }) {
+function Frame({ canvas, changeInstrument, setObjectsSelectable, handleButtonClick, activeButtonFromIcons }) {
     const projectSettings = useContext(EditorContext);
     const frame = useRef(null);
     const startX = useRef(0);
     const startY = useRef(0);
-    let isDrawing = false;
-    const [disabledGroup, setDisabledGroup] = useState(true);
 
     const onMouseDown = function createShape(options) {
-        isDrawing = true;
         const pointer = canvas.getPointer(options.e);
         startX.current = pointer.x;
         startY.current = pointer.y;
 
         frame.current = new fabric.Rect({
             name: 'frame',
-            left: startX,
-            top: startY,
+            left: startX.current,
+            top: startY.current,
             width: 0,
             height: 0,
             fill: 'white',
@@ -38,10 +35,11 @@ function Frame({ canvas, icon, text, changeInstrument, setObjectsSelectable }) {
             strokeWidth: 1,
             selectable: false,
         });
-        canvas.add(frame);
+        canvas.add(frame.current);
+        canvas.renderAll();
     }
     const onMouseMove = function changeShape(options) {
-        if (!isDrawing) return;
+        if (!frame.current) return;
 
         const pointer = canvas.getPointer(options.e);
         const width = pointer.x - startX.current;
@@ -57,8 +55,8 @@ function Frame({ canvas, icon, text, changeInstrument, setObjectsSelectable }) {
         canvas.renderAll();
     }
     const onMouseUp = function endShape() {
-        isDrawing = false;
         frame.current.set({ selectable: true });
+        frame.current = null;
         changeInstrument('', false, true);
         setObjectsSelectable(true);
     }
@@ -74,12 +72,11 @@ function Frame({ canvas, icon, text, changeInstrument, setObjectsSelectable }) {
     }
     return (
         <IconButton
-            key={'frame'}
+            sx={{ backgroundColor: activeButtonFromIcons === 'frame' ? 'grey' : 'transparent' }}
             edge="start"
             color="inherit"
             aria-label={'create-frame'}
-            onClick={createFrame}
-            disabled={disabledGroup}
+            onClick={(event) => handleButtonClick(event, 'frame', createFrame)}
         >
             <FilterFrames/>
         </IconButton>

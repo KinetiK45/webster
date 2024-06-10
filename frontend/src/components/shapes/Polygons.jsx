@@ -11,7 +11,7 @@ import {
 } from "../../utils/CoordinatesUtils";
 import {removeShapeListeners} from "../../utils/Utils";
 
-function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument, setObjectsSelectable }) {
+function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, changeInstrument, setObjectsSelectable, handleShapeClick }) {
     const projectSettings = useContext(EditorContext);
     const figure = useRef(null);
     const startX = useRef(0);
@@ -172,7 +172,10 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         addListeners();
     }
     return (
-        <MenuItem onClick={addShape}>
+        <MenuItem onClick={() => {
+            handleShapeClick(text, icon, addShape);
+            addShape();
+        }}>
             <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText>{text}</ListItemText>
         </MenuItem>
