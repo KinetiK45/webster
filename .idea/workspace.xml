@@ -4,11 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="dima kvadrokopter" />
+    <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="dima kvadrokopter">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/editor/Editor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/editor/Editor.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/editor/Workspace.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/editor/Workspace.jsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -23,6 +35,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/ivank/Desktop/ReactWproj&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -32,7 +45,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="npm.start">
     <configuration name="start" type="js.build_tools.npm" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/frontend/package.json" />
       <command value="run" />
@@ -59,6 +72,16 @@
       <workItem from="1715950112985" duration="1909000" />
       <workItem from="1716724708956" duration="35000" />
       <workItem from="1717098170823" duration="503000" />
+      <workItem from="1717099135965" duration="2996000" />
+      <workItem from="1717151571316" duration="5666000" />
+      <workItem from="1717593294190" duration="2745000" />
+      <workItem from="1717672822208" duration="5340000" />
+      <workItem from="1717693882637" duration="2005000" />
+      <workItem from="1717753288564" duration="12467000" />
+      <workItem from="1717835563249" duration="29730000" />
+      <workItem from="1717918331186" duration="2965000" />
+      <workItem from="1718012960283" duration="1393000" />
+      <workItem from="1718106240540" duration="451000" />
     </task>
     <task id="LOCAL-00001" summary="dima kvadrokopter">
       <created>1715708315548</created>
@@ -67,7 +90,14 @@
       <option name="project" value="LOCAL" />
       <updated>1715708315548</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="dima kvadrokopter">
+      <created>1717099427330</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1717099427330</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

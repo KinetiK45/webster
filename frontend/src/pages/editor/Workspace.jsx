@@ -127,6 +127,32 @@ export function Workspace() {
                 this.isDragging = false;
                 this.selection = true;
             });
+            canvas.on('drop', function(event) {
+                event.e.stopPropagation();
+                event.e.stopImmediatePropagation();
+                event.e.preventDefault();
+
+                if(event.e.dataTransfer.files.length > 0){
+                    let files = event.e.dataTransfer.files;
+                    for (var i = 0, f; f = files[i]; i++) {
+                        if (f.type.match('image.*')) {
+                            var reader = new FileReader();
+                            reader.onload = function(evt) {
+                                fabric.Image.fromURL(evt.target.result, function(obj) {
+
+                                    obj.scaleToHeight(canvas.height);
+
+                                    obj.set('strokeWidth',0);
+
+                                    canvas.add(obj);
+
+                                });
+                            };
+                            reader.readAsDataURL(f);
+                        }
+                    }
+                }
+            });
         }
     }, [canvas]);
 

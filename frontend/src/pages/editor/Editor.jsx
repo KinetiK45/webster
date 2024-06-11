@@ -9,6 +9,7 @@ import PermDataSettingIcon from '@mui/icons-material/PermDataSetting';
 import Menu from "@mui/material/Menu";
 import {ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
+
 import {
     AddPhotoAlternateOutlined,
     ChangeHistoryOutlined,
@@ -21,6 +22,7 @@ import {EditorContext} from "./EditorContextProvider";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import Line from "../../components/shapes/Line";
 import Polygons from "../../components/shapes/Polygons";
+import DrawTools from "../../components/shapes/DrawTools";
 
 export function Editor({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -73,6 +75,10 @@ export function Editor({canvas}) {
         handleDrawClose();
         canvas.isDrawingMode = !canvas.isDrawingMode;
     }
+    function enablePen() {
+        handleDrawClose();
+        // changeInstrument('pen', false, false);
+    }
     function editPolygon() {
         const poly = canvas.getActiveObjects()[0];
         poly.edit = !poly.edit;
@@ -111,8 +117,8 @@ export function Editor({canvas}) {
         <Line key={'Line'} canvas={canvas} handleFiguresClose={handleFiguresClose}/>,
     ];
     const drawActions = [
-        {icon: <Edit fontSize="small" />, text: 'Pen', func: handleEnableDrawing},
-        {icon: <Edit fontSize="small" />, text: 'Pencil', func: handleEnableDrawing},
+        <DrawTools canvas={canvas} icon={<Edit fontSize="small" />} text={'Pen'} handleDrawClose={handleDrawClose}/>,
+        <DrawTools canvas={canvas} icon={<Gesture fontSize="small" />} text={'Pencil'} handleDrawClose={handleDrawClose} />
     ];
     const iconButtonConfigs = [
         { key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon /> },
@@ -155,10 +161,7 @@ export function Editor({canvas}) {
                 >
                     <MenuList>
                         {drawActions.map((item) => {
-                            return <MenuItem key={item.text} onClick={item.func}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText>{item.text}</ListItemText>
-                            </MenuItem>
+                            return item;
                         })}
                     </MenuList>
                 </Menu>
