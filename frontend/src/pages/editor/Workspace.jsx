@@ -147,15 +147,11 @@ export function Workspace() {
 
     useEffect(() => {
         if (canvas) {
-            // let objectIdCounter = 0;
             let history = [];
             let objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
 
             canvas.on('object:added', function (event) {
                 let object = event.target;
-                // if (!object.id) {
-                //     object.id = 'object_' + objectIdCounter++;
-                // }
                 objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
                 history.push({
                     action: 'object:added',
@@ -207,8 +203,7 @@ export function Workspace() {
                         canvas.renderAll();
                     }
                     console.log(lastChange.action);
-                }
-                else
+                } else
                     customAlert('history empty!', "info");
                 history = history.slice(0, histLen);
             }

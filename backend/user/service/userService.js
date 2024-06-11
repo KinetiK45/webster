@@ -20,13 +20,13 @@ let photoRepository;
 
 async function getById(requestedId, currentUserId) {
     try {
-        if(requestedId === undefined){
-            return { status: 400, isMatch: false, message: "Not your profile" };
+        if (requestedId === undefined) {
+            return {status: 400, isMatch: false, message: "Not your profile"};
         }
-        const user = await userRepository.findOne({ where: { id: requestedId } });
+        const user = await userRepository.findOne({where: {id: requestedId}});
         const lastPhoto = await photoRepository.findOne({
-            where: { user: { id: requestedId } },
-            order: { created_at: 'DESC' },
+            where: {user: {id: requestedId}},
+            order: {created_at: 'DESC'},
         });
         const isMatch = Boolean(user);
         return {
@@ -37,7 +37,7 @@ async function getById(requestedId, currentUserId) {
                     id: user.id,
                     full_name: user.full_name,
                     ...(requestedId === currentUserId
-                            ? { username: user.username, email: user.email }
+                            ? {username: user.username, email: user.email}
                             : {}
                     ),
                     avatar: lastPhoto
@@ -53,20 +53,20 @@ async function getById(requestedId, currentUserId) {
 }
 
 
-async function updateUserById( id, password, new_password, email, full_name ) {
+async function updateUserById(id, password, new_password, email, full_name) {
     try {
         if (id === undefined) {
-            return { status: 401, isMatch: false, message: "Authorization required" };
+            return {status: 401, isMatch: false, message: "Authorization required"};
         }
-        const user = await userRepository.findOne({ where: { id: Number.parseInt(id) } });
+        const user = await userRepository.findOne({where: {id: Number.parseInt(id)}});
         if (!user) {
-            return { status: 404, isMatch: false, message: "User not found" };
+            return {status: 404, isMatch: false, message: "User not found"};
         }
         const updates = {};
         if (password && new_password) {
             const isPasswordCorrect = await bcrypt.compare(password, user.password);
             if (!isPasswordCorrect) {
-                return { status: 404, isMatch: false, message: "Incorrect current password" };
+                return {status: 404, isMatch: false, message: "Incorrect current password"};
             }
             updates.password = await bcrypt.hash(new_password, 10);
         }
@@ -83,12 +83,12 @@ async function updateUserById( id, password, new_password, email, full_name ) {
             ...(hasUpdates && {
                 user: {
                     id: user.id,
-                    ...(email && { email }),
-                    ...(full_name && { full_name }),
+                    ...(email && {email}),
+                    ...(full_name && {full_name}),
                 },
             }),
         };
-    }catch (error) {
+    } catch (error) {
         console.error('Error fetching user by ID:', error);
         throw Error;
     }
@@ -97,11 +97,11 @@ async function updateUserById( id, password, new_password, email, full_name ) {
 async function uploadImage(file, user_id) {
     try {
         if (user_id === undefined) {
-            return { status: 401, isMatch: false, message: "Authorization required" };
+            return {status: 401, isMatch: false, message: "Authorization required"};
         }
-        const user = await userRepository.findOne(user_id);
+        const user = await userRepository.findOne({where: {id: user_id}});
         if (!user) {
-            return { status: 404, isMatch: false, message: "User not found" };
+            return {status: 404, isMatch: false, message: "User not found"};
         }
 
         const contentType = file.mimetype;
@@ -109,7 +109,7 @@ async function uploadImage(file, user_id) {
         const objectKey = `userAvatar/${generateCode(12)}${fileExtension}`;
         const fileContent = file.data;
 
-        await sendToS3PutCommand(objectKey,fileContent,contentType);
+        await sendToS3PutCommand(objectKey, fileContent, contentType);
         console.log("File uploaded to S3");
 
         const newUserAvatar = await photoRepository.create({
@@ -118,55 +118,55 @@ async function uploadImage(file, user_id) {
         });
 
         await photoRepository.save(newUserAvatar);
-        return { isMatch: true, message: "Avatar uploaded successfully", avatar: newUserAvatar };
+        return {isMatch: true, message: "Avatar uploaded successfully", avatar: newUserAvatar};
     } catch (error) {
         console.error("Error uploading avatar:", error);
-        return { status: 500, isMatch: false, message: "Error uploading avatar" };
+        return {status: 500, isMatch: false, message: "Error uploading avatar"};
     }
 }
 
 async function getImage(user_id) {
     try {
         if (user_id === undefined) {
-            return { status: 400, isMatch: false, message: "User ID is required" };
+            return {status: 400, isMatch: false, message: "User ID is required"};
         }
         const lastPhoto = await photoRepository.findOne({
-            where: { user: { id: user_id }  },
-            order: { created_at: 'DESC' },
+            where: {user: {id: user_id}},
+            order: {created_at: 'DESC'},
         });
         if (!lastPhoto) {
-            return { status: 404, isMatch: false, message: "No photos found for this user" };
+            return {status: 404, isMatch: false, message: "No photos found for this user"};
         }
         const s3Data = await sendToS3GetCommand(lastPhoto.url);
-        return { isMatch: true, message: "Photo retrieved", photo: s3Data.Body };
+        return {isMatch: true, message: "Photo retrieved", photo: s3Data.Body};
     } catch (error) {
         console.error("Error getting avatar:", error);
-        return { status: 500, isMatch: false, message: "Error getting avatar" };
+        return {status: 500, isMatch: false, message: "Error getting avatar"};
     }
 }
 
-async function getImages(user_id){
+async function getImages(user_id) {
     try {
         if (user_id === undefined) {
-            return { status: 400, isMatch: false, message: "User ID is required" };
+            return {status: 400, isMatch: false, message: "User ID is required"};
         }
         const photos = await photoRepository.find({
-            where: { userId: user_id },
-            order: { created_at: 'DESC' },
+            where: {userId: user_id},
+            order: {created_at: 'DESC'},
         });
 
         if (photos.length === 0) {
-            return { status: 404, isMatch: false, message: "No photos found for this user" };
+            return {status: 404, isMatch: false, message: "No photos found for this user"};
         }
         const images = [];
         for (const photo of photos) {
             const data = await sendToS3GetCommand(photo.url);
-            images.push({ id: photo.id, created_at: photo.created_at, content: data.Body });
+            images.push({id: photo.id, created_at: photo.created_at, content: data.Body});
         }
-        return { isMatch: true, message: "Photos retrieved successfully", data: images };
+        return {isMatch: true, message: "Photos retrieved successfully", data: images};
     } catch (error) {
         console.error("Error getting photos from S3:", error);
-        return { status: 500, isMatch: false, message: "Error getting photos from S3" };
+        return {status: 500, isMatch: false, message: "Error getting photos from S3"};
     }
 }
 

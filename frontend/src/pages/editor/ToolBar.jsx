@@ -21,6 +21,7 @@ import {customAlert, removeShapeListeners} from "../../utils/Utils";
 import {clearScale, handleEditedPolygon} from "../../utils/CoordinatesUtils";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButtons from "../../components/toolbar/IconButtons";
+import DrawTools from "../../components/shapes/DrawTools";
 
 export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -31,7 +32,8 @@ export function ToolBar({canvas}) {
     const [lastSelectedDraw, setLastSelectedDraw] = useState(null);
     const [projectName, setProjectName] = useState(projectSettings.projectName);
     const [projectSaving, setProjectSaving] = useState(false);
-    const debouncedFetchData = debounce(async () => {
+
+    const debouncedUpdateProjectName = debounce(async () => {
         setProjectSaving(true);
         const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectName);
         if (resp.state === true){
@@ -42,12 +44,17 @@ export function ToolBar({canvas}) {
         setProjectSaving(false);
     }, 1000);
     useEffect(() => {
-        if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
-            setProjectSaving(true);
-            debouncedFetchData();
-            return debouncedFetchData.cancel;
+        if (projectSettings.projectId){
+            if (projectName !== projectSettings.projectName && projectName.trim() !== ''){
+                setProjectSaving(true);
+                debouncedUpdateProjectName();
+                return debouncedUpdateProjectName.cancel;
+            }
         }
+        else
+            projectSettings.projectName = projectName;
     }, [projectName]);
+
     useEffect(() => {
         if (canvas) {
             canvas.on('selection:updated', (opt) => clearGroupScale(opt.deselected));
@@ -140,6 +147,10 @@ export function ToolBar({canvas}) {
                 enablePen();
         }},
     ];
+    // const drawActions = [
+    //     <DrawTools canvas={canvas} icon={<Edit fontSize="small" />} text={'Pen'} handleDrawClose={handleDrawClose}/>,
+    //     <DrawTools canvas={canvas} icon={<Gesture fontSize="small" />} text={'Pencil'} handleDrawClose={handleDrawClose} />
+    // ];
     return (
         <Toolbar variant="regular"
                  sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
@@ -174,11 +185,16 @@ export function ToolBar({canvas}) {
                             </MenuItem>
                         })}
                     </MenuList>
+                    {/*<MenuList>*/}
+                    {/*    {drawActions.map((item) => {*/}
+                    {/*        return item;*/}
+                    {/*    })}*/}
+                    {/*</MenuList>*/}
                 </Menu>
             </Stack>
             <EditorTextInput
                 icon={projectSaving ? <CircularProgress /> : <Typography>Name:</Typography>}
-                value={projectSettings.projectName}
+                value={projectName}
                 onChange={(input) => setProjectName(input)}
             />
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>

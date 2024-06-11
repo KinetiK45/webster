@@ -22,7 +22,6 @@ services:
     depends_on:
       - redis
       - rabbitmq
-      - initdb
     environment:
       POSTGRES_URL: ${POSTGRES_URL}
       REDIS_URL: ${REDIS_URL}
@@ -52,6 +51,9 @@ services:
   user:
     image: user:latest
 #    build: ./backend/user/
+    depends_on:
+      - mongo
+      - rabbitmq
     environment:
       RABBITMQ_URL: ${RABBITMQ_URL}
       POSTGRES_URL: ${POSTGRES_URL}
@@ -71,22 +73,47 @@ services:
       STMP_URL: ${STMP_URL}
     restart: unless-stopped
 
-  initdb:
-    image: init-db:latest
-    #    build: ./backend/initdb/
-    environment:
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_NAME: ${POSTGRES_NAME}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      BACKUP_POSTGRES: ${BACKUP_POSTGRES}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      BUCKET_NAME: ${BUCKET_NAME}
-    depends_on:
-      - postgres
-    restart: on-failure
+#  restore:
+#    image: restore:latest
+#    #    build: ./backend/initdb/restore/
+#    environment:
+#      POSTGRES_HOST: ${POSTGRES_HOST}
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      POSTGRES_NAME: ${POSTGRES_NAME}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      BACKUP_POSTGRES: ${BACKUP_POSTGRES}
+#      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#      BUCKET_NAME: ${BUCKET_NAME}
+#      MONGO_HOST: ${MONGO_HOST}
+#      MONGO_PORT: ${MONGO_PORT}
+#      MONGO_NAME: ${MONGO_NAME}
+#    depends_on:
+#      - postgres
+#      - mongo
+#    restart: on-failure
+#
+#  backup:
+#    image: backup:latest
+#    #    build: ./backend/initdb/backup/
+#    environment:
+#      POSTGRES_HOST: ${POSTGRES_HOST}
+#      POSTGRES_PORT: ${POSTGRES_PORT}
+#      POSTGRES_NAME: ${POSTGRES_NAME}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      BACKUP_POSTGRES: ${BACKUP_POSTGRES}
+#      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#      BUCKET_NAME: ${BUCKET_NAME}
+#      MONGO_HOST: ${MONGO_HOST}
+#      MONGO_PORT: ${MONGO_PORT}
+#      MONGO_NAME: ${MONGO_NAME}
+#    depends_on:
+#      - postgres
+#      - mongo
+##    restart: on-failure
 
   redis:
     image: redis:latest
@@ -106,6 +133,8 @@ services:
       - webster_mongo_db:/data/db
       - webster_mongo_configdb:/data/configdb
     restart: always
+#    ports:
+#      - "27017:27017"
 
   postgres:
     image: postgres:latest

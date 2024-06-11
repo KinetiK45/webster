@@ -9,6 +9,7 @@ import EditorContextProvider from "./pages/editor/EditorContextProvider";
 import {Workspace} from "./pages/editor/Workspace";
 import Profile from "./pages/users/Profile";
 import UserLayout from "./pages/users/UserLayout";
+import Projects from "./pages/Projects";
 
 const Login = lazy(() => import("./pages/auth/Login"));
 const Registration = lazy(() => import("./pages/auth/Registration"));
@@ -20,7 +21,7 @@ function App() {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path="/" element={<RootLayout/>}>
-                <Route index element={<Navigate to={'/projects'}/>}/>
+                <Route index element={<Projects />}/>
                 <Route path="auth" element={<AuthLayout/>}>
                     <Route path="login" element={<Login/>}/>
                     <Route path="registration" element={<Registration/>}/>

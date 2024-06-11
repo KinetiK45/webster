@@ -17,8 +17,8 @@ import {UserContext} from "../RootLayout";
 import {ListItemIcon} from "@mui/material";
 
 const pages = [
-    // {to: '/events', text: 'Events'},
-    // {to: '/companies', text: 'Companies'},
+    {to: '/', text: 'Main'},
+    {to: '/projects/create', text: 'Create'},
 ];
 
 const profileMenuItems = [
@@ -47,7 +47,7 @@ function CustomNavigation() {
                         variant="h6"
                         noWrap
                         component="a"
-                        href="/events"
+                        href="/"
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },

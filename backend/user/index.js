@@ -8,7 +8,6 @@ const morgan = require('morgan');
 const tokenMiddleware = require("./middleware/verifyToken");
 const {listenForUpdateProjectEvents} = require("./service/rabbitService");
 
-
 const app = express();
 
 app.use(cors({
@@ -33,9 +32,9 @@ app.use(router);
 app.use(express.static('images'));
 
 const PORT = process.env.PORT;
-
 listenForUpdateProjectEvents().catch((error) => {
     console.error('Error starting listener login:', error);
+    process.exit(1);
 });
 app.listen(PORT, () => {
     console.log(`Сервер запущен http://localhost:${PORT}`);

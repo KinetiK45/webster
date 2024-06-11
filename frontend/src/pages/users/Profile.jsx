@@ -4,17 +4,21 @@ import Typography from "@mui/material/Typography";
 import {useParams} from "react-router-dom";
 import Requests from "../../api/Requests";
 import Container from "@mui/material/Container";
-import {Pagination, Stack} from "@mui/material";
+import {Divider, Pagination, Stack} from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import {UserContext} from "../../RootLayout";
 import Button from "@mui/material/Button";
 import {debounce} from "lodash";
 import ProjectMini from "../../components/ProjectMini";
+import CustomImageDropzone from "../../components/inputs/CustomImageDropzone";
+import {customAlert} from "../../utils/Utils";
+import usePageName from "../../hooks/usePageName";
 
 function Profile() {
     const {user_id} = useParams();
-    const {userData} = useContext(UserContext);
+    const {userData, setUserData} = useContext(UserContext);
     const [profileData, setProfileData] = useState(undefined);
+    usePageName(profileData?.full_name || 'Profile');
 
     const [projects, setProjects] = useState([]);
     // pagenation
@@ -27,7 +31,7 @@ function Profile() {
     };
     const debouncedFetchData = debounce(async () => {
         setLoading(true);
-        const resp = await Requests.getProjects(user_id, currentPage, PAGE_SIZE);
+        const resp = await Requests.getUserProjects(user_id, currentPage, PAGE_SIZE);
         if (resp.state === true) {
             setProjects(resp.data);
             setTotalPages(resp.totalPages);
@@ -66,7 +70,7 @@ function Profile() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const resp = await Requests.getProjects(user_id);
+            const resp = await Requests.getUserProjects(user_id);
             if (resp.state === true) {
                 setProjects(resp.data);
             } else {
@@ -75,6 +79,7 @@ function Profile() {
         };
         fetchData();
     }, [user_id]);
+
     if (!profileData)
         return <CircularProgress/>
 
@@ -90,13 +95,25 @@ function Profile() {
             }}
         >
             <Stack direction="row">
-                <Avatar
-                    src={profileData.avatar}
-                    sx={{width: 200, height: 200}}
-                    variant="rounded"
-                >
-                    {profileData.full_name}
-                </Avatar>
+                {/*<Avatar*/}
+                {/*    src={profileData.avatar}*/}
+                {/*    sx={{width: 200, height: 200}}*/}
+                {/*    variant="rounded"*/}
+                {/*>*/}
+                {/*    {profileData.full_name}*/}
+                {/*</Avatar>*/}
+                <CustomImageDropzone
+                    imageLink={profileData.avatar}
+                    alt={profileData.full_name}
+                    onFileSelected={(file, renderedImage) => {
+                        Requests.avatarUpload(file).then((resp) => {
+                            if (resp.state === true) {
+                                customAlert('Avatar changed', 'success');
+                                setUserData({...userData, avatar: renderedImage});
+                            } else
+                                customAlert(resp?.message || 'Error uploading avatar', 'error');
+                        });
+                    }}/>
                 <Stack direction="column" sx={{margin: 'auto', textAlign: 'center'}}>
                     <Typography variant="h3">
                         {profileData.full_name}
@@ -108,10 +125,6 @@ function Profile() {
                     }
                 </Stack>
             </Stack>
-            <Button variant="outlined" onClick={async () => {
-                const newVar = await Requests.create_project('zaloopa proj 2');
-                console.log(newVar);
-            }}>Create project</Button>
             {totalPages > 1 &&
                 <Pagination
                     size="small"
@@ -126,8 +139,11 @@ function Profile() {
                     (<CircularProgress/>)
                     : (
                         <>
-                            {projects.map((project) => (
-                                <ProjectMini projectData={project} />
+                            {projects.map((project, index) => (
+                                <>
+                                    {index !== 0 && <Divider />}
+                                    <ProjectMini projectData={project}/>
+                                </>
                             ))}
                             {projects.length === 0 &&
                                 <Typography>No projects here</Typography>

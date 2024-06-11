@@ -17,8 +17,7 @@ function EditorContextProvider({ children }) {
             try {
                 const resp = await Requests.getProjectDetails(projectId);
                 if (resp.state === true){
-                    // TODO: array delete after Maksim fix
-                    projectSettings.projectName = resp.data[0].project_name;
+                    projectSettings.projectName = resp.data.project_name;
                 }
             } catch (e) {
                 customAlert(e.message, 'error')
