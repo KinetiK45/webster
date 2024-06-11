@@ -88,35 +88,31 @@ async function getProjectById(project_id) {
         if(project_id === undefined){
             return { status: 400, isMatch: false, message: "Project ID is required" };
         }
-        const project = await projectRepository.find({where: {id: project_id}, relations: ['user'],select: ["user.id"]});
+        const project = await projectRepository.findOne({where: {id: project_id}});
         if(!project) {
             return { status: 404, isMatch: false, message: "Project not found" };
         }
-        return { isMatch: true, message: "User project", project: project };
+        return { isMatch: true, message: "User project", project:{
+            id: project.id,
+            project_name: project.project_name,
+            updated_at: project.updated_at,
+            created_at: project.created_at,
+            userId: project.userId,
+            projectImageUrl: `https://ucodewebster.s3.amazonaws.com/${project.projectImageUrl}`
+            } };
     } catch (error) {
         console.error("Error get project by id:", error);
 
     }
 }
 
-async function updateProject(project_id, project_name, userId, projectImageUrl) {
+async function updateProject(project_id, project_name, projectImageUrl) {
     try {
-        if (userId === undefined) {
-            return { status: 401, isMatch: false, message: "Authorization required" };
-        }
+        const project = await projectRepository.findOne({where: {id: project_id}});
 
-        const projects = await projectRepository.find({ where: { id: project_id }, relations: ['user'], select: ["user.id"] });
-
-        if (projects.length === 0) {
+        if (!project) {
             return { status: 404, isMatch: false, message: "Project not found" };
         }
-
-        const project = projects[0];
-
-        // if (userId !== project.user.id) {
-        //     return { status: 400, isMatch: false, message: "It's not your project" };
-        // }
-
         const updates = {};
         if (project_name) {
             updates.project_name = project_name;
