@@ -70,9 +70,17 @@ async function getProjectByUserId(userId, page, pageSize) {
         if (!projects.length) {
             return { status: 200, isMatch: true, message: "User has no projects", projects: [] };
         }
+        const withUrlProjects = projects.map(project => ({
+            id: project.id,
+            project_name: project.project_name,
+            updated_at: project.updated_at,
+            created_at: project.created_at,
+            userId: project.userId,
+            projectImageUrl: `https://ucodewebster.s3.amazonaws.com/${project.projectImageUrl}`
+        }));
         return {
             isMatch: true,
-            projects: projects,
+            projects: withUrlProjects,
             currentPage: page,
             totalPages: Math.ceil(total / pageSize)
         };
