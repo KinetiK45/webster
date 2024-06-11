@@ -101,17 +101,37 @@ export default class Requests {
         return resp.data;
     }
 
-    //done
+    // PROJECTS
+    // file
     static async saveProject(project_id, canvasJson) {
-        // const { data, project_name } = req.body;
-
         const resp = await
             axiosInstance.post(`/projects/${project_id}/save`, canvasJson);
         return resp.data;
     }
 
-    static async getProjects(user_id = '4'){
-        const resp = await axiosInstance.get(`/projects/${user_id}/all`);
+    static async getProjects(user_id = 'me', page = 1, pageSize = 10) {
+        const resp = await axiosInstance.get(`/projects/${user_id}/all`, {
+            params: {
+                page: page,
+                pageSize: pageSize
+            }
+        });
+        return resp.data;
+    }
+
+    static async getProjectCanvas(project_id){
+        const resp = await axiosInstance.get(`/projects/${project_id}`);
+        return resp.data;
+    }
+
+    static async getProjectDetails(project_id){
+        const resp = await axiosInstance.get(`/project_details/${project_id}`);
+        return resp.data;
+    }
+
+    static async updateProjectDetails(project_id, project_name){
+        const resp = await axiosInstance
+            .patch(`/project_details/${project_id}`, {project_name});
         return resp.data;
     }
 }

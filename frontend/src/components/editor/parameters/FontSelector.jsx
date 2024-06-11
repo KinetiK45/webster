@@ -1,12 +1,14 @@
-import {MenuItem, Select, Stack, TextField} from "@mui/material";
-import React, {useContext, useEffect} from "react";
-import {customAlert} from "../../utils/Utils";
-import {EditorContext} from "../../pages/editor/EditorContextProvider";
+import React, {useContext, useEffect, useState} from "react";
+import {customAlert} from "../../../utils/Utils";
+import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 import FontDownloadIcon from "@mui/icons-material/FontDownload";
 import FontFaceObserver from "fontfaceobserver";
+import EditorSelector from "../../inputs/EditorSelector";
+import Tooltip from "@mui/material/Tooltip";
 
 function FontSelector({canvas}) {
     const projectSettings = useContext(EditorContext);
+    const [currentFontFamily, setCurrentFontFamily] = useState(projectSettings.fontFamily);
 
     const fonts = [
         'Times New Roman', 'Pacifico', 'VT323', 'Quicksand', 'Inconsolata'
@@ -20,9 +22,11 @@ function FontSelector({canvas}) {
                     const activeObject = canvas.getActiveObject();
                     if (activeObject) {
                         activeObject.set("fontFamily", font);
+                        canvas.fire('object:modified', { target: activeObject });
                         canvas.requestRenderAll();
                     } else {
-                        projectSettings.setFontFamily(font);
+                        projectSettings.fontFamily = font;
+                        setCurrentFontFamily(font);
                     }
                 }
             })
@@ -32,9 +36,9 @@ function FontSelector({canvas}) {
             });
     };
 
-    const handleFontChange = (event) => {
-        const newFont = event.target.value;
-        projectSettings.setFontFamily(newFont);
+    const handleFontChange = (newFont) => {
+        projectSettings.fontFamily = newFont;
+        setCurrentFontFamily(newFont);
         loadAndUseFont(newFont);
     };
 
@@ -42,8 +46,10 @@ function FontSelector({canvas}) {
         if (canvas) {
             const onObjectSelected = () => {
                 const activeObject = canvas.getActiveObject();
-                if (activeObject) {
-                    projectSettings.setFontFamily(activeObject.fontFamily || projectSettings.fontFamily);
+                console.log(activeObject);
+                if (activeObject?.fontFamily) {
+                    projectSettings.fontFamily = activeObject.fontFamily;
+                    setCurrentFontFamily(activeObject.fontFamily);
                 }
             };
 
@@ -58,21 +64,12 @@ function FontSelector({canvas}) {
     }, [canvas, projectSettings]);
 
     return (
-        <Stack direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-            <FontDownloadIcon/>
-            <Select
-                value={projectSettings.fontFamily}
-                onChange={handleFontChange}
-                displayEmpty
-                sx={{width: '100%', '& .MuiSelect-select': {padding: '8px', marginBottom: 0}}}
-            >
-                {fonts.map((font, index) => (
-                    <MenuItem key={index} value={font}>
-                        {font}
-                    </MenuItem>
-                ))}
-            </Select>
-        </Stack>
+        <EditorSelector
+            value={currentFontFamily}
+            options={fonts.map((font) => ({ label: font, value: font }))}
+            icon={<Tooltip title="Font family"><FontDownloadIcon fontSize="small"/></Tooltip>}
+            onChange={handleFontChange}
+        />
     )
 }
 

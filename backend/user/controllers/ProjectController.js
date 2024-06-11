@@ -39,13 +39,13 @@ async function getProject(req,res){
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        if (userId === result.project[0].user.id) {
-            return res.status(200).json({ state: true, isMatch: true});
-        }
         const projectsWithoutUser = result.project.map(project => {
             const { user, ...rest } = project;
             return rest;
         });
+        if (userId === result.project[0].user.id) {
+            return res.status(200).json({ state: true, isMatch: true , data: projectsWithoutUser});
+        }
         res.status(200).json({ state: true, data: projectsWithoutUser});
     }catch (error) {
         console.error('Error in get project:', error);

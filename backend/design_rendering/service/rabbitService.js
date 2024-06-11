@@ -1,4 +1,5 @@
 const amqplib = require('amqplib');
+const uuid = require('uuid');
 const {deleteProject} = require("./projectService");
 
 async function createRabbitMQConnection() {
@@ -25,7 +26,7 @@ async function listenForDeleteProjectEvents() {
         const event = JSON.parse(message.content.toString());
         console.log('Received event:', event);
 
-        const { project_id } = event;
+        const { project_id, eventName } = event;
         if (eventName === 'DeleteProject') {
             await deleteProject(project_id);
         }

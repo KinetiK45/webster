@@ -1,5 +1,5 @@
 const Project = require('../model/projects');
-const { createCanvas } = require('canvas');
+const { createCanvas, loadImage } = require('canvas');
 const { JSDOM } = require('jsdom');
 const fabric = require('fabric').fabric;
 const {sendToS3PutCommand} = require("../config/s3Client");
@@ -41,7 +41,8 @@ async function getById(project_id){
             return { status: 404, isMatch: false, message: "Project not found" };
         }
         const resultObject = result.toObject({ versionKey: false });
-        return { isMatch: true, project: resultObject};
+        const { _id, ...resultWithoutId } = resultObject;
+        return { isMatch: true, project: resultWithoutId};
     } catch (error) {
         throw error;
     }
@@ -49,26 +50,21 @@ async function getById(project_id){
 
 async function createImage(project_id, jsonData) {
     try {
-        const dom = new JSDOM(`<!DOCTYPE html><html><body></body></html>`);
+        const dom = new JSDOM(`<!DOCTYPE html><html><body><canvas id="c"></canvas></body></html>`);
         global.window = dom.window;
         global.document = dom.window.document;
 
-        // Create canvas element using regular DOM API
-        const canvasElement = global.document.createElement('canvas');
-        canvasElement.id = 'c';
-        global.document.body.appendChild(canvasElement);
-
-        // Initialize fabric canvas
         const canvas = new fabric.StaticCanvas('c');
         canvas.loadFromJSON(jsonData, async () => {
             const outCanvas = createCanvas(canvas.width, canvas.height);
             const ctx = outCanvas.getContext('2d');
-            // Access canvas element directly from fabric canvas object
-            const imageElement = canvas.lowerCanvasEl; // Access canvas element directly
+
+            const imageElement = await loadImage(canvas.toDataURL());
+
             if (imageElement) {
-                ctx.drawImage(imageElement, 0, 0);//error there
+                ctx.drawImage(imageElement, 0, 0);
                 const buffer = outCanvas.toBuffer('image/png');
-                const fileExtension = getFileExtension(buffer);
+                const fileExtension = getFileExtension('image/png');
                 const objectKey = `userProject/project${project_id}${fileExtension}`;
                 await sendToS3PutCommand(objectKey, buffer, 'image/png');
                 console.log("File uploaded to S3");

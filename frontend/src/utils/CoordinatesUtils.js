@@ -34,3 +34,98 @@ export function setLineCoordinates(line) {
     });
     line.setCoords();
 }
+
+export function findMaxValue(points) {
+    let maxValue = -Infinity;
+
+    for (let i = 0; i < points.length; i++) {
+        if (points[i].x > maxValue) {
+            maxValue = points[i].x;
+        }
+        if (points[i].y > maxValue) {
+            maxValue = points[i].y;
+        }
+    }
+
+    return maxValue;
+}
+
+export function getEllipsePoints(rx, ry){
+    const ellipsePoints = [];
+    for (let i = 0; i < 50; i++) {
+        const angle = (i * 2 * Math.PI) / 50;
+        ellipsePoints.push({
+            x: rx * Math.cos(angle),
+            y: ry * Math.sin(angle)
+        });
+    }
+    return ellipsePoints;
+}
+
+export function setRectangleProps(shape, startProps, width, height){
+    shape.set({
+        ...startProps,
+        points: [
+            { x: 0, y: 0 },
+            { x: width, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height },
+        ],
+    });
+}
+
+export function setPolygonProps(shape, startProps, width, height){
+    shape.set({
+        ...startProps,
+        points: [
+            { x: width / 2, y: 0 },
+            { x: width, y: height },
+            { x: 0, y: height }
+        ],
+    });
+}
+
+export function setShapeProps(name, shape, shapesProps, width, height) {
+    switch (name) {
+        case 'rectangle':
+            setRectangleProps(shape, shapesProps, width, height);
+            break;
+        case 'polygon':
+            setPolygonProps(shape, shapesProps, width, height);
+            break;
+        case 'ellipse':
+            shape.set({
+                ...shapesProps,
+                points: getEllipsePoints(width / 2, height / 2),
+                width: width,
+                height: height,
+            });
+            break;
+        default:
+            throw new Error('Непідтримувана фігура: ' + shape.name);
+    }
+}
+
+export function findMinMaxValues(points) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < points.length; i++) {
+        if (points[i].x < minX) {
+            minX = points[i].x;
+        }
+        if (points[i].y < minY) {
+            minY = points[i].y;
+        }
+        if (points[i].x > maxX) {
+            maxX = points[i].x;
+        }
+        if (points[i].y > maxY) {
+            maxY = points[i].y;
+        }
+    }
+
+    return { minX, minY, maxX, maxY };
+}

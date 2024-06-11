@@ -20,7 +20,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Projects.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 45, unique: true, nullable: false }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 45, nullable: false }),
     __metadata("design:type", String)
 ], Projects.prototype, "project_name", void 0);
 __decorate([

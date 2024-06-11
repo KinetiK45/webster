@@ -6,15 +6,14 @@ services:
     image: gateway:latest
     #    build: ./backend/api_gateway/
     ports:
-      - "3001:3001"
-    environment:
-      CERTIFICATES_PATH: ${CERTIFICATES_PATH}
-      AUTHENTICATION_URL: ${AUTHENTICATION_URL}
-      USER_URL: ${USER_URL}
-      PROJECT_URL: ${PROJECT_URL}
+      - "3001:443"
+    depends_on:
+      - user
+      - authentication
+      - design_rendering
     volumes:
-      - ${CERTIFICATES_PATH}:/certificates
-    restart: on-failure
+       - ${CERTIFICATES_PATH}:/certificates
+    restart: unless-stopped
 
 #3002
   authentication:
@@ -32,7 +31,7 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       BUCKET_NAME: ${BUCKET_NAME}
-    restart: on-failure
+    restart: unless-stopped
 
   #3003
   design_rendering:
@@ -44,7 +43,10 @@ services:
     environment:
       MONGO_DB_URL: ${MONGO_DB_URL}
       RABBITMQ_URL: ${RABBITMQ_URL}
-    restart: on-failure
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
+    restart: unless-stopped
 
   #3004
   user:
@@ -57,7 +59,7 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       BUCKET_NAME: ${BUCKET_NAME}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-    restart: on-failure
+    restart: unless-stopped
 
   notification:
     image: notification:latest
@@ -67,7 +69,7 @@ services:
     environment:
       RABBITMQ_URL: ${RABBITMQ_URL}
       STMP_URL: ${STMP_URL}
-    restart: always
+    restart: unless-stopped
 
   initdb:
     image: init-db:latest

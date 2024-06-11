@@ -10,17 +10,10 @@ const morgan = require('morgan');
 const app = express();
 
 app.use(cors({
-    origin: ['http://api_gateway'],
+    origin: ['*'],
     credentials: true,
 }));
 
-app.use(
-    session({
-        secret: 'session secret',
-        resave: false,
-        saveUninitialized: true
-    })
-);
 app.use(morgan('dev'));
 
 app.use(cookieParser());

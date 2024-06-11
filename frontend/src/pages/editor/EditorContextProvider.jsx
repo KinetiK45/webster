@@ -1,43 +1,42 @@
-import React, {useState, createContext, useContext, useEffect} from "react";
-import {Outlet} from "react-router-dom";
-import Typography from "@mui/material/Typography";
+import React, {createContext, useEffect, useState} from "react";
+import {Outlet, useParams} from "react-router-dom";
+import {EditorSettings} from "../../utils/EditorSettings";
+import Requests from "../../api/Requests";
+import {customAlert} from "../../utils/Utils";
 
-export const EditorContext = createContext();
+export const EditorContext = createContext(new EditorSettings());
 
 function EditorContextProvider({ children }) {
-    // PROJECT:
-    const [projectName, setProjectName] = useState('untitled');
-    const [projectId, setProjectId] = useState(undefined);
-    const [projectHeight, setProjectHeight] = useState(400);
-    const [projectWidth, setProjectWidth] = useState(500);
-    // COLORS:
-    const [fillColor, setFillColor] = useState('#be0303');
-    const [backgroundColor, setBackgroundColor] = useState('#696969');
-    // SIZES:
-    const [lineSize, setLineSize] = useState(3);
-    const [fontSize, setFontSize] = useState(16);
-    // OBJECTS:
-    const [fillStyleEnable, setFillStyleEnable] = useState(true);
-    // FONTS:
-    const [fontFamily, setFontFamily] = useState('Times New Roman');
-    const [activeObjects, setActiveObjects] = useState([]);
+    const [projectSettings, setProjectSettings] = useState(new EditorSettings());
+    const { projectId} = useParams();
+    const [loading, setLoading] = useState(true);
 
-    const value = {
-        projectName, setProjectName,
-        projectId, setProjectId,
-        projectHeight, setProjectHeight,
-        projectWidth, setProjectWidth,
-        fillColor, setFillColor,
-        backgroundColor, setBackgroundColor,
-        lineSize, setLineSize,
-        fontSize, setFontSize,
-        fillStyleEnable, setFillStyleEnable,
-        fontFamily, setFontFamily,
-        activeObjects, setActiveObjects
-    };
+    useEffect(() => {
+        const fetchData = async () => {
+            projectSettings.projectId = Number.parseInt(projectId);
+            try {
+                const resp = await Requests.getProjectDetails(projectId);
+                if (resp.state === true){
+                    // TODO: array delete after Maksim fix
+                    projectSettings.projectName = resp.data[0].project_name;
+                }
+            } catch (e) {
+                customAlert(e.message, 'error')
+            }
+            setLoading(false);
+        };
+        if (projectId === 'create'){
+            setLoading(false);
+        }
+        else
+            fetchData();
+    }, []);
 
+    if (loading) {
+        return <h1>Loading project...</h1>;
+    }
     return (
-        <EditorContext.Provider value={value}>
+        <EditorContext.Provider value={projectSettings}>
             <Outlet />
         </EditorContext.Provider>
     );
