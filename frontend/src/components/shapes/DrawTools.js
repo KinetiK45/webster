@@ -194,7 +194,7 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
             }
         });
 
-        const group = new fabric.Group(objectsToGroup);
+        const group = new fabric.Group(objectsToGroup,{name:'vector'});
         canvas.add(group);
         objectsToGroup.forEach(obj => canvas.remove(obj));
 

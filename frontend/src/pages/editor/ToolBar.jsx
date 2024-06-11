@@ -28,6 +28,7 @@ import {customAlert, formatDouble, removeShapeListeners} from "../../utils/Utils
 import {findMinMaxValues, setShapeProps} from "../../utils/CoordinatesUtils";
 import strokeWidth from "../../components/editor/parameters/StrokeWidth";
 import CircularProgress from "@mui/material/CircularProgress";
+import DrawTools from "../../components/shapes/DrawTools";
 
 export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -379,9 +380,13 @@ export function ToolBar({canvas}) {
               handleFiguresClose={handleFiguresClose} selectedInstrument={selectedInstrument}
               changeInstrument={changeInstrument} setObjectsSelectable={setObjectsSelectable}/>,
     ];
+    // const drawActions = [
+    //     {icon: <Gesture/>, text: 'Pencil', func: handleEnableDrawing},
+    //     {icon: <Edit/>, text: 'Pen', func: enablePen},
+    // ];
     const drawActions = [
-        {icon: <Gesture/>, text: 'Pencil', func: handleEnableDrawing},
-        {icon: <Edit/>, text: 'Pen', func: enablePen},
+        <DrawTools canvas={canvas} icon={<Edit fontSize="small" />} text={'Pen'} handleDrawClose={handleDrawClose}/>,
+        <DrawTools canvas={canvas} icon={<Gesture fontSize="small" />} text={'Pencil'} handleDrawClose={handleDrawClose} />
     ];
     const [iconButtons, setIconButtons] = useState([
         {key: 'figures', ariaLabel: 'menu', onClick: handleFiguresClick, icon: <PermDataSettingIcon/>},
@@ -421,6 +426,7 @@ export function ToolBar({canvas}) {
                         })}
                     </MenuList>
                 </Menu>
+
                 <Menu
                     anchorEl={drawingAnchorEl}
                     open={Boolean(drawingAnchorEl)}
@@ -428,10 +434,7 @@ export function ToolBar({canvas}) {
                 >
                     <MenuList>
                         {drawActions.map((item) => {
-                            return <MenuItem key={item.text} onClick={item.func}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText>{item.text}</ListItemText>
-                            </MenuItem>
+                            return item;
                         })}
                     </MenuList>
                 </Menu>
