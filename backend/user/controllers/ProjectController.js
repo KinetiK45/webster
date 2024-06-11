@@ -74,10 +74,26 @@ async function deleteProject(req,res){
         res.status(500).json({ state: false, message: "Internal server error" });
     }
 }
+
+async function getAllProject(req,res){
+    const { page = 1, pageSize = 10 } = req.query;
+    try {
+        const result = await projectService.getAllProject(page, pageSize);
+        if (!result.isMatch) {
+            return res.status(result.status).json({ state: false, message: result.message });
+        }
+        res.status(200).json({ state: true, data: result.projects, currentPage: result.currentPage, totalPages: result.totalPages });
+    }catch (error) {
+        console.error('Error in update project:', error);
+        res.status(500).json({ state: false, message: "Internal server error" });
+    }
+}
+
 module.exports = {
     createProject,
     updateProject,
     getProject,
     getProjects,
-    deleteProject
+    deleteProject,
+    getAllProject
 }

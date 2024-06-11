@@ -7,7 +7,9 @@
     "redis": "brew services start redis",
     "start-rabbitmq": "brew services start rabbitmq",
     "build": "tsc",
-    "user": "npm run build && cross-env node -r dotenv/config index.js"
+    "user": "npm run build && cross-env node -r dotenv/config index.js",
+    "run": "npm run build && node index.js"
+
   },
   "keywords": [],
   "author": "",
