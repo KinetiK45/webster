@@ -8,11 +8,19 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {customAlert} from "../utils/Utils";
+import SubLayer from "./SubLayer";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+
 function Layer({canvas, item}) {
     const [isActive, setIsActive] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
-
+    const isGroup = item && item.type === 'group';
+    const [expanded, setExpanded] = useState(false);
+    const handleToggleExpand = () => {
+        setExpanded(!expanded);
+    };
     const toggleLock = () => {
         const object = canvas.getObjects()[item.index];
         object.set({
@@ -81,6 +89,11 @@ function Layer({canvas, item}) {
             <Typography sx={{m: "auto"}}>
                 {item.name ? item.name : item.type} {item.itemNumber}
             </Typography>
+            {isGroup && (
+                <IconButton onClick={handleToggleExpand}>
+                    {expanded ? <ExpandLessIcon fontSize={'small'}/> : <ExpandMoreIcon fontSize={'small'}/>}
+                </IconButton>
+            )}
             <IconButton
                 onClick={deleteObject}
             >
@@ -93,6 +106,9 @@ function Layer({canvas, item}) {
                 {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
         </Stack>
+        {isGroup && expanded && item._objects.map((subObject, index) => (
+            <SubLayer key={index} canvas={canvas} level={0} object={subObject} />
+        ))}
     </React.Fragment>;
 }
 

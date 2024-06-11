@@ -27,7 +27,7 @@ function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIc
     }
     return (
         <IconButton
-            sx={{ backgroundColor: activeButtonFromIcons === 'add-image' ? 'grey' : 'transparent' }}
+            sx={{ backgroundColor: activeButtonFromIcons === 'add-image' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}
             edge="start"
             color="inherit"
             aria-label={'add-image'}

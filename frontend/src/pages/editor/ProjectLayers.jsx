@@ -11,19 +11,38 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 function ProjectLayers({canvas}) {
     const [objects, setObjects] = useState([]);
     const objectsRef = useRef([]);
+    const groupCount = useRef(0);
 
     useEffect(() => {
         objectsRef.current = canvas.getObjects();
     }, [objects]);
 
+    function flattenCanvasObjects(canvasObjects) {
+        const result = [];
+
+        function recurse(objects) {
+            objects.forEach((item) => {
+                if (item.type === 'group' && Array.isArray(item._objects)) {
+                    recurse(item._objects);
+                }
+                result.push(item);
+            });
+        }
+
+        recurse(canvasObjects);
+        return result;
+    }
     function calculateItemNumber(item, canvasObjects) {
-        return item.name ?
-            canvasObjects
-            .filter((value) => value.name === item.name)
-            .indexOf(item) :
-            canvasObjects
-            .filter((value) => value.type === item.type)
-            .indexOf(item);
+        const flattenedObjects = flattenCanvasObjects(canvasObjects);
+        if (item.name) {
+            return flattenedObjects
+                .filter((value) => value.name === item.name)
+                .indexOf(item);
+        } else {
+            return flattenedObjects
+                .filter((value) => value.type === item.type)
+                .indexOf(item);
+        }
     }
 
     function makePointsVisible(active) {
@@ -73,14 +92,30 @@ function ProjectLayers({canvas}) {
         moveObjectToIndex(objlen - 1 - source.index, objlen - 1 - destination.index);
     };
 
-    const updateObjects = (canvasObjects) => {
-        const updatedObjects = canvasObjects.map((item, index) => ({
+    const processItem = (canvasObjects, item, index = null, groupIndex = null) => {
+        const objectData = {
             needToHide: item.needToHide,
             name: item.name,
             type: item.type,
             index: index,
+            groupIndex: groupIndex,
             itemNumber: calculateItemNumber(item, canvasObjects)
-        }));
+        }
+        if (item.type === 'group' && Array.isArray(item._objects)) {
+            item.index = groupCount.current++;
+            const objects = item._objects.map((groupItem, index) =>
+                processItem(canvasObjects, groupItem, index, item.index)
+            );
+            objectData._objects = objects.reverse();
+        }
+        return objectData;
+    };
+
+    const updateObjects = (canvasObjects) => {
+        const updatedObjects = canvasObjects.map((item, index) =>
+            processItem(canvasObjects, item, index)
+        );
+
         setObjects(updatedObjects.reverse());
     };
 

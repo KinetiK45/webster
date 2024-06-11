@@ -70,7 +70,7 @@ function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClic
     }
     return (
         <IconButton
-            sx={{ backgroundColor: activeButtonFromIcons === 'add-text' ? 'grey' : 'transparent' }}
+            sx={{ backgroundColor: activeButtonFromIcons === 'add-text' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}
             edge="start"
             color="inherit"
             aria-label={'add-text'}

@@ -1,8 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import {Gesture, Group, KeyboardArrowDown} from "@mui/icons-material";
-import Frame from "../shapes/Frame";
+import {
+    FormatShapes,
+    FormatShapesOutlined,
+    FormatShapesSharp,
+    Gesture,
+    Group, GroupAddOutlined, Groups, Groups3Sharp,
+    KeyboardArrowDown, ShapeLineOutlined
+} from "@mui/icons-material";
+import FolderIcon from '@mui/icons-material/Folder';
 import Text from "../shapes/Text";
 import Image from "../shapes/Image";
 import {fabric} from "fabric";
@@ -76,7 +83,11 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
     };
     return (
         <Stack direction="row" spacing={0.5}>
-            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: activeButtonFromIcons === 'shapes' ? 'grey' : 'transparent' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: activeButtonFromIcons === 'shapes' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    cursor: 'pointer',
+                }}}>
                 <IconButton
                     aria-label="last-tool"
                     onClick={(event) => {
@@ -85,38 +96,48 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
                 >
                     {lastSelectedTool ? lastSelectedTool.icon : <PermDataSettingIcon />}
                 </IconButton>
-                <IconButton
-                    aria-label="menu"
-                    onClick={(event) => {
-                        handleButtonClick(event, 'shapes', handleFiguresClick)
-                    }}
-                >
-                    <KeyboardArrowDown fontSize={'small'}/>
-                </IconButton>
+                <KeyboardArrowDown fontSize={'small'}
+                                   sx={{
+                                       transition: 'transform 0.2s ease-in-out',
+                                       '&:hover': {
+                                           transform: 'translateY(2px)',
+                                           cursor: 'pointer',
+                                       }
+                                   }}
+                                   onClick={(event) => {
+                                       handleButtonClick(event, 'shapes', handleFiguresClick)
+                                   }}/>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: activeButtonFromIcons === 'draws' ? 'grey' : 'transparent' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: activeButtonFromIcons === 'draws' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                    cursor: 'pointer',
+                }}}>
                 <IconButton
                     aria-label="last-draw"
                     onClick={(event) => {
                         handleButtonClick(event, 'draws', lastSelectedDraw ? lastSelectedDraw.onClick : handleDrawClick);
                     }}
                     >
-                    {lastSelectedDraw ? lastSelectedDraw.icon : <Gesture />}
+                    {lastSelectedDraw ?  lastSelectedDraw.icon : <Gesture />}
                 </IconButton>
-                <IconButton
-                    aria-label="menu"
-                    onClick={(event) => {
-                        handleButtonClick(event, 'draws', handleDrawClick)
-                    }}
-                >
-                    <KeyboardArrowDown fontSize={'small'}/>
-                </IconButton>
+                <KeyboardArrowDown fontSize={'small'}
+                                   sx={{
+                                       transition: 'transform 0.2s ease-in-out',
+                                       '&:hover': {
+                                           transform: 'translateY(2px)',
+                                           cursor: 'pointer',
+                                       }
+                                   }}
+                                   onClick={(event) => {
+                                       handleButtonClick(event, 'draws', handleDrawClick)
+                                   }}/>
             </Box>
-            <Frame key="frame" {...commonProps} />
+            {/*<Frame key="frame" {...commonProps} />*/}
             <Text key="add-text" {...commonProps} />
             <Image key="add-image" {...commonProps} />
-            <IconButton key="edit-polygon" aria-label="menu" disabled={disabledEditPolygon} onClick={(event) => handleButtonClick(event, 'edit-polygon', editPolygon)} sx={{ backgroundColor: activeButtonFromIcons === 'edit-polygon' ? 'grey' : 'transparent' }}><Gesture /></IconButton>
-            <IconButton key="group" aria-label="create-group" disabled={disabledGroup} onClick={(event) => handleButtonClick(event, 'group', createGroup)} sx={{ backgroundColor: activeButtonFromIcons === 'group' ? 'grey' : 'transparent' }}><Group /></IconButton>
+            <IconButton key="edit-polygon" aria-label="menu" disabled={disabledEditPolygon} onClick={(event) => handleButtonClick(event, 'edit-polygon', editPolygon)} sx={{ backgroundColor: activeButtonFromIcons === 'edit-polygon' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}><FormatShapes /></IconButton>
+            <IconButton key="group" aria-label="create-group" disabled={disabledGroup} onClick={(event) => handleButtonClick(event, 'group', createGroup)} sx={{ backgroundColor: activeButtonFromIcons === 'group' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}><Groups  /></IconButton>
         </Stack>
     );
 }

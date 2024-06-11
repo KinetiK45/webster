@@ -181,7 +181,7 @@ export function Workspace() {
                     object: oldObj,
                     index: index,
                 });
-                console.log(`modified ${object.top} ${oldObj.top}`);
+                // console.log(`modified ${object.top} ${oldObj.top}`);
                 objectsPrev = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
             })
 
@@ -216,7 +216,7 @@ export function Workspace() {
             document.addEventListener('keydown', function (event) {
                 // customAlert(event.keyCode, 'info');
                 if (
-                    // (event.metaKey || event.ctrlKey) &&
+                    (event.metaKey || event.ctrlKey) &&
                     event.keyCode === 90) {
                     event.preventDefault();
                     undo();
