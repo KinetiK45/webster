@@ -28,8 +28,6 @@ export async function logout(){
     if (resp.state === true){
         window.location.href = '/auth/login';
     }
-    else
-        alert(`logout error ${JSON.stringify(resp)}`)
 }
 
 export function customAlert(text, variant = 'info') {

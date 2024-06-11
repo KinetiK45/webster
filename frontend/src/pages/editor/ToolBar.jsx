@@ -41,7 +41,7 @@ export function ToolBar({canvas}) {
     const [projectName, setProjectName] = useState(projectSettings.projectName);
     const [projectSaving, setProjectSaving] = useState(false);
 
-    const debouncedFetchData = debounce(async () => {
+    const debouncedUpdateProjectName = debounce(async () => {
         setProjectSaving(true);
         const resp = await Requests.updateProjectDetails(projectSettings.projectId, projectName);
         if (resp.state === true){
@@ -53,12 +53,17 @@ export function ToolBar({canvas}) {
     }, 1000);
 
     useEffect(() => {
-        if (projectName !== projectSettings.projectName && projectName.trim() !== '' && projectSettings.projectId){
-            setProjectSaving(true);
-            debouncedFetchData();
-            return debouncedFetchData.cancel;
+        if (projectSettings.projectId){
+            if (projectName !== projectSettings.projectName && projectName.trim() !== ''){
+                setProjectSaving(true);
+                debouncedUpdateProjectName();
+                return debouncedUpdateProjectName.cancel;
+            }
         }
+        else
+            projectSettings.projectName = projectName;
     }, [projectName]);
+
     useEffect(() => {
         if (imgPath === '') return;
         fabric.Image.fromURL(imgPath, function (img) {
@@ -438,7 +443,7 @@ export function ToolBar({canvas}) {
             </Stack>
             <EditorTextInput
                 icon={projectSaving ? <CircularProgress /> : <Typography>Name:</Typography>}
-                value={projectSettings.projectName}
+                value={projectName}
                 onChange={(input) => setProjectName(input)}
             />
             <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>

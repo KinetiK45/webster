@@ -1,0 +1,37 @@
+{
+  "state": true,
+  "data": [
+    {
+      "id": 2,
+      "project_name": "hello Ni99eR",
+      "updated_at": "2024-06-11T19:20:21.403Z",
+      "created_at": "2024-06-04T16:16:13.452Z",
+      "projectImageUrl": "https://ucodewebster.s3.amazonaws.com/userProject/project2.png",
+      "creatorId": 3,
+      "creatorName": "Alice Johnson",
+      "creatorAvatarLink": "https://via.placeholder.com/50/FFFF00/000000?text=AJ"
+    },
+    {
+      "id": 3,
+      "project_name": "Hooi",
+      "updated_at": "2024-06-10T10:46:10.914Z",
+      "created_at": "2024-06-05T09:45:27.368Z",
+      "projectImageUrl": "https://ucodewebster.s3.amazonaws.com/userProject/project3.png",
+      "creatorId": 1,
+      "creatorName": "John Doe",
+      "creatorAvatarLink": "https://via.placeholder.com/50/0000FF/808080?text=JD"
+    },
+    {
+      "id": 4,
+      "project_name": "Hello World",
+      "updated_at": "2024-06-11T17:30:13.031Z",
+      "created_at": "2024-06-11T12:54:39.258Z",
+      "projectImageUrl": "https://ucodewebster.s3.amazonaws.com/userProject/project4.png",
+      "creatorId": 2,
+      "creatorName": "Jane Smith",
+      "creatorAvatarLink": "https://via.placeholder.com/50/FF0000/FFFFFF?text=JS"
+    }
+  ],
+  "currentPage": 2,
+  "totalPages": 2
+}

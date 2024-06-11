@@ -1,4 +1,6 @@
 import axios from "axios";
+import mainPageDataset from './mainPageDataset1.json';
+import mainPageDataset2 from './mainPageDataset2.json';
 import {logout} from "../utils/Utils";
 
 const ip = new URL(window.location.origin).hostname;
@@ -101,6 +103,18 @@ export default class Requests {
         return resp.data;
     }
 
+    static async avatarUpload(file){
+        const data = new FormData();
+        data.append('photo', file);
+        const config = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        };
+        const resp = await axiosInstance.patch(`/users/avatar`, data, config);
+        return resp.data;
+    }
+
     // PROJECTS
     // file
     static async saveProject(project_id, canvasJson) {
@@ -109,7 +123,7 @@ export default class Requests {
         return resp.data;
     }
 
-    static async getProjects(user_id = 'me', page = 1, pageSize = 10) {
+    static async getUserProjects(user_id = 'me', page = 1, pageSize = 10) {
         const resp = await axiosInstance.get(`/projects/${user_id}/all`, {
             params: {
                 page: page,
@@ -117,6 +131,28 @@ export default class Requests {
             }
         });
         return resp.data;
+    }
+
+    static async getProjects({page = 1, limit = 20, order = 'ASC',
+                                 searchValue = '',
+                                 dateFrom = '', dateTo = ''}) {
+        // const config = {
+        //     params: {
+        //         page: page,
+        //         limit: limit,
+        //         order: order,
+        //         search: searchValue,
+        //         dateFrom: dateFrom,
+        //         dateTo: dateTo,
+        //     }
+        // };
+        // const resp = await axiosInstance.get(
+        //     `/projects`, config
+        // );
+        if (page === 1)
+            return Promise.resolve(mainPageDataset);
+        return Promise.resolve(mainPageDataset2);
+        // return resp.data;
     }
 
     static async getProjectCanvas(project_id){
