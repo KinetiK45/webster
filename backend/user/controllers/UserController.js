@@ -86,7 +86,7 @@ async function userAllAvatars(req, res) {
 async function getByName(req,res){
     const {stringValue} = req.query;
     try {
-        const result = await userService.getByFullName(stringValue, req.senderData?.id);
+        const result = await userService.getByFullName(stringValue);
         if (!result.isMatch) {
             return res.status(result.status).json({state: false, message: result.message});
         }

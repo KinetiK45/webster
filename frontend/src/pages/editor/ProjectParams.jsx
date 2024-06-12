@@ -19,10 +19,6 @@ import {EditorContext} from "./EditorContextProvider";
 import {CustomStack} from "../../components/styled/CustomStack";
 
 function ProjectParams({canvas}) {
-    const { projectId } = useParams();
-    const projectSettings = useContext(EditorContext);
-    const { userData } = useContext(UserContext);
-
     const [currentSelectedType, setCurrentSelectedType] = useState(undefined);
     const [textAccordion, setTextAccordion] = useState(false);
     const [strokeAndColours, setStrokeAndColours] = useState(false);
@@ -82,55 +78,6 @@ function ProjectParams({canvas}) {
         }
         if (typesToCheckFill.some(type => currentTypes.has(type))) {
             setFill(true);
-        }
-    }
-    function getCanvasSize(){
-        const bounds = canvas.getObjects().reduce((acc, obj) => {
-            const objBounds = obj.getBoundingRect();
-            const left = objBounds.left;
-            const top = objBounds.top;
-            const right = left + objBounds.width;
-            const bottom = top + objBounds.height;
-
-            acc.minX = Math.min(acc.minX, left);
-            acc.minY = Math.min(acc.minY, top);
-            acc.maxX = Math.max(acc.maxX, right);
-            acc.maxY = Math.max(acc.maxY, bottom);
-
-            return acc;
-        }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
-
-        const width = bounds.maxX - bounds.minX;
-        const height = bounds.maxY - bounds.minY;
-        return {width, height};
-    }
-
-    async function saveProject() {
-        const {width, height} = getCanvasSize();
-        const canvasData = canvas.toJSON();
-        canvasData.width = width;
-        canvasData.height = height;
-        if (projectId === 'create' && !userData) {
-            localStorage.setItem('project', JSON.stringify(canvasData));
-            customAlert('Authorization is required', 'warning');
-            window.location.href = '/auth/login';
-        } else if (projectId === 'create' && userData) {
-            const resp = await Requests.create_project(projectSettings.projectName);
-            if (resp.state === true) {
-                const projId = resp.data;
-                await Requests.saveProject(projId, canvasData);
-                customAlert('Success', 'success');
-            } else
-                customAlert(resp.message || 'Error', 'error');
-        } else{
-            Requests.saveProject(projectId, canvasData)
-                .then((resp) => {
-                    customAlert(resp.state ? 'Saved' : 'Error',
-                        resp.state ? 'success' : 'error')
-                })
-                .catch((e) => {
-                    customAlert(e.toString(), 'error')
-                })
         }
     }
 

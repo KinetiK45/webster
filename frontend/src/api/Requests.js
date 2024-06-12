@@ -1,6 +1,4 @@
 import axios from "axios";
-import mainPageDataset from './mainPageDataset1.json';
-import mainPageDataset2 from './mainPageDataset2.json';
 import {logout} from "../utils/Utils";
 
 const ip = new URL(window.location.origin).hostname;
@@ -115,6 +113,11 @@ export default class Requests {
         return resp.data;
     }
 
+    static async findByUsername(username_part) {
+        const resp = await axiosInstance.get(`/users/find?stringValue=${username_part}`);
+        return resp.data;
+    }
+
     // PROJECTS
     // file
     static async saveProject(project_id, canvasJson) {
@@ -133,25 +136,22 @@ export default class Requests {
         return resp.data;
     }
 
-    static async getProjects({page = 1, limit = 20, order = 'ASC',
+    static async getProjects({page = 1, pageSize = 20, order = 'ASC',
                                  searchValue = '',
-                                 dateFrom = '', dateTo = ''}) {
+                                 dateFrom = '', dateTo = '', userId = undefined}) {
         const config = {
             params: {
                 page: page,
-                limit: limit,
-                order: order,
+                pageSize: pageSize,
                 search: searchValue,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
+                userId: userId,
             }
         };
         const resp = await axiosInstance.get(
-            `/main/page`
+            `/main/page`, config
         );
-        // if (page === 1)
-        //     return Promise.resolve(mainPageDataset);
-        // return Promise.resolve(mainPageDataset2);
         return resp.data;
     }
 

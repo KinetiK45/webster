@@ -14,6 +14,7 @@ import ProjectMini from "../components/ProjectMini";
 import usePageName from "../hooks/usePageName";
 import {CustomStack} from "../components/styled/CustomStack";
 import ProjectMiniSkeleton from "../components/skeletons/ProjectMiniSkeleton";
+import {UserSearch} from "../components/inputs/UserSearch";
 
 function Projects() {
     usePageName('Projects');
@@ -23,16 +24,19 @@ function Projects() {
 
     const [searchValue, setSearchValue] = useState('');
     const [searchOptions, setSearchOptions] = useState([]);
-    const ONE_PAGE_LIMIT = 20;
+    const ONE_PAGE_LIMIT = 24;
     const [loading, setLoading] = useState(true);
     const [searchLoading, setSearchLoading] = useState(false);
+
+    //filters
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [userIdFilter, setUserIdFilter] = useState(undefined);
 
     const debouncedFetchData = debounce(async () => {
         setLoading(true);
         const data = {
-            limit: ONE_PAGE_LIMIT,
+            pageSize: ONE_PAGE_LIMIT,
             searchValue: searchValue,
             page: 1
         }
@@ -43,6 +47,9 @@ function Projects() {
             data.dateFrom = new Date(dateFrom).toISOString()
         if (new Date(dateTo).toString() !== 'Invalid Date')
             data.dateTo = new Date(dateTo).toISOString()
+        if (userIdFilter){
+            data.userId = userIdFilter;
+        }
 
         const resp = await Requests.getProjects(data);
         if (resp.state === true) {
@@ -60,7 +67,7 @@ function Projects() {
         setLoading(true);
         debouncedFetchData();
         return debouncedFetchData.cancel;
-    }, [page, searchValue, dateFrom, dateTo]);
+    }, [page, searchValue, dateFrom, dateTo, userIdFilter]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -82,15 +89,16 @@ function Projects() {
                     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)'
                 }}>
                     <Stack direction="column" gap={2}>
+                        <UserSearch handleIdSelect={(user_id) => setUserIdFilter(user_id)} />
                         <CustomInputField
-                            onChangeChecked={(key, value) => setDateFrom(value)}
+                            onChangeChecked={setDateFrom}
                             id="eventDateFrom"
                             label="Date from"
                             type="datetime-local"
                             InputLabelProps={{ shrink: true }}
                         />
                         <CustomInputField
-                            onChangeChecked={(key, value) => setDateTo(value)}
+                            onChangeChecked={setDateTo}
                             id="eventDateTo"
                             label="Date to"
                             type="datetime-local"
