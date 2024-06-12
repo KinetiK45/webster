@@ -76,9 +76,9 @@ async function deleteProject(req,res){
 }
 
 async function getAllProject(req,res){
-    const { dateTo, dateFrom ,page = 1, pageSize = 10, userId } = req.query;
+    const { dateTo, dateFrom ,page = 1, pageSize = 10, userId, search } = req.query;
     try {
-        const result = await projectService.getAllProject(page, pageSize, dateTo , dateFrom, userId);
+        const result = await projectService.getAllProject(page, pageSize, dateTo , dateFrom, userId,search);
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
