@@ -94,7 +94,7 @@ async function getProjectByUserId(userId, page, pageSize) {
     }
 }
 
-async function getAllProject(page, pageSize, dateTo, dateFrom, userId) {
+async function getAllProject(page, pageSize, dateTo, dateFrom, userId, search) {
     try {
         const query = projectRepository.createQueryBuilder('project')
             .leftJoinAndSelect('project.user', 'user')
@@ -114,6 +114,10 @@ async function getAllProject(page, pageSize, dateTo, dateFrom, userId) {
         if(userId !== undefined){
             query.andWhere('project.user.id = :userId', { userId });
         }
+        if (search !== undefined) {
+            query.andWhere('LOWER(project.project_name) LIKE :search', { search: `%${search.toLowerCase()}%` });
+        }
+
         const [projects, total] = await query.getManyAndCount();
 
         if (!projects.length) {

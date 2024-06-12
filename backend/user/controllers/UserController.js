@@ -83,10 +83,25 @@ async function userAllAvatars(req, res) {
     }
 }
 
+async function getByName(req,res){
+    const {stringValue} = req.query;
+    try {
+        const result = await userService.getByFullName(stringValue, req.senderData?.id);
+        if (!result.isMatch) {
+            return res.status(result.status).json({state: false, message: result.message});
+        }
+        res.status(200).json({state: true, data: result.users});
+    } catch (error) {
+        console.error('Error in userAvatar:', error);
+        res.status(500).json({state: false, message: "Internal server error"});
+    }
+}
+
 module.exports = {
     getUser,
     updateUser,
     userAvatarUpload,
     userAvatar,
-    userAllAvatars
+    userAllAvatars,
+    getByName
 }

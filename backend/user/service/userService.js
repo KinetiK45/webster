@@ -42,7 +42,7 @@ async function getById(requestedId, currentUserId) {
                     ),
                     avatar: lastPhoto
                         ? `https://ucodewebster.s3.amazonaws.com/${lastPhoto.url}`
-                        : ''
+                        : `https://ucodewebster.s3.amazonaws.com/img.png`
                 },
             }),
         };
@@ -91,6 +91,33 @@ async function updateUserById(id, password, new_password, email, full_name) {
     } catch (error) {
         console.error('Error fetching user by ID:', error);
         throw Error;
+    }
+}
+
+async function getByFullName(value,id_to_exclude){
+    try {
+        const query = userRepository.createQueryBuilder('user')
+            .leftJoinAndSelect('user.photos', 'photos')
+            .andWhere('LOWER(user.full_name) LIKE :value', { value: `%${value.toLowerCase()}%` });
+        if(id_to_exclude !== undefined){
+            query.andWhere('user.id != :id_to_exclude', { id_to_exclude });
+        }
+        const users = await query.getMany();
+        if (!users.length) {
+            return { status: 200, isMatch: true, message: "User with this name don't found", users: [] };
+        }
+        const usersWithUrl = users.map(user => {
+            const photoUrl = user && user.photos ? user.photos.url : null;
+            const avatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            return {
+                id: user.id,
+                full_name: user.full_name,
+                avatar: avatarLink
+            }
+        });
+        return { isMatch: true, users: usersWithUrl };
+    } catch (error) {
+        throw error;
     }
 }
 
@@ -175,5 +202,6 @@ module.exports = {
     updateUserById,
     uploadImage,
     getImage,
-    getImages
+    getImages,
+    getByFullName
 }
