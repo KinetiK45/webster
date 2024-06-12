@@ -5,10 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="dima kvadrokopter">
+      <change afterPath="$PROJECT_DIR$/backend/initdb/restore/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/user/routers/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/InitDB_build.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/editor/Editor.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/editor/Editor.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/editor/Workspace.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/editor/Workspace.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/backup.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/backup.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/restore/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/initdb/restore.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/restore/restore.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/nginx/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/middleware/verifyToken.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/middleware/verifyToken.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/ormPostgresConfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/ormPostgresConfig.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/routers/projectRouter.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/routers/projectRouter.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/routers/router.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/routers/router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/service/projectService.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/service/projectService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/Requests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/Requests.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,22 +45,58 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/ivank/Desktop/ReactWproj&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/ivank/Desktop/ReactWproj",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Users/maksympol/Documents/FullStack/webster/backend/authentication/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="npm.start">
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/backend/user/routers" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.Frontend">
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml" />
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yml.api_gateway: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="api_gateway" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yml.postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="postgres" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
     <configuration name="start" type="js.build_tools.npm" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/frontend/package.json" />
       <command value="run" />
@@ -56,6 +107,38 @@
       <envs />
       <method v="2" />
     </configuration>
+    <configuration name="user" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/backend/user/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="user" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.Authentication build" />
+      <item itemvalue="Docker.Compose" />
+      <item itemvalue="Docker.Design rendering build" />
+      <item itemvalue="Docker.Gateway build" />
+      <item itemvalue="Docker.restore" />
+      <item itemvalue="Docker.Notification build" />
+      <item itemvalue="Docker.backup" />
+      <item itemvalue="Docker.User build" />
+      <item itemvalue="Docker.docker-compose.yml.api_gateway: Compose Deployment" />
+      <item itemvalue="Docker.docker-compose.yml.postgres: Compose Deployment" />
+      <item itemvalue="npm.start" />
+      <item itemvalue="npm.Frontend" />
+      <item itemvalue="npm.user" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.docker-compose.yml.api_gateway: Compose Deployment" />
+        <item itemvalue="npm.user" />
+        <item itemvalue="Docker.docker-compose.yml.postgres: Compose Deployment" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -111,5 +194,17 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="dima kvadrokopter" />
     <option name="LAST_COMMIT_MESSAGE" value="dima kvadrokopter" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/backend/user/service/projectService.js</url>
+          <line>108</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

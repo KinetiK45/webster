@@ -52,7 +52,7 @@ async function getProjects(req,res){
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
-        res.status(200).json({ state: true, data: result.projects, currentPage: result.currentPage, totalPages: result.totalPages });
+        res.status(200).json({ state: true, data: result.projects, currentPage: result.currentPage,  total: result.total, totalPages: result.totalPages });
     }catch (error) {
         console.error('Error in update project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
@@ -84,7 +84,7 @@ async function getAllProject(req,res){
         }
         res.status(200).json({ state: true, data: result.projects, currentPage: result.currentPage, totalPages: result.totalPages });
     }catch (error) {
-        console.error('Error in update project:', error);
+        console.error('Error in get all project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
     }
 }

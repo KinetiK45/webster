@@ -1,13 +1,16 @@
 const myDataSourcePromise = require("../config/ormSource");
 const {Users} = require("../model/users");
 const {Projects} = require("../model/projects");
+const {Photos} = require("../model/photos");
 let userRepository;
 let projectRepository;
+let photoRepository;
 (async () => {
     try {
         const myDataSource = await myDataSourcePromise;
         userRepository = myDataSource.getRepository(Users);
         projectRepository = myDataSource.getRepository(Projects);
+        photoRepository = myDataSource.getRepository(Photos);
     } catch (error) {
         console.error("Error initializing userRepository:", error);
         throw error;
@@ -82,6 +85,7 @@ async function getProjectByUserId(userId, page, pageSize) {
             isMatch: true,
             projects: withUrlProjects,
             currentPage: page,
+            total: total,
             totalPages: Math.ceil(total / pageSize)
         };
     } catch (error) {
@@ -95,19 +99,26 @@ async function getAllProject(page, pageSize) {
         const [projects, total] = await projectRepository.findAndCount({
             skip: (page - 1) * pageSize,
             take: pageSize,
-            order: { id: 'ASC' }
+            order: { id: 'ASC' },
+            relations: ['user','user.photos'],
         });
         if (!projects.length) {
             return { status: 200, isMatch: true, message: "User has no projects", projects: [] };
         }
-        const withUrlProjects = projects.map(project => ({
-            id: project.id,
-            project_name: project.project_name,
-            updated_at: project.updated_at,
-            created_at: project.created_at,
-            userId: project.userId,
-            projectImageUrl: `https://ucodewebster.s3.amazonaws.com/${project.projectImageUrl}`
-        }));
+        const withUrlProjects = projects.map(project => {
+            const photoUrl = project.user && project.user.photos ? project.user.photos.url : null;
+            const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${project.user.photos.url}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            return {
+                id: project.id,
+                project_name: project.project_name,
+                updated_at: project.updated_at,
+                created_at: project.created_at,
+                projectImageUrl: `https://ucodewebster.s3.amazonaws.com/${project.projectImageUrl}`,
+                creatorId: project.user.id,
+                creatorName: project.user.full_name,
+                creatorAvatarLink: creatorAvatarLink
+            };
+        });
         return {
             isMatch: true,
             projects: withUrlProjects,
@@ -115,7 +126,6 @@ async function getAllProject(page, pageSize) {
             totalPages: Math.ceil(total / pageSize)
         };
     } catch (error) {
-        console.error("Error getting user projects:", error);
         throw error;
     }
 }

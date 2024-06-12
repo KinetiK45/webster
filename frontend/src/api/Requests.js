@@ -136,23 +136,23 @@ export default class Requests {
     static async getProjects({page = 1, limit = 20, order = 'ASC',
                                  searchValue = '',
                                  dateFrom = '', dateTo = ''}) {
-        // const config = {
-        //     params: {
-        //         page: page,
-        //         limit: limit,
-        //         order: order,
-        //         search: searchValue,
-        //         dateFrom: dateFrom,
-        //         dateTo: dateTo,
-        //     }
-        // };
-        // const resp = await axiosInstance.get(
-        //     `/projects`, config
-        // );
-        if (page === 1)
-            return Promise.resolve(mainPageDataset);
-        return Promise.resolve(mainPageDataset2);
-        // return resp.data;
+        const config = {
+            params: {
+                page: page,
+                limit: limit,
+                order: order,
+                search: searchValue,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+            }
+        };
+        const resp = await axiosInstance.get(
+            `/main/page`
+        );
+        // if (page === 1)
+        //     return Promise.resolve(mainPageDataset);
+        // return Promise.resolve(mainPageDataset2);
+        return resp.data;
     }
 
     static async getProjectCanvas(project_id){

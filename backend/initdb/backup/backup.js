@@ -4,6 +4,20 @@ const fs = require("fs");
 const path = require("path");
 
 process.env.PATH = `${process.env.PATH}:/usr/lib/postgresql/16/bin`;
+process.env.PATH = `${process.env.PATH}:/usr/local/bin`;
+const requiredEnvVars = [
+    'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'BUCKET_NAME',
+    'POSTGRES_PASSWORD', 'POSTGRES_HOST', 'POSTGRES_PORT',
+    'POSTGRES_USER', 'POSTGRES_NAME', 'BACKUP_POSTGRES',
+    'MONGO_HOST', 'MONGO_PORT', 'MONGO_NAME'
+];
+
+requiredEnvVars.forEach(varName => {
+    if (!process.env[varName]) {
+        console.error(`Ошибка: Переменная окружения ${varName} не установлена.`);
+        process.exit(1);
+    }
+});
 
 const s3Client = new S3Client({
     region: "us-east-1",
