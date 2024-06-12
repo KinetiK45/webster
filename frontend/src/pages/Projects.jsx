@@ -13,6 +13,7 @@ import CustomSearch from "../components/inputs/CustomSearch";
 import ProjectMini from "../components/ProjectMini";
 import usePageName from "../hooks/usePageName";
 import {CustomStack} from "../components/styled/CustomStack";
+import ProjectMiniSkeleton from "../components/skeletons/ProjectMiniSkeleton";
 
 function Projects() {
     usePageName('Projects');
@@ -133,7 +134,7 @@ function Projects() {
                         {loading ? (
                             Array.from({ length: ONE_PAGE_LIMIT }).map((_, index) => (
                                 <Grid item xs={12} sm={6} md={4} lg={3}>
-                                    <Skeleton width={200} height={100} />
+                                    <ProjectMiniSkeleton />
                                 </Grid>
                             ))
                         ) : (
