@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState} from 'react';
 import Toolbar from "@mui/material/Toolbar";
 import RectangleOutlinedIcon from '@mui/icons-material/RectangleOutlined';
 import Menu from "@mui/material/Menu";
-import {MenuList, Stack} from "@mui/material";
+import {FormControlLabel, MenuList, Stack, Switch} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
     ChangeHistoryOutlined,
@@ -20,6 +20,7 @@ import {customAlert, removeShapeListeners} from "../../utils/Utils";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButtons from "../../components/toolbar/IconButtons";
 import DrawTools from "../../components/shapes/DrawTools";
+import AutoSave from "../../components/editor/parameters/AutoSave";
 
 export function ToolBar({canvas}) {
     const projectSettings = useContext(EditorContext);
@@ -156,16 +157,11 @@ export function ToolBar({canvas}) {
                 </Menu>
             </Stack>
             <EditorTextInput
-                icon={projectSaving ? <CircularProgress /> : <Typography>Name:</Typography>}
+                icon={projectSaving ? <Typography><CircularProgress size={15} sx={{mr: 1}} />Name:</Typography> : <Typography>Name:</Typography>}
                 value={projectName}
                 onChange={(input) => setProjectName(input)}
             />
-            <Stack spacing={1} direction="row" sx={{display: 'flex', alignItems: 'center'}}>
-                <Avatar alt="Avatar"/>
-                <Typography>
-                    Creator Name
-                </Typography>
-            </Stack>
+            <AutoSave canvas={canvas} />
         </Toolbar>
     );
 }

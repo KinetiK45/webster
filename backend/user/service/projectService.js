@@ -175,7 +175,7 @@ async function getProjectById(project_id) {
 
 async function updateProject(project_id, project_name, projectImageUrl) {
     try {
-        const project = await projectRepository.find({where: {id: project_id}});
+        const project = await projectRepository.findOne({where: {id: project_id}});
         if (!project) {
             return { status: 404, isMatch: false, message: "Project not found" };
         }

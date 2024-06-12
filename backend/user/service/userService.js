@@ -94,14 +94,11 @@ async function updateUserById(id, password, new_password, email, full_name) {
     }
 }
 
-async function getByFullName(value,id_to_exclude){
+async function getByFullName(value){
     try {
         const query = userRepository.createQueryBuilder('user')
             .leftJoinAndSelect('user.photos', 'photos')
             .andWhere('LOWER(user.full_name) LIKE :value', { value: `%${value.toLowerCase()}%` });
-        if(id_to_exclude !== undefined){
-            query.andWhere('user.id != :id_to_exclude', { id_to_exclude });
-        }
         const users = await query.getMany();
         if (!users.length) {
             return { status: 200, isMatch: true, message: "User with this name don't found", users: [] };

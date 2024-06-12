@@ -18,6 +18,7 @@ function EditorContextProvider({ children }) {
                 const resp = await Requests.getProjectDetails(projectId);
                 if (resp.state === true){
                     projectSettings.projectName = resp.data.project_name;
+                    projectSettings.updated_at = new Date(resp.data.updated_at);
                 }
             } catch (e) {
                 customAlert(e.message, 'error')

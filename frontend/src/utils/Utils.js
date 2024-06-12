@@ -51,7 +51,7 @@ export function formatDateRecent(date) {
     if (diff < 60 * 60) {
         const minutes = Math.floor(diff / 60);
         if (minutes < 1){
-            return 'now';
+            return `${diff} sec. ago`;
         }
         return `${minutes} min. ago`;
     } else if (

@@ -2,6 +2,7 @@ export class EditorSettings {
     constructor({
                     projectName = 'untitled',
                     projectId = undefined,
+                    updated_at = new Date(),
                     projectHeight = 400,
                     projectWidth = 500,
                     fillColor = '#be0303',
@@ -15,6 +16,7 @@ export class EditorSettings {
                 } = {}) {
         this.projectName = projectName;
         this.projectId = projectId;
+        this.updated_at = updated_at;
         this.projectHeight = projectHeight;
         this.projectWidth = projectWidth;
         this.fillColor = fillColor;
