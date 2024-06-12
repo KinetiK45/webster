@@ -32,10 +32,12 @@ app.use(router);
 app.use(express.static('images'));
 
 const PORT = process.env.PORT;
-// listenForUpdateProjectEvents().catch((error) => {
-//     console.error('Error starting listener login:', error);
-    // process.exit(1);
-// });
+setTimeout(() => {
+    listenForUpdateProjectEvents().catch((error) => {
+        console.error('Error starting listener login:', error);
+        process.exit(1);
+    });
+}, 5000);
 app.listen(PORT, () => {
     console.log(`Сервер запущен http://localhost:${PORT}`);
 });

@@ -94,20 +94,34 @@ async function getProjectByUserId(userId, page, pageSize) {
     }
 }
 
-async function getAllProject(page, pageSize) {
+async function getAllProject(page, pageSize, dateTo, dateFrom) {
     try {
-        const [projects, total] = await projectRepository.findAndCount({
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-            order: { id: 'ASC' },
-            relations: ['user','user.photos'],
-        });
+        const query = projectRepository.createQueryBuilder('project')
+            .leftJoinAndSelect('project.user', 'user')
+            .leftJoinAndSelect('user.photos', 'photos')
+            .skip((page - 1) * pageSize)
+            .take(pageSize)
+            .orderBy('project.id', 'ASC');
+
+        if (new Date(dateFrom).toString() !== 'Invalid Date') {
+            const dateFromString = new Date(dateFrom).toISOString();
+            query.andWhere('project.created_at >= :dateFromString', { dateFromString });
+        }
+        if (new Date(dateTo).toString() !== 'Invalid Date') {
+            const dateToString = new Date(dateTo).toISOString();
+            query.andWhere('project.created_at <= :dateToString', { dateToString });
+        }
+
+        const [projects, total] = await query.getManyAndCount();
+
         if (!projects.length) {
             return { status: 200, isMatch: true, message: "User has no projects", projects: [] };
         }
+
         const withUrlProjects = projects.map(project => {
             const photoUrl = project.user && project.user.photos ? project.user.photos.url : null;
-            const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${project.user.photos.url}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+
             return {
                 id: project.id,
                 project_name: project.project_name,
@@ -155,7 +169,7 @@ async function getProjectById(project_id) {
 
 async function updateProject(project_id, project_name, projectImageUrl) {
     try {
-        const project = await projectRepository.findOne({where: {id: project_id}});
+        const project = await projectRepository.find({where: {id: project_id}});
 
         if (!project) {
             return { status: 404, isMatch: false, message: "Project not found" };
@@ -179,14 +193,6 @@ async function updateProject(project_id, project_name, projectImageUrl) {
         return {
             isMatch: hasUpdates,
             message: hasUpdates ? "Project updated successfully" : "No changes to update",
-            // ...(hasUpdates && {
-            //     user: {
-            //         id: project.id,
-            //         updated_at: new Date().toISOString(),
-            //         ...(project_name && { project_name }),
-            //         ...(projectImageUrl && { projectImageUrl }),
-            //     },
-            // }),
         };
     } catch (error) {
         console.error("Error updating project:", error);

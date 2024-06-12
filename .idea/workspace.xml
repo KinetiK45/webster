@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="all project">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/user/service/projectService.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/service/projectService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +50,7 @@
       <recent name="$PROJECT_DIR$/backend/user/routers" />
     </key>
   </component>
-  <component name="RunManager" selected="Docker.backup">
+  <component name="RunManager" selected="Docker.docker-compose.yml.user: Compose Deployment">
     <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
       <deployment type="docker-compose.yml" />
       <method v="2" />
@@ -72,6 +74,19 @@
           <option name="services">
             <list>
               <option value="postgres" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yml.user: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="user" />
             </list>
           </option>
           <option name="sourceFilePath" value="docker-compose.yml" />
@@ -110,12 +125,14 @@
       <item itemvalue="Docker.User build" />
       <item itemvalue="Docker.docker-compose.yml.api_gateway: Compose Deployment" />
       <item itemvalue="Docker.docker-compose.yml.postgres: Compose Deployment" />
+      <item itemvalue="Docker.docker-compose.yml.user: Compose Deployment" />
       <item itemvalue="npm.start" />
       <item itemvalue="npm.Frontend" />
       <item itemvalue="npm.user" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Docker.docker-compose.yml.user: Compose Deployment" />
         <item itemvalue="Docker.docker-compose.yml.api_gateway: Compose Deployment" />
         <item itemvalue="npm.user" />
         <item itemvalue="Docker.docker-compose.yml.postgres: Compose Deployment" />
@@ -170,7 +187,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718203328930</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="all project">
+      <option name="closed" value="true" />
+      <created>1718204412763</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1718204412763</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,17 +210,5 @@
     <MESSAGE value="dima kvadrokopter" />
     <MESSAGE value="all project" />
     <option name="LAST_COMMIT_MESSAGE" value="all project" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/backend/user/service/projectService.js</url>
-          <line>108</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
