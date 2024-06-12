@@ -4,7 +4,7 @@ import { ListItemIcon, ListItemText } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import { fabric } from "fabric";
 
-function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
+function DrawTools({ canvas, icon, text, handleDrawClose, handleDrawSelected, changeInstrument, setObjectsSelectable }) {
     const pointProps = {
         radius: 3,
         fill: 'white',
@@ -25,7 +25,8 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
         selectable: false,
         objectCaching: false,
         needToHide: true,
-        isPenObj: true
+        isPenObj: true,
+        name: 'pen'
     }
 
     const projectSettings = useContext(EditorContext);
@@ -40,7 +41,7 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
         firstClick.current = true
     }, [])
 
-    function onMouseUp(options) {
+    const onMouseUp = function endShape(options) {
         firstClick.current = false
         isMouseDown.current = false
         canvas.add(tempLine.current)
@@ -50,7 +51,7 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
         }
     }
 
-    function onMouseDown(options) {
+    const onMouseDown = function createShape(options) {
         isMouseDown.current = true
         const pointer = canvas.getPointer(options.e);
         let newPoint
@@ -159,7 +160,7 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
             canvas.renderAll();
         }
     }
-    function onMouseMove(options) {
+    const onMouseMove = function changeShape(options) {
         if (isMouseDown.current && !firstClick.current)
             curveLine(options)
         else
@@ -168,6 +169,12 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
 
     function handleCanvasInteraction() {
         handleDrawClose();
+        if(text === 'Pencil') {
+            changeInstrument('pencil', true, canvas.selection);
+            return;
+        }
+        setObjectsSelectable(false);
+        changeInstrument(text.toLowerCase(), false, false);
 
         canvas.on('mouse:down', onMouseDown);
         canvas.on('mouse:up', onMouseUp);
@@ -180,12 +187,10 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
             endPenMode();
         }
     }, []);
-
     const endPenMode = useCallback(() => {
-        canvas.off('mouse:down', onMouseDown);
-        canvas.off('mouse:up', onMouseUp);
-        canvas.off('mouse:move', onMouseMove);
         document.removeEventListener('keydown', handleEscapeKey, true);
+        changeInstrument('', false, true);
+        setObjectsSelectable(true);
 
         const objectsToGroup = [];
         canvas.getObjects().forEach(obj => {
@@ -194,7 +199,7 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
             }
         });
 
-        const group = new fabric.Group(objectsToGroup,{name:'vector'});
+        const group = new fabric.Group(objectsToGroup,{ name: 'vector' });
         canvas.add(group);
         objectsToGroup.forEach(obj => canvas.remove(obj));
 
@@ -202,7 +207,11 @@ function DrawTools({ canvas, icon, text, func, handleDrawClose }) {
     }, [canvas, handleDrawClose]);
 
     return (
-        <MenuItem key={text} onClick={handleCanvasInteraction}>
+        <MenuItem key={text}
+                  onClick={() => {
+                      handleDrawSelected(text, icon, handleCanvasInteraction);
+                      handleCanvasInteraction();
+                  }}>
             <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText>{text}</ListItemText>
         </MenuItem>

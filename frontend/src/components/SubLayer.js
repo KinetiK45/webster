@@ -5,11 +5,35 @@ import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 function SubLayer({ canvas, object, level }) {
-    const isGroup = object && object.type === 'group';
+    const isGroup = object && object.type === 'group' && object.name !== 'vector';
     const [expanded, setExpanded] = useState(false);
     const [isActive, setIsActive] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+    const toggleLock = () => {
+        const objectToActivate = findObject();
+        objectToActivate.set({
+            evented: isLocked,
+            selectable: isLocked,
+            hasControls: isLocked
+        })
+        setIsLocked(!isLocked);
+        canvas.discardActiveObject();
+    };
+
+    const toggleVisibility = () => {
+        const objectToActivate = findObject();
+        objectToActivate.set('visible', !isVisible)
+        setIsVisible(!isVisible);
+        canvas.discardActiveObject();
+        canvas.renderAll();
+    };
 
     const handleToggleExpand = () => {
         setExpanded(!expanded);
@@ -34,15 +58,37 @@ function SubLayer({ canvas, object, level }) {
         return searchGroup(canvas.getObjects());
     }
 
-    function findAndRemoveObject() {
+    function findObject(){
         const group = findGroupByIndex(object.groupIndex);
-        if (!group) return;
+        return group ? group._objects[object.index] : null;
+    }
 
-        const objectToRemove = group._objects[object.index];
+    function removeEmptyGroups(group) {
+        if (!group._objects.length) {
+            const parentGroup = group.group;
+            if (parentGroup) {
+                parentGroup.removeWithUpdate(group);
+                canvas.fire('object:removed', { target: group });
+                removeEmptyGroups(parentGroup);
+            } else {
+                canvas.remove(group);
+            }
+            canvas.renderAll();
+        }
+    }
+
+    function findAndRemoveObject() {
+        const objectsGroup = findGroupByIndex(object.groupIndex);
+        if (!objectsGroup) return;
+
+        const objectToRemove = objectsGroup._objects[object.index];
         if (objectToRemove) {
-            group.removeWithUpdate(objectToRemove);
+            objectsGroup.removeWithUpdate(objectToRemove);
             canvas.fire('object:removed', { target: objectToRemove });
-            if(!group._objects.length) canvas.remove(group);
+
+            removeEmptyGroups(objectsGroup);
+
+            canvas.discardActiveObject();
             canvas.renderAll();
         }
     }
@@ -51,6 +97,7 @@ function SubLayer({ canvas, object, level }) {
         event.stopPropagation();
         if (canvas && object) {
             findAndRemoveObject();
+
         }
     };
 
@@ -59,6 +106,7 @@ function SubLayer({ canvas, object, level }) {
         const group = findGroupByIndex(object.groupIndex);
         const objectToActivate = group ? group._objects[object.index] : null;
         if (objectToActivate) {
+            objectToActivate.evented = false;
             canvas.setActiveObject(objectToActivate);
             canvas.renderAll();
         }
@@ -68,8 +116,7 @@ function SubLayer({ canvas, object, level }) {
         if (canvas) {
             const checkAndSet = () => {
                 const activeObjects = canvas.getActiveObjects();
-                const group = findGroupByIndex(object.groupIndex);
-                const objectToActivate = group ? group._objects[object.index] : null;
+                const objectToActivate = findObject();
                 setIsActive(activeObjects.some(obj => objectToActivate === obj));
             };
 
@@ -107,6 +154,12 @@ function SubLayer({ canvas, object, level }) {
                 )}
                 <IconButton onClick={deleteObject}>
                     <DeleteIcon />
+                </IconButton>
+                <IconButton onClick={toggleLock}>
+                    {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                </IconButton>
+                <IconButton onClick={toggleVisibility}>
+                    {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
             </Stack>
             {expanded && isGroup && object._objects.map((subObject, idx) => (

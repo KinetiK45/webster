@@ -1,9 +1,8 @@
 import React, { useContext, useEffect, useRef, useState} from 'react';
 import Toolbar from "@mui/material/Toolbar";
-import MenuItem from "@mui/material/MenuItem";
 import RectangleOutlinedIcon from '@mui/icons-material/RectangleOutlined';
 import Menu from "@mui/material/Menu";
-import {ListItemIcon, ListItemText, MenuList, Stack} from "@mui/material";
+import {MenuList, Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
     ChangeHistoryOutlined,
@@ -57,18 +56,18 @@ export function ToolBar({canvas}) {
 
     useEffect(() => {
         if (canvas) {
-            canvas.on('selection:updated', (opt) => clearGroupScale(opt.deselected));
-            canvas.on('selection:cleared', (opt) => clearGroupScale(opt.deselected));
-            canvas.on('object:scaling', (opt)  => {
-                if(opt.target.type === 'polygon') {
-                   clearScale(opt.target)
-                }
-            })
-            canvas.on('object:modified', (opt) => {
-                if(opt.target.type === 'polygon'){
-                   handleEditedPolygon(opt.target);
-                }
-            });
+            // canvas.on('selection:updated', (opt) => clearGroupScale(opt.deselected));
+            // canvas.on('selection:cleared', (opt) => clearGroupScale(opt.deselected));
+            // canvas.on('object:scaling', (opt)  => {
+            //     if(opt.target.type === 'polygon') {
+            //        clearScale(opt.target)
+            //     }
+            // })
+            // canvas.on('object:modified', (opt) => {
+            //     if(opt.target.type === 'polygon'){
+            //        handleEditedPolygon(opt.target);
+            //     }
+            // });
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Backspace' || event.key === 'Delete') {
                     if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
@@ -117,40 +116,32 @@ export function ToolBar({canvas}) {
             })
         }
     }
-    function enablePen() {
-        changeInstrument('pen', false, false);
-    }
-    function handleEnableDrawing() {
-        changeInstrument('pencil', true, canvas.selection);
-    }
     const commonProps = {
         canvas: canvas,
-        handleShapeClick: handleShapeClick,
-        handleFiguresClose: handleFiguresClose,
         selectedInstrument: selectedInstrument,
         changeInstrument: changeInstrument,
         setObjectsSelectable: setObjectsSelectable
     };
+    const commonShapesProps = {
+        ...commonProps,
+        handleShapeClick: handleShapeClick,
+        handleFiguresClose: handleFiguresClose
+    };
+    const commonDrawProps = {
+        ...commonProps,
+        handleDrawSelected: handleDrawSelected,
+        handleDrawClose: handleDrawClose
+    };
     const shapesActions = [
-        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon fontSize="small"/>} text={'Rectangle'} {...commonProps} />,
-        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined fontSize="small"/>} text={'Polygon'} {...commonProps} />,
-        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined fontSize="small"/>} text={'Ellipse'} {...commonProps} />,
-        <Line icon={<HorizontalRuleOutlined fontSize="small"/>} key={'Line'} {...commonProps} />
+        <Polygons key={'Rectangle'} icon={<RectangleOutlinedIcon />} text={'Rectangle'} {...commonShapesProps} />,
+        <Polygons key={'Polygon'} icon={<ChangeHistoryOutlined />} text={'Polygon'} {...commonShapesProps} />,
+        <Polygons key={'Ellipse'} icon={<RadioButtonUncheckedOutlined />} text={'Ellipse'} {...commonShapesProps} />,
+        <Line icon={<HorizontalRuleOutlined />} key={'Line'} {...commonShapesProps} />
     ];
     const drawActions = [
-        {icon: <Gesture/>, text: 'Pencil', func: () => {
-            handleDrawSelected('Pencil', <Gesture/>, handleEnableDrawing);
-            handleEnableDrawing();
-        }},
-        {icon: <Edit/>, text: 'Pen', func: () => {
-                handleDrawSelected('Pen', <Edit/>, enablePen);
-                enablePen();
-        }},
+        <DrawTools icon={<Gesture />} text={'Pencil'} {...commonDrawProps}/>,
+        <DrawTools icon={<Edit />} text={'Pen'} {...commonDrawProps}/>,
     ];
-    // const drawActions = [
-    //     <DrawTools canvas={canvas} icon={<Edit fontSize="small" />} text={'Pen'} handleDrawClose={handleDrawClose}/>,
-    //     <DrawTools canvas={canvas} icon={<Gesture fontSize="small" />} text={'Pencil'} handleDrawClose={handleDrawClose} />
-    // ];
     return (
         <Toolbar variant="regular"
                  sx={{display: 'flex', justifyContent: 'space-between', backgroundColor: 'background.default'}}>
@@ -179,17 +170,9 @@ export function ToolBar({canvas}) {
                 >
                     <MenuList>
                         {drawActions.map((item) => {
-                            return <MenuItem key={item.text} onClick={item.func}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText>{item.text}</ListItemText>
-                            </MenuItem>
+                            return item;
                         })}
                     </MenuList>
-                    {/*<MenuList>*/}
-                    {/*    {drawActions.map((item) => {*/}
-                    {/*        return item;*/}
-                    {/*    })}*/}
-                    {/*</MenuList>*/}
                 </Menu>
             </Stack>
             <EditorTextInput

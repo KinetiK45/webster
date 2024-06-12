@@ -108,7 +108,6 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         canvas.renderAll();
     }
     const onMouseUp = function endShape(options) {
-        //TODO: make shapes active after creating
         const shape = figure.current;
         if (!shape) return;
         const pointer = canvas.getPointer(options.e);

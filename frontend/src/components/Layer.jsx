@@ -16,7 +16,7 @@ function Layer({canvas, item}) {
     const [isActive, setIsActive] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
-    const isGroup = item && item.type === 'group';
+    const isGroup = item && item.type === 'group' && item.name !== 'vector';
     const [expanded, setExpanded] = useState(false);
     const handleToggleExpand = () => {
         setExpanded(!expanded);
