@@ -37,6 +37,9 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
                     Math.max(shape.width, shape.height) :
                     findMaxValue(shape.points);
                 const shapesProps = {
+                    width: sideSize,
+                    height: sideSize,
+                    pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: sideSize / 2, y: sideSize / 2},
                     left: shape.left < startX.current ? startX.current - sideSize : shape.left,
                     top: shape.top < startY.current ? startY.current - sideSize : shape.top
                 }
@@ -55,6 +58,9 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
                 let height = Math.abs(pointerLastY.current - startY.current);
 
                 const shapesProps = {
+                    width: width,
+                    height: height,
+                    pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: width / 2, y: height / 2},
                     left: shape.left < startX.current ? pointerLastX.current : shape.left,
                     top: shape.top < startY.current ? pointerLastY.current : shape.top
                 }
@@ -84,14 +90,10 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
         const pointer = canvas.getPointer(options.e);
         let width = Math.abs(startX.current - pointer.x);
         let height = Math.abs(startY.current - pointer.y);
-        const shapesProps = {
+        let shapesProps = {
             left: Math.min(pointer.x, startX.current),
             top: Math.min(pointer.y, startY.current),
-            pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: width / 2, y: height / 2},
-            width: width,
-            height: height
         }
-
         if (options.e.shiftKey) {
             width = height = Math.max(width, height);
             if(startX.current >= pointer.x){
@@ -102,7 +104,15 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
             }
         }
 
+        shapesProps = {
+            ...shapesProps,
+            pathOffset: name.current === 'ellipse' ? { x: 0, y: 0} : { x: width / 2, y: height / 2},
+            width: width,
+            height: height
+        }
+
         setShapeProps(name.current, shape, shapesProps, width, height);
+        canvas.fire('object:scaling', {target: figure.current})
         pointerLastX.current = pointer.x;
         pointerLastY.current = pointer.y;
         canvas.renderAll();
@@ -150,6 +160,7 @@ function Polygons({ canvas, icon, text, handleFiguresClose, selectedInstrument, 
                 throw new Error('Непідтримувана фігура: ' + text);
         }
         shape.setCoords();
+        canvas.setActiveObject(figure.current)
         changeInstrument('', false, true);
         setObjectsSelectable(true);
         figure.current = null;

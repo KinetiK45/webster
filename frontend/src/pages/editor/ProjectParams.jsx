@@ -17,6 +17,7 @@ import CharSpacing from "../../components/editor/parameters/CharSpacing";
 import Shadow from "../../components/editor/effects/Shadow";
 import {EditorContext} from "./EditorContextProvider";
 import {CustomStack} from "../../components/styled/CustomStack";
+import {fabric} from "fabric";
 
 function ProjectParams({canvas}) {
     const { projectId } = useParams();
@@ -84,7 +85,7 @@ function ProjectParams({canvas}) {
             setFill(true);
         }
     }
-    function getCanvasSize(){
+    function getCanvasSize() {
         const bounds = canvas.getObjects().reduce((acc, obj) => {
             const objBounds = obj.getBoundingRect();
             const left = objBounds.left;
@@ -142,33 +143,24 @@ function ProjectParams({canvas}) {
         }}>
             <Divider/>
             <CustomStack direction="column" sx={{p: 0, m: 0, height: '100%', overflow: 'scroll'}}>
-                { currentSelectedType === undefined &&
-                    <Typography sx={{ m: 'auto' }}>
-                        Select something...
-                    </Typography>
-                }
 
-                { currentSelectedType !== undefined &&
-                    <>
-                        <Accordion disableGutters >
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                            >
+                <Accordion disableGutters>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon/>}
+                    >
                                 <Typography>Sizes</Typography>
                             </AccordionSummary>
-                            <AccordionDetails>
-                                <PositionSizes canvas={canvas}/>
-                                { strokeAndColours &&
-                                    <>
-                                        <Divider sx={{m: 1}}/>
-                                        <StrokeWidth canvas={canvas}/>
-                                    </>
-                                }
-                            </AccordionDetails>
-                        </Accordion>
-                        <Divider style={{borderWidth: '1px'}}/>
-                    </>
-                }
+                    <AccordionDetails>
+                        <PositionSizes canvas={canvas}/>
+                        { strokeAndColours &&
+                            <>
+                                <Divider sx={{m: 1}}/>
+                                <StrokeWidth canvas={canvas}/>
+                            </>
+                        }
+                    </AccordionDetails>
+                </Accordion>
+                <Divider style={{borderWidth: '1px'}}/>
 
                 { textAccordion &&
                     <>
@@ -205,7 +197,7 @@ function ProjectParams({canvas}) {
                     </>
                 }
 
-                <Accordion disableGutters sx={{display: currentSelectedType !== undefined ? '' : 'none'}}>
+                <Accordion disableGutters >
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                         >
@@ -215,6 +207,8 @@ function ProjectParams({canvas}) {
                             <Shadow canvas={canvas}/>
                         </AccordionDetails>
                     </Accordion>
+                <Divider/>
+                <Button variant="outlined" onClick={saveProject}>Save</Button>
             </CustomStack>
         </Container>
     );

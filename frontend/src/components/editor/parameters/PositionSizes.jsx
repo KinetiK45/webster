@@ -92,6 +92,7 @@ function PositionSizes({canvas}) {
     }
 
     function setNewShapeSize(activeObject, newSize, sizeToChange, coordToChange, coordToStay){
+        if (!newSize) newSize = 1;
         let newPoints = [];
         let oldPoints = activeObject.points;
         const isEllipse = activeObject.name === 'ellipse';

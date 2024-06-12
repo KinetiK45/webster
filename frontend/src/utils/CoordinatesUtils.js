@@ -1,4 +1,3 @@
-import {formatDouble} from "./Utils";
 
 export function getOffsets(canvas, opt, startX, startY) {
     const pointer = canvas.getPointer(opt.e);
@@ -99,8 +98,6 @@ export function setShapeProps(name, shape, shapesProps, width, height) {
             shape.set({
                 ...shapesProps,
                 points: getEllipsePoints(width / 2, height / 2),
-                width: width,
-                height: height,
             });
             break;
         default:
