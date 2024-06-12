@@ -4,26 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="dima kvadrokopter">
-      <change afterPath="$PROJECT_DIR$/backend/initdb/restore/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/user/routers/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/InitDB_build.xml" beforeDir="false" />
+    <list default="true" id="257f1256-c9f4-4220-86ed-9cbe5d9dc9d1" name="Changes" comment="all project">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/backup.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/backup.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/restore/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/backup/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/initdb/restore.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/initdb/restore/restore.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/nginx/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/backend/nginx/nginx.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/controllers/ProjectController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/middleware/verifyToken.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/middleware/verifyToken.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/ormPostgresConfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/ormPostgresConfig.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/routers/projectRouter.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/routers/projectRouter.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/routers/router.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/routers/router.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/user/service/projectService.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/user/service/projectService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/Requests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/Requests.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +48,7 @@
       <recent name="$PROJECT_DIR$/backend/user/routers" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.Frontend">
+  <component name="RunManager" selected="Docker.backup">
     <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
       <deployment type="docker-compose.yml" />
       <method v="2" />
@@ -180,7 +162,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717099427330</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="all project">
+      <option name="closed" value="true" />
+      <created>1718203328930</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1718203328930</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,7 +183,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="dima kvadrokopter" />
-    <option name="LAST_COMMIT_MESSAGE" value="dima kvadrokopter" />
+    <MESSAGE value="all project" />
+    <option name="LAST_COMMIT_MESSAGE" value="all project" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -7,8 +7,9 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y postgresql-client-16
 
-RUN npm install -g mongodb-tools
-
+#RUN wget -qO /tmp/mongodb-tools.tgz https://fastdl.mongodb.org/tools/db/mongodb-database-tools-debian10-x86_64-100.5.0.tgz && \
+#    tar -xzf /tmp/mongodb-tools.tgz -C /usr/local --strip-components=1 && \
+#    rm /tmp/mongodb-tools.tgz
 WORKDIR /app
 
 COPY ./package.json  ./

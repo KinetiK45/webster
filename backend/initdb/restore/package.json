@@ -1,0 +1,15 @@
+{
+  "name": "initdb",
+  "version": "1.0.0",
+  "scripts": {
+    "init": "cross-env node -r dotenv/config restore/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.583.0",
+    "pg": "^8.11.5",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
