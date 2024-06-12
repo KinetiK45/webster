@@ -76,9 +76,9 @@ async function deleteProject(req,res){
 }
 
 async function getAllProject(req,res){
-    const { page = 1, pageSize = 10 } = req.query;
+    const { dateTo, dateFrom ,page = 1, pageSize = 10, userId } = req.query;
     try {
-        const result = await projectService.getAllProject(page, pageSize);
+        const result = await projectService.getAllProject(page, pageSize, dateTo , dateFrom, userId);
         if (!result.isMatch) {
             return res.status(result.status).json({ state: false, message: result.message });
         }
@@ -87,10 +87,6 @@ async function getAllProject(req,res){
         console.error('Error in get all project:', error);
         res.status(500).json({ state: false, message: "Internal server error" });
     }
-}
-
-async function filters(req,res){
-
 }
 
 module.exports = {
