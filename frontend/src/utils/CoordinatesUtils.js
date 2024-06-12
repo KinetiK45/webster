@@ -132,48 +132,6 @@ export function findMinMaxValues(points) {
     return { minX, minY, maxX, maxY };
 }
 
-export function clearScale(shape, scaleX, scaleY) {
-    if (!scaleX) scaleX = shape.scaleX;
-    if (!scaleY) scaleY = shape.scaleY;
-    if (scaleX === 1 && scaleY === 1) return;
-
-    const MIN_DIMENSION = 1; // Мінімальна ширина і висота
-
-    let oldPoints = shape.points;
-    const isEllipse = shape.name === 'ellipse';
-    let newPoints = [];
-
-    const newWidth = Math.max(formatDouble(shape.width * scaleX), MIN_DIMENSION);
-    const newHeight = Math.max(formatDouble(shape.height * scaleY), MIN_DIMENSION);
-
-    const ellipseOffset = {
-        x: (shape.pathOffset.x * newWidth) / shape.width,
-        y: (shape.pathOffset.y * newHeight) / shape.height
-    };
-
-    const shapeProps = {
-        width: newWidth,
-        height: newHeight,
-        scaleX: 1,
-        scaleY: 1,
-        pathOffset: isEllipse ? ellipseOffset : { x: newWidth / 2, y: newHeight / 2 }
-    };
-
-    for (let i = 0; i < oldPoints.length; i++) {
-        newPoints.push({
-            x: (newWidth * oldPoints[i].x) / shape.width,
-            y: (newHeight * oldPoints[i].y) / shape.height
-        });
-    }
-
-    shape.set({
-        ...shapeProps,
-        points: newPoints
-    });
-
-    shape.setCoords();
-}
-
 export function handleEditedPolygon(target) {
     let oldPoints = target.points;
     let newPoints = [];

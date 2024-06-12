@@ -17,7 +17,6 @@ import EditorTextInput from "../../components/inputs/EditorTextInput";
 import Requests from "../../api/Requests";
 import {debounce} from "lodash";
 import {customAlert, removeShapeListeners} from "../../utils/Utils";
-import {clearScale, handleEditedPolygon} from "../../utils/CoordinatesUtils";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButtons from "../../components/toolbar/IconButtons";
 import DrawTools from "../../components/shapes/DrawTools";
@@ -56,18 +55,6 @@ export function ToolBar({canvas}) {
 
     useEffect(() => {
         if (canvas) {
-            // canvas.on('selection:updated', (opt) => clearGroupScale(opt.deselected));
-            // canvas.on('selection:cleared', (opt) => clearGroupScale(opt.deselected));
-            // canvas.on('object:scaling', (opt)  => {
-            //     if(opt.target.type === 'polygon') {
-            //        clearScale(opt.target)
-            //     }
-            // })
-            // canvas.on('object:modified', (opt) => {
-            //     if(opt.target.type === 'polygon'){
-            //        handleEditedPolygon(opt.target);
-            //     }
-            // });
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Backspace' || event.key === 'Delete') {
                     if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
@@ -109,13 +96,6 @@ export function ToolBar({canvas}) {
     const handleDrawClose = () => {
         setDrawingAnchorEl(null);
     };
-    function clearGroupScale(group) {
-        if(group?.length){
-            group.map(item => {
-                if(item.type === 'polygon') clearScale(item)
-            })
-        }
-    }
     const commonProps = {
         canvas: canvas,
         selectedInstrument: selectedInstrument,
