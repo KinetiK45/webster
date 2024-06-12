@@ -11,20 +11,20 @@ function generateToken(payload, expires = '24h') {
 
 function deactivateToken(req, res) {
     let token;
-    try {
-        if (req.cookies.auth_token) {
-            token = req.cookies.auth_token;
-            res.clearCookie('auth_token');
-        }
-    } catch (error) {}
     if (!token) {
         return res.json({ state: false, message: 'Missing token' });
     }
     if (blackList.has(token)){
         return res.json({ state: false, message: 'The token has already been deleted' });
     }
+    try {
+        if (req.cookies.auth_token) {
+            token = req.cookies.auth_token;
+            res.clearCookie('auth_token');
+        }
+    } catch (error) {}
     blackList.add(token);
-    return res.json({ state: false, message: 'The token has been successfully deleted' });
+    return res.json({ state: true });
 }
 
 module.exports = {
