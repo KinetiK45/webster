@@ -6,6 +6,7 @@ body {
   margin: 0;
   background-image: url('../public/background.png');
   background-size: 100vw 100vh;
+  overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
   color: var(--text-color);
 }

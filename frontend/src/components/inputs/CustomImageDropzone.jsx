@@ -28,13 +28,13 @@ function CustomImageDropzone({ imageLink = '', onFileSelected, alt= 'Drop logo h
 
     return (
         <Box {...getRootProps()} sx={{ textAlign: 'center', mt: 2, border: '2px dashed',
-            width: 'max-content',
+            width: '100%',
             padding: '10px', borderRadius: '8px', cursor: 'copy'}}>
             <input {...getInputProps()} />
             <Avatar
                 variant="rounded"
                 src={imageSrc}
-                sx={{ width: 150, height: 150 }}
+                sx={{ width: '100%', height: 'auto' }}
             >
                 {alt}
             </Avatar>

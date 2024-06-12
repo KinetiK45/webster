@@ -23,7 +23,7 @@ const pages = [
 
 const profileMenuItems = [
     { label: 'Profile', icon: <Person />, link: '/users/me' },
-    { label: 'Settings', icon: <Settings />, link: '/users/me/settings' },
+    // { label: 'Settings', icon: <Settings />, link: '/users/me/settings' },
     { label: 'Logout', icon: <ExitToApp />, onClick: logout }
 ];
 
@@ -97,20 +97,20 @@ function CustomNavigation() {
                                         {profileMenuItems.map((item, index) => (
                                             <MenuItem
                                                 key={index}
-                                                onClick={item.onClick ? handleCloseUserMenu : null}
+                                                component={item.link ? Link : 'div'}
+                                                to={item.link || undefined}
+                                                onClick={async () => {
+                                                    if (item.onClick) await item.onClick();
+                                                    handleCloseUserMenu();
+                                                }}
+                                                style={{ textDecoration: 'none', color: 'inherit' }}
                                             >
                                                 <ListItemIcon>
                                                     {item.icon}
                                                 </ListItemIcon>
-                                                {item.link ? (
-                                                    <Link to={item.link} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                                        {item.label}
-                                                    </Link>
-                                                ) : (
-                                                    <Typography onClick={item.onClick}>
-                                                        {item.label}
-                                                    </Typography>
-                                                )}
+                                                <Typography>
+                                                    {item.label}
+                                                </Typography>
                                             </MenuItem>
                                         ))}
                                     </Menu>
