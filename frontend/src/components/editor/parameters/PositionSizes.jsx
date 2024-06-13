@@ -45,7 +45,7 @@ function PositionSizes({canvas}) {
     };
 
     const changeNumbers = (activeSelection) => {
-        if (activeSelection && activeSelection?.type !== 'activeSelection') {
+        if (activeSelection) {
             setW(formatDouble(activeSelection.width * activeSelection.scaleX));
             setH(formatDouble(activeSelection.height * activeSelection.scaleY));
             setLeft(formatDouble(activeSelection.left));

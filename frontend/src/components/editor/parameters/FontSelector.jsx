@@ -51,6 +51,9 @@ function FontSelector({canvas}) {
                     projectSettings.fontFamily = activeObject.fontFamily;
                     setCurrentFontFamily(activeObject.fontFamily);
                 }
+                else{
+                    setCurrentFontFamily('');
+                }
             };
             onObjectSelected();
             // canvas.on('selection:created', onObjectSelected);
