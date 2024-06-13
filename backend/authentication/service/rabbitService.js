@@ -65,7 +65,7 @@ async function publishUserLoginEvent(code, userId, full_name, email) {
     }
 }
 
-async function publishUserResetEvent(code, email) {
+async function publishUserResetEvent(code, email, full_name) {
     try {
         const queueName = 'user_reset';
         const connection = await createRabbitMQConnection();
@@ -76,6 +76,7 @@ async function publishUserResetEvent(code, email) {
         const event = {
             eventId: uuid.v4(),
             code: code,
+            full_name:full_name,
             email: email,
             eventName: 'UserReset',
             timestamp: new Date(),

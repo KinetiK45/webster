@@ -65,7 +65,7 @@ async function passwordReset(req, res) {
         }
         const resetPasswordCode = generateCode()
         await autService.saveResetPasswordCode(result.user.id, resetPasswordCode);
-        await rabbitService.publishUserResetEvent(resetPasswordCode, email);
+        await rabbitService.publishUserResetEvent(resetPasswordCode, result.user.email, result.user.full_name);
         res.json({state: true,
             // message: 'A password recovery link has been sent to your email'
         });
