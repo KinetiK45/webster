@@ -68,14 +68,12 @@ function AutoSave({ canvas }) {
         hiddenCanvas.remove(group);
         function processItems(items) {
             items.forEach(item => {
-                if (item.type === 'group' && item._objects) {
-                    overrideToObject(item);
-                    if(!item.group)
-                        hiddenCanvas.add(item);
-                    processItems(item._objects);
+                overrideToObject(item);
+                if (!item.group) {
+                    hiddenCanvas.add(item);
                 }
-                else{
-                    overrideToObject(item);
+                if (item.type === 'group' && Array.isArray(item._objects)) {
+                    processItems(item._objects);
                 }
             });
         }
@@ -113,22 +111,23 @@ function AutoSave({ canvas }) {
             if (projectId === 'create' && !userData) {
                 localStorage.setItem('project', JSON.stringify(canvasData));
                 customAlert('Authorization is required', 'warning');
-                window.location.href = '/auth/login';
-            } else if (projectId === 'create' && userData) {
-                const resp = await Requests.create_project(projectSettings.projectName);
-                if (resp.state === true) {
-                    const projId = resp.data;
-                    await Requests.saveProject(projId, canvasData);
-                    customAlert('Success', 'success');
-                } else {
-                    customAlert(resp.message || 'Error', 'error');
-                }
-            } else {
-                const resp = await Requests.saveProject(projectId, canvasData);
-                if (resp.state === true)
-                    projectSettings.updated_at = new Date();
-                customAlert(resp.state ? 'Project saved' : 'Error saving project', resp.state ? 'info' : 'error');
             }
+                // window.location.href = '/auth/login';
+            // } else if (projectId === 'create' && userData) {
+            //     const resp = await Requests.create_project(projectSettings.projectName);
+            //     if (resp.state === true) {
+            //         const projId = resp.data;
+            //         await Requests.saveProject(projId, canvasData);
+            //         customAlert('Success', 'success');
+            //     } else {
+            //         customAlert(resp.message || 'Error', 'error');
+            //     }
+            // } else {
+            //     const resp = await Requests.saveProject(projectId, canvasData);
+            //     if (resp.state === true)
+            //         projectSettings.updated_at = new Date();
+            //     customAlert(resp.state ? 'Project saved' : 'Error saving project', resp.state ? 'info' : 'error');
+            // }
         } catch (e) {
             customAlert(e.toString(), 'error');
         }
