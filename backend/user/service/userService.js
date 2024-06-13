@@ -77,6 +77,10 @@ async function updateUserById(id, password, new_password, email, full_name) {
             updates.full_name = full_name;
         }
         const hasUpdates = Object.keys(updates).length > 0;
+        if (hasUpdates) {
+            Object.assign(user, updates);
+            await userRepository.save(user);
+        }
         return {
             isMatch: hasUpdates,
             message: hasUpdates ? "User updated successfully" : "No changes to update",
