@@ -170,9 +170,11 @@ function DrawTools({ canvas, icon, text, handleDrawClose, handleDrawSelected, ch
     function handleCanvasInteraction() {
         handleDrawClose();
         if(text === 'Pencil') {
-            changeInstrument('pencil', true, canvas.selection);
+            endPenMode();
+            changeInstrument('pencil', true, true);
             return;
         }
+        handleEndPenMode();
         setObjectsSelectable(false);
         changeInstrument(text.toLowerCase(), false, false);
 
@@ -180,6 +182,25 @@ function DrawTools({ canvas, icon, text, handleDrawClose, handleDrawSelected, ch
         canvas.on('mouse:up', onMouseUp);
         canvas.on('mouse:move', onMouseMove);
         document.addEventListener('keydown', handleEscapeKey, true);
+    }
+
+    const handleEndPenMode = () => {
+        const objectsToGroup = [];
+        canvas.getObjects().forEach(obj => {
+            if (obj.isPenObj) {
+                objectsToGroup.push(obj);
+            }
+        });
+
+        if (objectsToGroup.length > 0) {
+            if(objectsToGroup[objectsToGroup.length - 1].name === 'pen'){
+                canvas.remove(objectsToGroup[objectsToGroup.length - 1]);
+                objectsToGroup.pop();
+            }
+            const group = new fabric.Group(objectsToGroup,{ name: 'vector' });
+            canvas.add(group);
+            objectsToGroup.forEach(obj => canvas.remove(obj));
+        }
     }
 
     const handleEscapeKey = useCallback((event) => {
@@ -192,16 +213,7 @@ function DrawTools({ canvas, icon, text, handleDrawClose, handleDrawSelected, ch
         changeInstrument('', false, true);
         setObjectsSelectable(true);
 
-        const objectsToGroup = [];
-        canvas.getObjects().forEach(obj => {
-            if (obj.isPenObj) {
-                objectsToGroup.push(obj);
-            }
-        });
-
-        const group = new fabric.Group(objectsToGroup,{ name: 'vector' });
-        canvas.add(group);
-        objectsToGroup.forEach(obj => canvas.remove(obj));
+       handleEndPenMode();
 
         handleDrawClose();
     }, [canvas, handleDrawClose]);

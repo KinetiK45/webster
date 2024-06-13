@@ -14,7 +14,7 @@ import IconButton from "@mui/material/IconButton";
 import {FilterFrames} from "@mui/icons-material";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 
-function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClick, activeButtonFromIcons }) {
+function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClick, activeButtonFromIcons, selectedInstrument }) {
     const projectSettings = useContext(EditorContext);
     const textBox = useRef(null);
     const origX = useRef(0);
@@ -74,6 +74,7 @@ function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClic
             edge="start"
             color="inherit"
             aria-label={'add-text'}
+            disabled={selectedInstrument.current === 'pen'}
             onClick={(event) => handleButtonClick(event, 'add-text', createText)}
         >
             <TextFieldsIcon/>

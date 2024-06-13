@@ -9,6 +9,16 @@ function StrokeWidth({canvas}) {
     const projectSettings = useContext(EditorContext);
     const [strokeWidthCurrent, setStrokeWidthCurrent] = useState(projectSettings.strokeWidth);
 
+    const applyPropertyToGroup = (group, property, value) => {
+        group.getObjects().forEach(obj => {
+            if (obj.type === 'group') {
+                applyPropertyToGroup(obj, property, value);
+            } else if(obj.type !== 'image'){
+                obj.set(property, value);
+            }
+        });
+    };
+
     useEffect(() => {
         if (canvas) {
             const onObjectSelected = () => {
@@ -18,12 +28,12 @@ function StrokeWidth({canvas}) {
                     projectSettings.strokeWidth = activeObject.strokeWidth;
                 }
             };
-
-            canvas.on('selection:created', onObjectSelected);
+            onObjectSelected();
+            // canvas.on('selection:created', onObjectSelected);
             canvas.on('selection:updated', onObjectSelected);
 
             return () => {
-                canvas.off('selection:created', onObjectSelected);
+                // canvas.off('selection:created', onObjectSelected);
                 canvas.off('selection:updated', onObjectSelected);
             };
         }
@@ -37,7 +47,11 @@ function StrokeWidth({canvas}) {
         if (canvas) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
-                activeObject.set("strokeWidth", strokeWidth);
+                if (activeObject.type === 'activeSelection' || activeObject.type === 'group') {
+                    applyPropertyToGroup(activeObject, 'strokeWidth', strokeWidth);
+                } else {
+                    activeObject.set('stroke', strokeWidth);
+                }
                 canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             }

@@ -70,7 +70,7 @@ function ProjectParams({canvas}) {
             currentTypes.add(activeObject.type)
         }
 
-        if(currentTypes.has('i-text')){
+        if (activeObject.type === 'activeSelection' && currentTypes.has('i-text')) {
             setTextAccordion(true);
         }
         if (typesToCheckStroke.some(type => currentTypes.has(type))) {
@@ -89,6 +89,7 @@ function ProjectParams({canvas}) {
         }}>
             <Divider/>
             <CustomStack direction="column" sx={{p: 0, m: 0, height: '100%', overflow: 'scroll'}}>
+
                 { currentSelectedType === undefined &&
                     <Typography sx={{ m: 'auto' }}>
                         Select something...
@@ -97,7 +98,7 @@ function ProjectParams({canvas}) {
 
                 { currentSelectedType !== undefined &&
                     <>
-                        <Accordion disableGutters >
+                        <Accordion disableGutters defaultExpanded>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon/>}
                             >
@@ -117,7 +118,7 @@ function ProjectParams({canvas}) {
                     </>
                 }
 
-                { textAccordion &&
+                { (currentSelectedType === 'i-text' || textAccordion) &&
                     <>
                         <Accordion disableGutters>
                             <AccordionSummary
@@ -153,15 +154,15 @@ function ProjectParams({canvas}) {
                 }
 
                 <Accordion disableGutters sx={{display: currentSelectedType !== undefined ? '' : 'none'}}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                        >
-                            <Typography>Effects</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Shadow canvas={canvas}/>
-                        </AccordionDetails>
-                    </Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography>Effects</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Shadow canvas={canvas}/>
+                    </AccordionDetails>
+                </Accordion>
             </CustomStack>
         </Container>
     );

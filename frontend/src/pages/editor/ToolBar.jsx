@@ -131,7 +131,7 @@ export function ToolBar({canvas}) {
                     canvas={canvas} setObjectsSelectable={setObjectsSelectable}
                     changeInstrument={changeInstrument} setFiguresAnchorEl={setFiguresAnchorEl}
                     setDrawingAnchorEl={setDrawingAnchorEl} lastSelectedTool={lastSelectedTool}
-                    lastSelectedDraw={lastSelectedDraw}
+                    lastSelectedDraw={lastSelectedDraw} selectedInstrument={selectedInstrument}
                 />
                 <Menu
                     anchorEl={figuresAnchorEl}

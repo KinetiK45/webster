@@ -19,7 +19,7 @@ import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/
 import PermDataSettingIcon from "@mui/icons-material/PermDataSetting";
 import {Stack} from "@mui/material";
 
-function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFiguresAnchorEl, setDrawingAnchorEl, lastSelectedDraw, lastSelectedTool }) {
+function IconButtons({ canvas, setObjectsSelectable, selectedInstrument, changeInstrument, setFiguresAnchorEl, setDrawingAnchorEl, lastSelectedDraw, lastSelectedTool }) {
     const [disabledEditPolygon, setDisabledEditPolygon] = useState(true);
     const [disabledGroup, setDisabledGroup] = useState(true);
     const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
@@ -30,7 +30,7 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
                 const object = canvas.getActiveObject();
                 setDisabledEditPolygon(!(object?.type === 'polygon' && !object?.group));
                 setDisabledGroup(object?.type !== 'activeSelection');
-                setGroup(object?.type === 'group');
+                setGroup(object?.type === 'group' && object?.name !== 'vector');
             }
             canvas.on('selection:created', isDisabled);
             canvas.on('selection:updated', isDisabled);
@@ -52,25 +52,31 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
         poly.edit = !poly.edit;
 
         if (poly.edit) {
-            var lastControl = poly.points.length - 1;
-            poly.cornerStyle = 'circle';
-            poly.cornerColor = 'rgba(0,0,255,0.5)';
+            const lastControl = poly.points.length - 1;
             poly.controls = poly.points.reduce(function (acc, point, index) {
                 acc['p' + index] = new fabric.Control({
                     positionHandler: polygonPositionHandler,
                     actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
                     actionName: 'modifyPolygon',
-                    pointIndex: index
+                    pointIndex: index,
+                    render: renderIcon,  // Adding custom rendering function for control points
+                    cornerSize: 6
                 });
                 return acc;
             }, {});
         } else {
-            poly.cornerColor = 'blue';
-            poly.cornerStyle = 'rect';
             poly.controls = fabric.Object.prototype.controls;
         }
         poly.hasBorders = !poly.edit;
         canvas.requestRenderAll();
+    }
+
+    function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+        const size = this.cornerSize;
+        ctx.beginPath();
+        ctx.arc(left, top, size / 2, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.stroke();
     }
     function createGroup(){
         const object = canvas.getActiveObject();
@@ -139,7 +145,7 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
         canvas: canvas,
         changeInstrument: changeInstrument,
         setObjectsSelectable: setObjectsSelectable,
-        activeButtonFromIcons: activeButtonFromIcons
+        activeButtonFromIcons: activeButtonFromIcons,
     };
     return (
         <Stack
@@ -164,18 +170,22 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
                         handleButtonClick(event, 'shapes', lastSelectedTool ? lastSelectedTool.onClick : handleFiguresClick);
                     }}
                     sx={{ paddingRight: 0 }}
+                    disabled={selectedInstrument.current === 'pen'}
                 >
                     {lastSelectedTool ? lastSelectedTool.icon : <PermDataSettingIcon />}
                 </IconButton>
                 <IconButton  onClick={(event) => handleButtonClick(event, 'shapes', handleFiguresClick)}
-                    sx={{
-                        transition: 'transform 0.2s ease-in-out',
-                        '&:hover': {
-                            transform: 'translateY(2px)',
-                            cursor: 'pointer',
-                        },
-                        padding: 0,
-                     }}>
+                             sx={{
+                                transition: 'transform 0.2s ease-in-out',
+                                '&:hover': {
+                                    transform: 'translateY(2px)',
+                                    cursor: 'pointer',
+                                },
+                                padding: 0,
+                             }}
+                             disabled={selectedInstrument.current === 'pen'}
+
+                >
                     <KeyboardArrowDown fontSize={'small'}/>
                 </IconButton>
             </Box>
@@ -210,12 +220,12 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
                     <KeyboardArrowDown fontSize={'small'}/>
                 </IconButton>
             </Box>
-            <Text key="add-text" {...commonProps} />
-            <Image key="add-image" {...commonProps} />
+            <Text key="add-text" {...commonProps} selectedInstrument={selectedInstrument}/>
+            <Image key="add-image" {...commonProps} selectedInstrument={selectedInstrument}/>
             <IconButton
                 key="edit-polygon"
                 aria-label="menu"
-                disabled={disabledEditPolygon}
+                disabled={disabledEditPolygon || selectedInstrument.current === 'pen'}
                 onClick={(event) => handleButtonClick(event, 'edit-polygon', editPolygon)}
                 sx={{
                     backgroundColor: activeButtonFromIcons === 'edit-polygon' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
@@ -226,7 +236,7 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
             <IconButton
                 key="group"
                 aria-label="create-group"
-                disabled={!group && disabledGroup}
+                disabled={(!group && disabledGroup) || selectedInstrument.current === 'pen'}
                 onClick={(event) => handleButtonClick(event, 'group', !group ? createGroup : destroyGroup)}
                 sx={{
                     backgroundColor: activeButtonFromIcons === 'group' && !group ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
@@ -237,7 +247,7 @@ function IconButtons({ canvas, setObjectsSelectable, changeInstrument, setFigure
             <IconButton
                 key="export-group"
                 aria-label="export-group"
-                disabled={!group}
+                disabled={!group || selectedInstrument.current === 'pen'}
                 onClick={(event) => handleButtonClick(event, 'export-group', exportGroupAsImage)}
                 sx={{
                     backgroundColor: activeButtonFromIcons === 'export-group' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',

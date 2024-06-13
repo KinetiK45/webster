@@ -147,8 +147,8 @@ function ProjectLayers({canvas}) {
             canvas.on('object:modified', (opt) => {
                 if (opt.target.type === 'activeSelection' || opt.target.type === 'group') {
                     opt.target._objects.map((item, index) => {
-                        const {offsetX, offsetY} = getOffsets(canvas, opt, startX, startY);
-                        if (item.withPoints) {
+                        if (item.withPoints && opt.e) {
+                            const {offsetX, offsetY} = getOffsets(canvas, opt, startX, startY);
                             setPointsCoordinates(item, offsetX, offsetY);
                         }
                     });
