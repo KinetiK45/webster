@@ -11,9 +11,13 @@ import {customAlert} from "../utils/Utils";
 import SubLayer from "./SubLayer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import EditorTextInput from "./inputs/EditorTextInput";
+import Box from "@mui/material/Box";
 
 function Layer({canvas, item}) {
     const [isActive, setIsActive] = useState(false);
+    const [nameEditMode, setNameEditMode] = useState(false);
+    const [layerName, setLayerName] = useState(item.name);
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const isGroup = item && item.type === 'group' && item.name !== 'vector';
@@ -42,9 +46,20 @@ function Layer({canvas, item}) {
     function selectObject() {
         canvas.isDrawingMode = false;
         const object = canvas.getObjects()[item.index];
-        setIsActive(true);
-        canvas.setActiveObject(object);
-        canvas.renderAll();
+        if (isActive) {
+            setNameEditMode(true);
+        }
+        else {
+            setIsActive(true);
+            canvas.setActiveObject(object);
+            canvas.renderAll();
+        }
+    }
+
+    function handleBlur() {
+        const object = canvas.getObjects()[item.index];
+        object.set({name: layerName});
+        setNameEditMode(false);
     }
 
     function deleteObject(event) {
@@ -86,25 +101,42 @@ function Layer({canvas, item}) {
                    backgroundColor: isActive ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
                }}
         >
-            <Typography sx={{m: "auto"}}>
-                {item.name ? item.name : item.type} {item.itemNumber}
-            </Typography>
-            {isGroup && (
-                <IconButton onClick={handleToggleExpand}>
-                    {expanded ? <ExpandLessIcon fontSize={'small'}/> : <ExpandMoreIcon fontSize={'small'}/>}
-                </IconButton>
-            )}
-            <IconButton
-                onClick={deleteObject}
-            >
-                <DeleteIcon/>
-            </IconButton>
-            <IconButton onClick={toggleLock}>
-                {isLocked ? <LockIcon /> : <LockOpenIcon />}
-            </IconButton>
-            <IconButton onClick={toggleVisibility}>
-                {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
-            </IconButton>
+            {nameEditMode ? (
+                <Box sx={{width: '100%', display: 'flex', justifyContent: 'center'}}>
+                    <EditorTextInput
+                        icon={<Typography></Typography>}
+                        value={layerName}
+                        onChange={(value) => setLayerName(value)}
+                        onBlur={handleBlur}
+                    />
+                </Box>
+            ) : (
+                <Typography sx={{m: "auto"}}>
+                    {layerName ? layerName : item.type} {item.itemNumber}
+                </Typography>
+                )
+            }
+            {
+                !nameEditMode &&
+                <>
+                    {isGroup && (
+                        <IconButton onClick={handleToggleExpand}>
+                            {expanded ? <ExpandLessIcon fontSize={'small'}/> : <ExpandMoreIcon fontSize={'small'}/>}
+                        </IconButton>
+                    )}
+                    <IconButton
+                        onClick={deleteObject}
+                    >
+                        <DeleteIcon/>
+                    </IconButton>
+                    <IconButton onClick={toggleLock}>
+                        {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                    </IconButton>
+                    <IconButton onClick={toggleVisibility}>
+                        {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                    </IconButton>
+                </>
+            }
         </Stack>
         {isGroup && expanded && item._objects.map((subObject, index) => (
             <SubLayer key={index} canvas={canvas} level={0} object={subObject} />

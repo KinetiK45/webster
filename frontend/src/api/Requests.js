@@ -170,4 +170,10 @@ export default class Requests {
             .patch(`/project_details/${project_id}`, {project_name});
         return resp.data;
     }
+
+    static async deleteProject(project_id) {
+        const resp = await axiosInstance
+            .delete(`/api/projects/${project_id}/delete`);
+        return resp.data;
+    }
 }

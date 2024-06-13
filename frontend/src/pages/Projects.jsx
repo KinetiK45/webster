@@ -142,7 +142,7 @@ function Projects() {
                         {loading ? (
                             Array.from({ length: ONE_PAGE_LIMIT }).map((_, index) => (
                                 <Grid item xs={12} sm={6} md={4} lg={3}>
-                                    <ProjectMiniSkeleton />
+                                    <ProjectMiniSkeleton withCreator={true} />
                                 </Grid>
                             ))
                         ) : (
@@ -152,22 +152,13 @@ function Projects() {
                                 }
                                 {projects.map((event, index) => (
                                     <Grid item xs={12} sm={6} md={4} lg={3}>
-                                        <ProjectMini projectData={event} key={event.id} />
+                                        <ProjectMini projectData={event} key={event.id} withCreator={true} />
                                     </Grid>
                                 ))}
                             </>
                         )}
                     </Grid>
                 </CustomStack>
-                {/*<Container sx={{*/}
-                {/*    backgroundColor: "background.default",*/}
-                {/*    padding: 2,*/}
-                {/*    borderRadius: 2,*/}
-                {/*    height: `calc(100vh - ${64}px)`, overflowX: 'hidden', overflowY: 'scroll',*/}
-                {/*    display: 'flex', flexDirection: 'column', gap: 2*/}
-                {/*}}>*/}
-                {/*    */}
-                {/*</Container>*/}
             </Grid>
         </Grid>
     )

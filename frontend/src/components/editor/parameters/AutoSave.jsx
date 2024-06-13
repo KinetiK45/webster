@@ -58,6 +58,13 @@ function AutoSave({ canvas }) {
         hiddenCanvas.remove(group);
 
         items.forEach(item => {
+            item.toObject = (function(toObject) {
+                return function() {
+                    return fabric.util.object.extend(toObject.call(this), {
+                        name: this.name
+                    });
+                };
+            })(item.toObject);
             hiddenCanvas.add(item);
         });
 
@@ -128,7 +135,7 @@ function AutoSave({ canvas }) {
                     >
                         <AutorenewIcon />
                     </IconButton>
-                </Tooltip>
+                    </Tooltip>
             )}
             <Tooltip title={autoSave ? 'Blocked by AutoSave' : `${projectId === 'create' ? 'Create' : 'Save'} project`}>
                 <Button
@@ -140,10 +147,6 @@ function AutoSave({ canvas }) {
                     {projectId === 'create' ? 'Create' : 'Save'}
                 </Button>
             </Tooltip>
-
-            {/*<Typography variant="caption" sx={{ ml: 2 }}>*/}
-            {/*    Last saved: {lastSaveTime}*/}
-            {/*</Typography>*/}
         </Stack>
     );
 }
