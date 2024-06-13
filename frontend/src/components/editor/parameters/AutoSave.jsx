@@ -66,11 +66,10 @@ function AutoSave({ canvas }) {
     }
     function getCanvasSize() {
         const bounds = canvas.getObjects().reduce((acc, obj) => {
-            const objBounds = obj.getBoundingRect();
-            const left = objBounds.left;
-            const top = objBounds.top;
-            const right = left + objBounds.width;
-            const bottom = top + objBounds.height;
+            const left = obj.left;
+            const top = obj.top;
+            const right = left + obj.width;
+            const bottom = top + obj.height;
 
             acc.minX = Math.min(acc.minX, left);
             acc.minY = Math.min(acc.minY, top);
@@ -79,7 +78,6 @@ function AutoSave({ canvas }) {
 
             return acc;
         }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
-
         const width = bounds.maxX - bounds.minX;
         const height = bounds.maxY - bounds.minY;
         return { width, height };
