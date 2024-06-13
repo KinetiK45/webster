@@ -27,9 +27,11 @@ function Profile() {
     const [editMode, setEditMode] = useState(false);
     usePageName(profileData?.full_name || 'Profile');
 
+
+    const [totalProjectsStr, setTotalProjectsStr] = useState('');
     const [projects, setProjects] = useState([]);
     // pagenation
-    const PAGE_SIZE = 10;
+    const PAGE_SIZE = 3;
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -42,6 +44,9 @@ function Profile() {
         if (resp.state === true) {
             setTotalPages(resp.totalPages);
             setProjects(resp.data);
+            if ('total' in resp){
+                setTotalProjectsStr(` ${resp.total}`);
+            }
             const projects = resp.data;
             const currentPageParsed = Number.parseInt(resp.currentPage || 1);
             const totalPagesParsed = Number.parseInt(resp.totalPages || 1);
@@ -120,7 +125,7 @@ function Profile() {
                             display: 'flex', flexDirection: 'column', gap: 2
                         }}
                     >
-                        <Typography variant="h2">Projects</Typography>
+                        <Typography variant="h2">Projects{totalProjectsStr}</Typography>
                         <Divider sx={{margin: '1px'}} />
                         {totalPages > 1 &&
                             <Pagination

@@ -18,8 +18,10 @@ import {fabric} from "fabric";
 import {actionHandler, anchorWrapper, polygonPositionHandler} from "../../utils/EditPolygon";
 import PermDataSettingIcon from "@mui/icons-material/PermDataSetting";
 import {Stack} from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
 
-function IconButtons({ canvas, setObjectsSelectable, selectedInstrument, changeInstrument, setFiguresAnchorEl, setDrawingAnchorEl, lastSelectedDraw, lastSelectedTool }) {
+function IconButtons({ canvas, setObjectsSelectable, selectedInstrument, changeInstrument,
+                         setFiguresAnchorEl, setDrawingAnchorEl, lastSelectedDraw, lastSelectedTool }) {
     const [disabledEditPolygon, setDisabledEditPolygon] = useState(true);
     const [disabledGroup, setDisabledGroup] = useState(true);
     const [activeButtonFromIcons, setActiveButtonFromIcons] = useState(null);
@@ -164,30 +166,34 @@ function IconButtons({ canvas, setObjectsSelectable, selectedInstrument, changeI
                     },
                 }}
             >
-                <IconButton
-                    aria-label="last-tool"
-                    onClick={(event) => {
-                        handleButtonClick(event, 'shapes', lastSelectedTool ? lastSelectedTool.onClick : handleFiguresClick);
-                    }}
-                    sx={{ paddingRight: 0 }}
-                    disabled={selectedInstrument.current === 'pen'}
-                >
-                    {lastSelectedTool ? lastSelectedTool.icon : <PermDataSettingIcon />}
-                </IconButton>
-                <IconButton  onClick={(event) => handleButtonClick(event, 'shapes', handleFiguresClick)}
-                             sx={{
-                                transition: 'transform 0.2s ease-in-out',
-                                '&:hover': {
-                                    transform: 'translateY(2px)',
-                                    cursor: 'pointer',
-                                },
-                                padding: 0,
-                             }}
-                             disabled={selectedInstrument.current === 'pen'}
-
-                >
-                    <KeyboardArrowDown fontSize={'small'}/>
-                </IconButton>
+                <Tooltip title={ lastSelectedTool ? lastSelectedTool.shape : "Shape tools"}>
+                    <IconButton
+                        aria-label="last-tool"
+                        onClick={(event) => {
+                            handleButtonClick(event, 'shapes', lastSelectedTool ? lastSelectedTool.onClick : handleFiguresClick);
+                        }}
+                        sx={{ paddingRight: 0 }}
+                        disabled={selectedInstrument.current === 'pen'}
+                    >
+                        {lastSelectedTool ? lastSelectedTool.icon : <PermDataSettingIcon />}
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Shape tools">
+                    <IconButton
+                        onClick={(event) => handleButtonClick(event, 'shapes', handleFiguresClick)}
+                        sx={{
+                            transition: 'transform 0.2s ease-in-out',
+                            '&:hover': {
+                                transform: 'translateY(2px)',
+                                cursor: 'pointer',
+                            },
+                            padding: 0,
+                        }}
+                        disabled={selectedInstrument.current === 'pen'}
+                    >
+                        <KeyboardArrowDown fontSize={'small'} />
+                    </IconButton>
+                </Tooltip>
             </Box>
             <Box
                 sx={{
@@ -200,61 +206,98 @@ function IconButtons({ canvas, setObjectsSelectable, selectedInstrument, changeI
                     },
                 }}
             >
-                <IconButton
-                    aria-label="last-draw"
-                    onClick={(event) => {
-                        handleButtonClick(event, 'draws', lastSelectedDraw ? lastSelectedDraw.onClick : handleDrawClick);
-                    }}
-                    sx={{ paddingRight: 0 }}
-                >
-                    {lastSelectedDraw ? lastSelectedDraw.icon : <Gesture />}
-                </IconButton>
-                <IconButton   onClick={(event) =>  handleButtonClick(event, 'draws', handleDrawClick)} sx={{
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                        transform: 'translateY(2px)',
-                        cursor: 'pointer',
-                    },
-                    padding: 0
-                }}>
-                    <KeyboardArrowDown fontSize={'small'}/>
-                </IconButton>
+                <Tooltip title={ lastSelectedDraw ? lastSelectedDraw.draw : "Drawing tools"}>
+                    <IconButton
+                        aria-label="last-draw"
+                        onClick={(event) => {
+                            handleButtonClick(event, 'draws', lastSelectedDraw ? lastSelectedDraw.onClick : handleDrawClick);
+                        }}
+                        sx={{ paddingRight: 0 }}
+                    >
+                        {lastSelectedDraw ? lastSelectedDraw.icon : <Gesture />}
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Drawing tools">
+                    <IconButton
+                        onClick={(event) => handleButtonClick(event, 'draws', handleDrawClick)}
+                        sx={{
+                            transition: 'transform 0.2s ease-in-out',
+                            '&:hover': {
+                                transform: 'translateY(2px)',
+                                cursor: 'pointer',
+                            },
+                            padding: 0,
+                        }}
+                    >
+                        <KeyboardArrowDown fontSize={'small'} />
+                    </IconButton>
+                </Tooltip>
             </Box>
-            <Text key="add-text" {...commonProps} selectedInstrument={selectedInstrument}/>
-            <Image key="add-image" {...commonProps} selectedInstrument={selectedInstrument}/>
-            <IconButton
-                key="edit-polygon"
-                aria-label="menu"
-                disabled={disabledEditPolygon || selectedInstrument.current === 'pen'}
-                onClick={(event) => handleButtonClick(event, 'edit-polygon', editPolygon)}
-                sx={{
-                    backgroundColor: activeButtonFromIcons === 'edit-polygon' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                }}
-            >
-                <PolylineOutlined />
-            </IconButton>
-            <IconButton
-                key="group"
-                aria-label="create-group"
-                disabled={(!group && disabledGroup) || selectedInstrument.current === 'pen'}
-                onClick={(event) => handleButtonClick(event, 'group', !group ? createGroup : destroyGroup)}
-                sx={{
-                    backgroundColor: activeButtonFromIcons === 'group' && !group ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                }}
-            >
-                {!group ? <Groups/> : <Undo />}
-            </IconButton>
-            <IconButton
-                key="export-group"
-                aria-label="export-group"
-                disabled={!group || selectedInstrument.current === 'pen'}
-                onClick={(event) => handleButtonClick(event, 'export-group', exportGroupAsImage)}
-                sx={{
-                    backgroundColor: activeButtonFromIcons === 'export-group' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                }}
-            >
-                <Download />
-            </IconButton>
+            <Text key="add-text" {...commonProps} selectedInstrument={selectedInstrument} />
+            <Image key="add-image" {...commonProps} selectedInstrument={selectedInstrument} />
+            <Tooltip title="Edit shape">
+                <Box
+                    component="span"
+                    sx={{
+                        display: 'inline-block',
+                        cursor: 'not-allowed', // Optional, to indicate that the button is disabled
+                    }}
+                >
+                    <IconButton
+                        key="edit-polygon"
+                        aria-label="menu"
+                        disabled={disabledEditPolygon || selectedInstrument.current === 'pen'}
+                        onClick={(event) => handleButtonClick(event, 'edit-polygon', editPolygon)}
+                        sx={{
+                            backgroundColor: activeButtonFromIcons === 'edit-polygon' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                        }}
+                    >
+                        <PolylineOutlined />
+                    </IconButton>
+                </Box>
+            </Tooltip>
+            <Tooltip title={!group ? "Group objects" : "Ungroup objects"}>
+                <Box
+                    component="span"
+                    sx={{
+                        display: 'inline-block',
+                        cursor: 'not-allowed',
+                    }}
+                >
+                    <IconButton
+                        key="group"
+                        aria-label="create-group"
+                        disabled={(!group && disabledGroup) || selectedInstrument.current === 'pen'}
+                        onClick={(event) => handleButtonClick(event, 'group', !group ? createGroup : destroyGroup)}
+                        sx={{
+                            backgroundColor: activeButtonFromIcons === 'group' && !group ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                        }}
+                    >
+                        {!group ? <Groups /> : <Undo />}
+                    </IconButton>
+                </Box>
+            </Tooltip>
+            <Tooltip title="Export group as image">
+                <Box
+                    component="span"
+                    sx={{
+                        display: 'inline-block',
+                        cursor: 'not-allowed',
+                    }}
+                >
+                    <IconButton
+                        key="export-group"
+                        aria-label="export-group"
+                        disabled={!group || selectedInstrument.current === 'pen'}
+                        onClick={(event) => handleButtonClick(event, 'export-group', exportGroupAsImage)}
+                        sx={{
+                            backgroundColor: activeButtonFromIcons === 'export-group' ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                        }}
+                    >
+                        <Download />
+                    </IconButton>
+                </Box>
+            </Tooltip>
         </Stack>
     );
 }

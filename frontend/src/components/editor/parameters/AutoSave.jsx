@@ -40,6 +40,16 @@ function AutoSave({ canvas }) {
         return () => clearInterval(timerId);
     }, []);
 
+    function overrideToObject(item) {
+        item.toObject = (function(toObject) {
+            return function() {
+                return fabric.util.object.extend(toObject.call(this), {
+                    name: this.name
+                });
+            };
+        })(item.toObject);
+    }
+
     function moveObjectsToOrigin() {
         const hiddenCanvas = new fabric.Canvas(null, { width: canvas.width, height: canvas.height });
         const objects = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
@@ -56,21 +66,29 @@ function AutoSave({ canvas }) {
         const items = group._objects;
         group._restoreObjectsState();
         hiddenCanvas.remove(group);
-
-        items.forEach(item => {
-            hiddenCanvas.add(item);
-        });
-
+        function processItems(items) {
+            items.forEach(item => {
+                if (item.type === 'group' && item._objects) {
+                    overrideToObject(item);
+                    if(!item.group)
+                        hiddenCanvas.add(item);
+                    processItems(item._objects);
+                }
+                else{
+                    overrideToObject(item);
+                }
+            });
+        }
+        processItems(items);
         hiddenCanvas.renderAll();
         return hiddenCanvas.toJSON();
     }
     function getCanvasSize() {
         const bounds = canvas.getObjects().reduce((acc, obj) => {
-            const objBounds = obj.getBoundingRect();
-            const left = objBounds.left;
-            const top = objBounds.top;
-            const right = left + objBounds.width;
-            const bottom = top + objBounds.height;
+            const left = obj.left;
+            const top = obj.top;
+            const right = left + obj.width;
+            const bottom = top + obj.height;
 
             acc.minX = Math.min(acc.minX, left);
             acc.minY = Math.min(acc.minY, top);
@@ -79,7 +97,6 @@ function AutoSave({ canvas }) {
 
             return acc;
         }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
-
         const width = bounds.maxX - bounds.minX;
         const height = bounds.maxY - bounds.minY;
         return { width, height };
@@ -130,7 +147,7 @@ function AutoSave({ canvas }) {
                     >
                         <AutorenewIcon />
                     </IconButton>
-                </Tooltip>
+                    </Tooltip>
             )}
             <Tooltip title={autoSave ? 'Blocked by AutoSave' : `${projectId === 'create' ? 'Create' : 'Save'} project`}>
                 <Button
@@ -142,10 +159,6 @@ function AutoSave({ canvas }) {
                     {projectId === 'create' ? 'Create' : 'Save'}
                 </Button>
             </Tooltip>
-
-            {/*<Typography variant="caption" sx={{ ml: 2 }}>*/}
-            {/*    Last saved: {lastSaveTime}*/}
-            {/*</Typography>*/}
         </Stack>
     );
 }

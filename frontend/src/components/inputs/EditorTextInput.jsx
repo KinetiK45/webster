@@ -22,7 +22,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
 function EditorTextInput({ value = '',
                              icon = <LineStyleIcon fontSize="small" />,
                              postfixText = '',
-                             onChange }) {
+                             onChange, onBlur }) {
     const [internalValue, setInternalValue] = useState(value);
     const inputRef = useRef(null);
 
@@ -49,6 +49,8 @@ function EditorTextInput({ value = '',
         if (internalValue.trim() === '') {
             setInternalValue(value);
         }
+        if (onBlur)
+            onBlur();
     };
 
     return (

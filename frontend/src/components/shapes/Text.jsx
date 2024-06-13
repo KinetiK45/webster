@@ -13,6 +13,7 @@ import {ListItemIcon, ListItemText} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import {FilterFrames} from "@mui/icons-material";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import Tooltip from "@mui/material/Tooltip";
 
 function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClick, activeButtonFromIcons, selectedInstrument }) {
     const projectSettings = useContext(EditorContext);
@@ -69,16 +70,18 @@ function Text({ canvas, changeInstrument, setObjectsSelectable, handleButtonClic
         setObjectsSelectable(false);
     }
     return (
-        <IconButton
-            sx={{ backgroundColor: activeButtonFromIcons === 'add-text' ? 'rgba(255, 255, 255, 0.15)' : 'transparent'}}
-            edge="start"
-            color="inherit"
-            aria-label={'add-text'}
-            disabled={selectedInstrument.current === 'pen'}
-            onClick={(event) => handleButtonClick(event, 'add-text', createText)}
-        >
-            <TextFieldsIcon/>
-        </IconButton>
+        <Tooltip title="Add text">
+            <IconButton
+                sx={{ backgroundColor: activeButtonFromIcons === 'add-text' ? 'rgba(255, 255, 255, 0.15)' : 'transparent'}}
+                edge="start"
+                color="inherit"
+                aria-label={'add-text'}
+                disabled={selectedInstrument.current === 'pen'}
+                onClick={(event) => handleButtonClick(event, 'add-text', createText)}
+            >
+                <TextFieldsIcon/>
+            </IconButton>
+        </Tooltip>
     );
 }
 

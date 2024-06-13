@@ -34,14 +34,17 @@ function ProjectLayers({canvas}) {
     }
     function calculateItemNumber(item, canvasObjects) {
         const flattenedObjects = flattenCanvasObjects(canvasObjects);
+
         if (item.name) {
-            return flattenedObjects
-                .filter((value) => value.name === item.name)
-                .indexOf(item);
+            const filteredByName = flattenedObjects.filter((value) => value.name === item.name);
+            const itemIndex = filteredByName.indexOf(item);
+            const itemCount = filteredByName.length;
+            return { index: itemIndex, count: itemCount };
         } else {
-            return flattenedObjects
-                .filter((value) => value.type === item.type)
-                .indexOf(item);
+            const filteredByType = flattenedObjects.filter((value) => value.type === item.type);
+            const itemIndex = filteredByType.indexOf(item);
+            const itemCount = filteredByType.length;
+            return { index: itemIndex, count: itemCount };
         }
     }
 
@@ -93,13 +96,15 @@ function ProjectLayers({canvas}) {
     };
 
     const processItem = (canvasObjects, item, index = null, groupIndex = null) => {
+        const itemNumbers = calculateItemNumber(item, canvasObjects);
         const objectData = {
             needToHide: item.needToHide,
             name: item.name,
             type: item.type,
             index: index,
             groupIndex: groupIndex,
-            itemNumber: calculateItemNumber(item, canvasObjects)
+            itemNumber: itemNumbers.index,
+            count: itemNumbers.count
         }
         if (item.type === 'group' && Array.isArray(item._objects)) {
             item.index = groupCount.current++;
@@ -153,6 +158,7 @@ function ProjectLayers({canvas}) {
                         }
                     });
                 }
+                updateObjects(canvas.getObjects());
             });
         }
     }, [canvas]);
