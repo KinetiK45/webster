@@ -40,6 +40,16 @@ function AutoSave({ canvas }) {
         return () => clearInterval(timerId);
     }, []);
 
+    function overrideToObject(item) {
+        item.toObject = (function(toObject) {
+            return function() {
+                return fabric.util.object.extend(toObject.call(this), {
+                    name: this.name
+                });
+            };
+        })(item.toObject);
+    }
+
     function moveObjectsToOrigin() {
         const hiddenCanvas = new fabric.Canvas(null, { width: canvas.width, height: canvas.height });
         const objects = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
@@ -56,18 +66,20 @@ function AutoSave({ canvas }) {
         const items = group._objects;
         group._restoreObjectsState();
         hiddenCanvas.remove(group);
-
-        items.forEach(item => {
-            item.toObject = (function(toObject) {
-                return function() {
-                    return fabric.util.object.extend(toObject.call(this), {
-                        name: this.name
-                    });
-                };
-            })(item.toObject);
-            hiddenCanvas.add(item);
-        });
-
+        function processItems(items) {
+            items.forEach(item => {
+                if (item.type === 'group' && item._objects) {
+                    overrideToObject(item);
+                    if(!item.group)
+                        hiddenCanvas.add(item);
+                    processItems(item._objects);
+                }
+                else{
+                    overrideToObject(item);
+                }
+            });
+        }
+        processItems(items);
         hiddenCanvas.renderAll();
         return hiddenCanvas.toJSON();
     }

@@ -9,6 +9,8 @@ import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import Box from "@mui/material/Box";
+import EditorTextInput from "./inputs/EditorTextInput";
 
 function SubLayer({ canvas, object, level }) {
     const isGroup = object && object.type === 'group' && object.name !== 'vector';
@@ -16,6 +18,9 @@ function SubLayer({ canvas, object, level }) {
     const [isActive, setIsActive] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
+    const [layerName, setLayerName] = useState('');
+    const [nameEditMode, setNameEditMode] = useState(false);
+
     const toggleLock = () => {
         const objectToActivate = findObject();
         objectToActivate.set({
@@ -35,7 +40,8 @@ function SubLayer({ canvas, object, level }) {
         canvas.renderAll();
     };
 
-    const handleToggleExpand = () => {
+    const handleToggleExpand = (event) => {
+        event.stopPropagation();
         setExpanded(!expanded);
     };
 
@@ -77,6 +83,14 @@ function SubLayer({ canvas, object, level }) {
         }
     }
 
+    function handleBlur() {
+        const objectToChange = findObject();
+        objectToChange.set({name: layerName});
+        canvas.fire('object:modified', {target: objectToChange})
+        setNameEditMode(false);
+    }
+
+
     function findAndRemoveObject() {
         const objectsGroup = findGroupByIndex(object.groupIndex);
         if (!objectsGroup) return;
@@ -105,15 +119,24 @@ function SubLayer({ canvas, object, level }) {
         canvas.isDrawingMode = false;
         const group = findGroupByIndex(object.groupIndex);
         const objectToActivate = group ? group._objects[object.index] : null;
-        if (objectToActivate) {
-            objectToActivate.evented = false;
-            canvas.setActiveObject(objectToActivate);
-            canvas.renderAll();
-        }
+            if (objectToActivate) {
+                if (isActive) {
+                    setNameEditMode(true);
+                }
+                else {
+                    objectToActivate.evented = false;
+                    canvas.setActiveObject(objectToActivate);
+                    canvas.renderAll();
+                }
+            }
     };
 
     useEffect(() => {
         if (canvas) {
+            if(object.name)
+                setLayerName(object.name);
+            else
+                setLayerName(object.type);
             const checkAndSet = () => {
                 const activeObjects = canvas.getActiveObjects();
                 const objectToActivate = findObject();
@@ -144,23 +167,41 @@ function SubLayer({ canvas, object, level }) {
                        paddingLeft: level,
                    }}
             >
-                <Typography sx={{ m: "auto" }}>
-                    {object.name ? object.name : object.type} {object.itemNumber}
-                </Typography>
-                {isGroup && (
-                    <IconButton onClick={handleToggleExpand}>
-                        {expanded ? <ExpandLessIcon fontSize={'small'}/> : <ExpandMoreIcon fontSize={'small'}/>}
-                    </IconButton>
-                )}
-                <IconButton onClick={deleteObject}>
-                    <DeleteIcon />
-                </IconButton>
-                <IconButton onClick={toggleLock}>
-                    {isLocked ? <LockIcon /> : <LockOpenIcon />}
-                </IconButton>
-                <IconButton onClick={toggleVisibility}>
-                    {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                </IconButton>
+
+                {nameEditMode ? (
+                    <Box sx={{width: '100%', display: 'flex', justifyContent: 'center'}}>
+                        <EditorTextInput
+                            icon={<Typography></Typography>}
+                            value={layerName}
+                            onChange={(value) => setLayerName(value)}
+                            onBlur={handleBlur}
+                        />
+                    </Box>
+                ) : (
+                    <Typography sx={{ m: "auto" }}>
+                        {object.name ? object.name : object.type} { ((object.name && object.count > 1) || !object.name) && object.itemNumber}
+                    </Typography>
+                )
+                }
+                {
+                    !nameEditMode &&
+                    <>
+                        {isGroup && (
+                            <IconButton onClick={handleToggleExpand}>
+                                {expanded ? <ExpandLessIcon fontSize={'small'}/> : <ExpandMoreIcon fontSize={'small'}/>}
+                            </IconButton>
+                        )}
+                        <IconButton onClick={deleteObject}>
+                            <DeleteIcon />
+                        </IconButton>
+                        <IconButton onClick={toggleLock}>
+                            {isLocked ? <LockIcon /> : <LockOpenIcon />}
+                        </IconButton>
+                        <IconButton onClick={toggleVisibility}>
+                            {isVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                        </IconButton>
+                    </>
+                }
             </Stack>
             {expanded && isGroup && object._objects.map((subObject, idx) => (
                 <SubLayer key={idx} canvas={canvas} level={level + 1} object={subObject} />

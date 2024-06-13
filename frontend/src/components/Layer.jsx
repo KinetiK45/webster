@@ -17,12 +17,13 @@ import Box from "@mui/material/Box";
 function Layer({canvas, item}) {
     const [isActive, setIsActive] = useState(false);
     const [nameEditMode, setNameEditMode] = useState(false);
-    const [layerName, setLayerName] = useState(item.name);
+    const [layerName, setLayerName] = useState('');
     const [isLocked, setIsLocked] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const isGroup = item && item.type === 'group' && item.name !== 'vector';
     const [expanded, setExpanded] = useState(false);
-    const handleToggleExpand = () => {
+    const handleToggleExpand = (event) => {
+        event.stopPropagation();
         setExpanded(!expanded);
     };
     const toggleLock = () => {
@@ -59,6 +60,7 @@ function Layer({canvas, item}) {
     function handleBlur() {
         const object = canvas.getObjects()[item.index];
         object.set({name: layerName});
+        canvas.fire('object:modified', {target: object})
         setNameEditMode(false);
     }
 
@@ -78,6 +80,10 @@ function Layer({canvas, item}) {
 
     useEffect(() => {
         if (canvas) {
+            if(item.name)
+                setLayerName(item.name);
+            else
+                setLayerName(item.type);
             const checkAndSet = () => {
                 const activeObjects = canvas.getActiveObjects();
                 const canvasObjects = canvas.getObjects();
@@ -112,7 +118,7 @@ function Layer({canvas, item}) {
                 </Box>
             ) : (
                 <Typography sx={{m: "auto"}}>
-                    {layerName ? layerName : item.type} {item.itemNumber}
+                    {layerName ? layerName : item.type} { ((item.name && item.count > 1) || !item.name) && item.itemNumber}
                 </Typography>
                 )
             }

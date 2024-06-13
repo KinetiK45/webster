@@ -3,6 +3,7 @@ import {EditorContext} from "../../pages/editor/EditorContextProvider";
 import {fabric} from "fabric";
 import IconButton from "@mui/material/IconButton";
 import {AddPhotoAlternateOutlined} from "@mui/icons-material";
+import Tooltip from "@mui/material/Tooltip";
 
 function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIcons, selectedInstrument }) {
     const projectSettings = useContext(EditorContext);
@@ -26,16 +27,18 @@ function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIc
         input.click();
     }
     return (
-        <IconButton
-            sx={{ backgroundColor: activeButtonFromIcons === 'add-image' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}
-            edge="start"
-            color="inherit"
-            aria-label={'add-image'}
-            disabled={selectedInstrument.current === 'pen'}
-            onClick={(event) => handleButtonClick(event, 'add-image', addImage)}
-        >
-            <AddPhotoAlternateOutlined/>
-        </IconButton>
+        <Tooltip title="Add image">
+            <IconButton
+                sx={{ backgroundColor: activeButtonFromIcons === 'add-image' ? 'rgba(255, 255, 255, 0.15)' : 'transparent' }}
+                edge="start"
+                color="inherit"
+                aria-label={'add-image'}
+                disabled={selectedInstrument.current === 'pen'}
+                onClick={(event) => handleButtonClick(event, 'add-image', addImage)}
+            >
+                <AddPhotoAlternateOutlined/>
+            </IconButton>
+        </Tooltip>
     );
 }
 
