@@ -4,7 +4,7 @@ import {fabric} from "fabric";
 import IconButton from "@mui/material/IconButton";
 import {AddPhotoAlternateOutlined} from "@mui/icons-material";
 
-function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIcons }) {
+function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIcons, selectedInstrument }) {
     const projectSettings = useContext(EditorContext);
     function addImage() {
         changeInstrument('image', false, true);
@@ -31,6 +31,7 @@ function Image({ canvas, changeInstrument, handleButtonClick, activeButtonFromIc
             edge="start"
             color="inherit"
             aria-label={'add-image'}
+            disabled={selectedInstrument.current === 'pen'}
             onClick={(event) => handleButtonClick(event, 'add-image', addImage)}
         >
             <AddPhotoAlternateOutlined/>

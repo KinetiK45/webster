@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {customAlert} from "../../../utils/Utils";
+import {applyPropertyToText, customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 import FormatSizeIcon from '@mui/icons-material/FormatSize';
 import EditorNumberInput from "../../inputs/EditorNumberInput";
@@ -18,12 +18,12 @@ function FontSize({canvas}) {
                     projectSettings.fontSize = activeObject.fontSize;
                 }
             };
-
-            canvas.on('selection:created', onObjectSelected);
+            onObjectSelected();
+            // canvas.on('selection:created', onObjectSelected);
             canvas.on('selection:updated', onObjectSelected);
 
             return () => {
-                canvas.off('selection:created', onObjectSelected);
+                // canvas.off('selection:created', onObjectSelected);
                 canvas.off('selection:updated', onObjectSelected);
             };
         }
@@ -37,7 +37,7 @@ function FontSize({canvas}) {
         if (canvas) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
-                activeObject.set("fontSize", fontSize);
+                applyPropertyToText(activeObject, 'fontSize', fontSize);
                 canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             } else {

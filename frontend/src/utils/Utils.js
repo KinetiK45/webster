@@ -98,3 +98,15 @@ export function removeShapeListeners(listeners) {
         }
     });
 }
+
+export function applyPropertyToText(activeObject, key, input){
+    if (activeObject.type === 'activeSelection') {
+        activeObject.getObjects().forEach(obj => {
+            if(obj.type === 'i-text'){
+                obj.set(key, input);
+            }
+        });
+    } else {
+        activeObject.set(key, input);
+    }
+}

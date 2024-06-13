@@ -11,6 +11,16 @@ function MainColorPicker({ canvas }) {
     const [fillColorCurrent, setFillColorCurrent] = useState(projectSettings.fillColor);
     const [fillOpacityPercentCurrent, setFillOpacityPercentCurrent] = useState(projectSettings.fillOpacityPercent);
 
+    const applyPropertyToGroup = (group, property, value) => {
+        group.getObjects().forEach(obj => {
+            if (obj.type === 'group') {
+                applyPropertyToGroup(obj, property, value);
+            } else if(obj.type === 'i-text' || obj.type === 'polygon'){
+                obj.set(property, value);
+            }
+        });
+    };
+
     useEffect(() => {
         if (canvas) {
             const onObjectSelected = () => {
@@ -36,13 +46,13 @@ function MainColorPicker({ canvas }) {
                     setFillOpacityPercentCurrent(projectSettings.fillOpacityPercent);
                 }
             };
-
-            canvas.on('selection:created', onObjectSelected);
+            onObjectSelected();
+            // canvas.on('selection:created', onObjectSelected);
             canvas.on('selection:updated', onObjectSelected);
             canvas.on('selection:cleared', onObjectSelected);
 
             return () => {
-                canvas.off('selection:created', onObjectSelected);
+                // canvas.off('selection:created', onObjectSelected);
                 canvas.off('selection:updated', onObjectSelected);
                 canvas.off('selection:cleared', onObjectSelected);
             };
@@ -57,7 +67,11 @@ function MainColorPicker({ canvas }) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
                 const rgbaColor = hexToRgba(color, fillOpacityPercentCurrent * 0.01);
-                activeObject.set("fill", rgbaColor);
+                if (activeObject.type === 'activeSelection' || activeObject.type === 'group') {
+                    applyPropertyToGroup(activeObject, 'fill', rgbaColor);
+                } else {
+                    activeObject.set('fill', rgbaColor);
+                }
                 canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             }
@@ -72,7 +86,11 @@ function MainColorPicker({ canvas }) {
             const activeObject = canvas.getActiveObject();
             if (activeObject) {
                 const rgbaColor = hexToRgba(fillColorCurrent, opacityPercent * 0.01);
-                activeObject.set("fill", rgbaColor);
+                if (activeObject.type === 'activeSelection' || activeObject.type === 'group') {
+                    applyPropertyToGroup(activeObject, 'fill', rgbaColor);
+                } else {
+                    activeObject.set('fill', rgbaColor);
+                }
                 canvas.fire('object:modified', { target: activeObject });
                 canvas.requestRenderAll();
             }

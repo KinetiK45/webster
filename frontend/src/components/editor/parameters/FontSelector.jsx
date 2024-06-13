@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {customAlert} from "../../../utils/Utils";
+import {applyPropertyToText, customAlert} from "../../../utils/Utils";
 import {EditorContext} from "../../../pages/editor/EditorContextProvider";
 import FontDownloadIcon from "@mui/icons-material/FontDownload";
 import FontFaceObserver from "fontfaceobserver";
@@ -21,7 +21,7 @@ function FontSelector({canvas}) {
                 if (canvas) {
                     const activeObject = canvas.getActiveObject();
                     if (activeObject) {
-                        activeObject.set("fontFamily", font);
+                        applyPropertyToText(activeObject, 'fontFamily', font);
                         canvas.fire('object:modified', { target: activeObject });
                         canvas.requestRenderAll();
                     } else {
@@ -52,12 +52,12 @@ function FontSelector({canvas}) {
                     setCurrentFontFamily(activeObject.fontFamily);
                 }
             };
-
-            canvas.on('selection:created', onObjectSelected);
+            onObjectSelected();
+            // canvas.on('selection:created', onObjectSelected);
             canvas.on('selection:updated', onObjectSelected);
 
             return () => {
-                canvas.off('selection:created', onObjectSelected);
+                // canvas.off('selection:created', onObjectSelected);
                 canvas.off('selection:updated', onObjectSelected);
             };
         }

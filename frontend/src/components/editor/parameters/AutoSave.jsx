@@ -11,6 +11,7 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import IconButton from "@mui/material/IconButton";
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Tooltip from "@mui/material/Tooltip";
+import {fabric} from "fabric";
 
 
 function AutoSave({ canvas }) {
@@ -39,6 +40,30 @@ function AutoSave({ canvas }) {
         return () => clearInterval(timerId);
     }, []);
 
+    function moveObjectsToOrigin() {
+        const hiddenCanvas = new fabric.Canvas(null, { width: canvas.width, height: canvas.height });
+        const objects = canvas.getObjects().map(obj => fabric.util.object.clone(obj));
+        const group = new fabric.Group(objects);
+
+        hiddenCanvas.add(group);
+        group.set({
+            left: 0,
+            top: 0
+        })
+        group.setCoords();
+        hiddenCanvas.renderAll();
+
+        const items = group._objects;
+        group._restoreObjectsState();
+        hiddenCanvas.remove(group);
+
+        items.forEach(item => {
+            hiddenCanvas.add(item);
+        });
+
+        hiddenCanvas.renderAll();
+        return hiddenCanvas.toJSON();
+    }
     function getCanvasSize() {
         const bounds = canvas.getObjects().reduce((acc, obj) => {
             const objBounds = obj.getBoundingRect();
@@ -61,10 +86,12 @@ function AutoSave({ canvas }) {
     }
 
     async function saveProject() {
+        const objects = moveObjectsToOrigin().objects;
         const { width, height } = getCanvasSize();
         const canvasData = canvas.toJSON();
         canvasData.width = width;
         canvasData.height = height;
+        canvasData.objects = objects;
         try {
             if (projectId === 'create' && !userData) {
                 localStorage.setItem('project', JSON.stringify(canvasData));

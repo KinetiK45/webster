@@ -70,7 +70,7 @@ function ProjectParams({canvas}) {
             currentTypes.add(activeObject.type)
         }
 
-        if(currentTypes.has('i-text')){
+        if (activeObject.type === 'activeSelection' && currentTypes.has('i-text')) {
             setTextAccordion(true);
         }
         if (typesToCheckStroke.some(type => currentTypes.has(type))) {
@@ -90,25 +90,35 @@ function ProjectParams({canvas}) {
             <Divider/>
             <CustomStack direction="column" sx={{p: 0, m: 0, height: '100%', overflow: 'scroll'}}>
 
-                <Accordion disableGutters>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon/>}
-                    >
+                { currentSelectedType === undefined &&
+                    <Typography sx={{ m: 'auto' }}>
+                        Select something...
+                    </Typography>
+                }
+
+                { currentSelectedType !== undefined &&
+                    <>
+                        <Accordion disableGutters defaultExpanded>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon/>}
+                            >
                                 <Typography>Sizes</Typography>
                             </AccordionSummary>
-                    <AccordionDetails>
-                        <PositionSizes canvas={canvas}/>
-                        { strokeAndColours &&
-                            <>
-                                <Divider sx={{m: 1}}/>
-                                <StrokeWidth canvas={canvas}/>
-                            </>
-                        }
-                    </AccordionDetails>
-                </Accordion>
-                <Divider style={{borderWidth: '1px'}}/>
+                            <AccordionDetails>
+                                <PositionSizes canvas={canvas}/>
+                                { strokeAndColours &&
+                                    <>
+                                        <Divider sx={{m: 1}}/>
+                                        <StrokeWidth canvas={canvas}/>
+                                    </>
+                                }
+                            </AccordionDetails>
+                        </Accordion>
+                        <Divider style={{borderWidth: '1px'}}/>
+                    </>
+                }
 
-                { textAccordion &&
+                { (currentSelectedType === 'i-text' || textAccordion) &&
                     <>
                         <Accordion disableGutters>
                             <AccordionSummary
@@ -143,16 +153,16 @@ function ProjectParams({canvas}) {
                     </>
                 }
 
-                <Accordion disableGutters >
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                        >
-                            <Typography>Effects</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Shadow canvas={canvas}/>
-                        </AccordionDetails>
-                    </Accordion>
+                <Accordion disableGutters sx={{display: currentSelectedType !== undefined ? '' : 'none'}}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                    >
+                        <Typography>Effects</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Shadow canvas={canvas}/>
+                    </AccordionDetails>
+                </Accordion>
             </CustomStack>
         </Container>
     );

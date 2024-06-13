@@ -18,9 +18,34 @@ function PositionSizes({canvas}) {
         if (lastChangedObject)
             canvas.fire('object:modified', { target: lastChangedObject });
     }
+    const applySizeToGroup = (group,  input, sizeToChange, coordToChange, coordToStay, scale) => {
+        group.getObjects().forEach(obj => {
+            const newSize = input / obj[scale];
+            if(obj.type === 'polygon')
+                setNewShapeSize(obj, newSize, sizeToChange, coordToChange, coordToStay);
+            else {
+                obj.set(sizeToChange, newSize);
+                obj.setCoords();
+            }
+        });
+    };
+
+    const applyParamToGroup = (group, key, input) => {
+        group.getObjects().forEach(obj => {
+            if(key === 'left' || key === 'top'){
+                const newValue = input - (key === 'left'
+                    ? (group.width / 2 + group.left)
+                    : (group.height / 2 + group.top));
+                obj.set(key, newValue);
+            }
+            else obj.set(key, input);
+
+            obj.setCoords();
+        });
+    };
 
     const changeNumbers = (activeSelection) => {
-        if (activeSelection) {
+        if (activeSelection && activeSelection?.type !== 'activeSelection') {
             setW(formatDouble(activeSelection.width * activeSelection.scaleX));
             setH(formatDouble(activeSelection.height * activeSelection.scaleY));
             setLeft(formatDouble(activeSelection.left));
@@ -44,8 +69,8 @@ function PositionSizes({canvas}) {
             const selectionCleared = () => {
                 changeNumbers();
             }
-
-            canvas.on('selection:created', onTargetAction);
+            onTargetAction();
+            // canvas.on('selection:created', onTargetAction);
             canvas.on('selection:updated', onTargetAction);
             canvas.on('selection:cleared', selectionCleared);
             canvas.on('object:scaling', onTargetAction);
@@ -53,7 +78,7 @@ function PositionSizes({canvas}) {
             canvas.on('object:rotating', onTargetAction);
 
             return () => {
-                canvas.off('selection:created', onTargetAction);
+                // canvas.off('selection:created', onTargetAction);
                 canvas.off('selection:updated', onTargetAction);
                 canvas.off('selection:cleared', selectionCleared);
                 canvas.off('object:scaling', onTargetAction);
@@ -68,7 +93,9 @@ function PositionSizes({canvas}) {
         setLastChangedObject(activeObject);
         if (activeObject) {
             const newWidth = input / (activeObject.scaleX);
-            if(activeObject.type === 'polygon')
+            if(activeObject.type === 'activeSelection')
+                applySizeToGroup(activeObject, input,  'width', 'x', 'y', 'scaleX');
+            else if(activeObject.type === 'polygon')
                 setNewShapeSize(activeObject, newWidth, 'width', 'x', 'y');
             else
                 activeObject.set('width', newWidth);
@@ -82,7 +109,9 @@ function PositionSizes({canvas}) {
         setLastChangedObject(activeObject);
         if (activeObject) {
             const newHeight = input / (activeObject.scaleY);
-            if(activeObject.type === 'polygon')
+            if(activeObject.type === 'activeSelection')
+                applySizeToGroup(activeObject, input, 'height', 'y', 'x', 'scaleY');
+            else if(activeObject.type === 'polygon')
                 setNewShapeSize(activeObject, newHeight, 'height', 'y', 'x');
             else
                 activeObject.set('height', newHeight);
@@ -121,7 +150,9 @@ function PositionSizes({canvas}) {
         setLastChangedObject(activeObject);
         if (activeObject) {
 
-            activeObject.set(key, input);
+            if(activeObject.type === 'activeSelection')
+                applyParamToGroup(activeObject, key, input);
+            else activeObject.set(key, input);
 
             activeObject.setCoords();
             canvas.requestRenderAll();

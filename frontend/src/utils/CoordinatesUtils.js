@@ -1,6 +1,7 @@
 
 export function getOffsets(canvas, opt, startX, startY) {
     const pointer = canvas.getPointer(opt.e);
+    if(!pointer) return { offsetX: 0, offsetY: 0};
     const offsetX = pointer.x - startX;
     const offsetY = pointer.y - startY;
     return {offsetX, offsetY};

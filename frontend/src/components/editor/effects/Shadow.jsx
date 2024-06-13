@@ -18,15 +18,25 @@ function Shadow({canvas}) {
         addShadow();
     }, [shadowBlur, offsetY, offsetX, opacity, color]);
 
+    const applyEffectToGroup = (group, key, input) => {
+        group.getObjects().forEach(obj => {
+            obj.set(key, input);
+        });
+    };
+
     function addShadow() {
         const activeObject = canvas.getActiveObject();
         if (activeObject){
-            activeObject.set('shadow', {
+            const input = {
                 color: hexToRgba(color, opacity),
                 blur: shadowBlur,
                 offsetX: offsetX,
                 offsetY: offsetY,
-            });
+            };
+            if(activeObject.type === 'activeSelection')
+                applyEffectToGroup(activeObject, 'shadow', input);
+            else
+                activeObject.set('shadow', input);
             canvas.fire('object:modified', { target: activeObject });
             canvas.requestRenderAll();
         }
@@ -35,6 +45,10 @@ function Shadow({canvas}) {
     function removeShadow() {
         const obj = canvas.getActiveObject();
         if (obj){
+            if(obj.type === 'activeSelection')
+                applyEffectToGroup(obj, 'shadow', null);
+            else
+                obj.set('shadow', null);
             obj.set('shadow', null);
             canvas.requestRenderAll();
         }
