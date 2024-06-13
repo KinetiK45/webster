@@ -125,9 +125,9 @@ async function getAllProject(page, pageSize, dateTo, dateFrom, userId, search) {
         }
 
         const withUrlProjects = projects.map(project => {
-            const photoUrl = project.user && project.user.photos ? project.user.photos.url : null;
+            const photoUrls = project.user.photos;
+            const photoUrl = (photoUrls && photoUrls.length > 0) ? photoUrls[0].url : null;
             const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
-
             return {
                 id: project.id,
                 project_name: project.project_name,
@@ -208,11 +208,11 @@ async function updateProject(project_id, project_name, projectImageUrl) {
 
 async function deleteProject(project_id){
     try {
-        const projectToDelete = await projectRepository.findOne(project_id);
+        const projectToDelete = await projectRepository.findOne({where: {id: project_id}});
         if(!projectToDelete){
             return { status: 404, isMatch: false, message: "Project not found" };
         }
-        await userRepository.remove(projectToDelete);
+        await projectRepository.remove(projectToDelete);
         return {isMatch: true, message: "Project deleted"};
     }catch (error) {
         console.error("Error delete project:", error);
