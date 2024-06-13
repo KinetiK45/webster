@@ -42,7 +42,7 @@ async function getById(requestedId, currentUserId) {
                     ),
                     avatar: lastPhoto
                         ? `https://ucodewebster.s3.amazonaws.com/${lastPhoto.url}`
-                        : `https://ucodewebster.s3.amazonaws.com/img.png`
+                        : `https://ucodewebster.s3.amazonaws.com/userAvatar/default.jpg`
                 },
             }),
         };
@@ -105,7 +105,7 @@ async function getByFullName(value){
         }
         const usersWithUrl = users.map(user => {
             const photoUrl = user && user.photos ? user.photos.url : null;
-            const avatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            const avatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/userAvatar/default.jpg`;
             return {
                 id: user.id,
                 full_name: user.full_name,

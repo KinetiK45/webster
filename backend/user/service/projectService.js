@@ -58,8 +58,6 @@ async function createNewProject(project_name = "Untitled", userId) {
     }
 }
 
-
-
 async function getProjectByUserId(userId, page, pageSize) {
     try {
         if (userId === undefined) {
@@ -127,7 +125,7 @@ async function getAllProject(page, pageSize, dateTo, dateFrom, userId, search) {
         const withUrlProjects = projects.map(project => {
             const photoUrls = project.user.photos;
             const photoUrl = (photoUrls && photoUrls.length > 0) ? photoUrls[0].url : null;
-            const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            const creatorAvatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/userAvatar/default.jpg`;
             return {
                 id: project.id,
                 project_name: project.project_name,
