@@ -42,7 +42,7 @@ async function getById(requestedId, currentUserId) {
                     ),
                     avatar: lastPhoto
                         ? `https://ucodewebster.s3.amazonaws.com/${lastPhoto.url}`
-                        : `https://ucodewebster.s3.amazonaws.com/img.png`
+                        : `https://ucodewebster.s3.amazonaws.com/userAvatar/default.jpg`
                 },
             }),
         };
@@ -77,6 +77,10 @@ async function updateUserById(id, password, new_password, email, full_name) {
             updates.full_name = full_name;
         }
         const hasUpdates = Object.keys(updates).length > 0;
+        if (hasUpdates) {
+            Object.assign(user, updates);
+            await userRepository.save(user);
+        }
         return {
             isMatch: hasUpdates,
             message: hasUpdates ? "User updated successfully" : "No changes to update",
@@ -105,7 +109,7 @@ async function getByFullName(value){
         }
         const usersWithUrl = users.map(user => {
             const photoUrl = user && user.photos ? user.photos.url : null;
-            const avatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/img.png`;
+            const avatarLink = photoUrl ? `https://ucodewebster.s3.amazonaws.com/${photoUrl}` : `https://ucodewebster.s3.amazonaws.com/userAvatar/default.jpg`;
             return {
                 id: user.id,
                 full_name: user.full_name,
